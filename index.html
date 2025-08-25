@@ -50,7 +50,7 @@
         <div class="glass-effect rounded-3xl shadow-2xl p-8 w-full max-w-md fade-in">
             <div class="text-center mb-8">
                 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0  0 24 24">
+                    <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253z"></path>
                     </svg>
                 </div>
@@ -316,844 +316,699 @@
         </div>
     </div>
     <script>
-        // Load data from localStorage or use defaults
-        let students = JSON.parse(localStorage.getItem('students')) || [
-            {
-                rollNo: "21CS001",
-                name: "John Doe",
-                password: "student123",
-                program: "B.Tech",
-                course: "Computer Science Engineering",
-                currentSemester: 4,
-                semesters: {
-                    1: {
-                        subjects: [
-                            { name: "Mathematics I", marks: 85 },
-                            { name: "Physics", marks: 78 },
-                            { name: "Chemistry", marks: 82 },
-                            { name: "Programming", marks: 90 },
-                            { name: "English", marks: 75 }
-                        ]
-                    },
-                    2: {
-                        subjects: [
-                            { name: "Mathematics II", marks: 88 },
-                            { name: "Data Structures", marks: 92 },
-                            { name: "Digital Logic", marks: 80 },
-                            { name: "Electronics", marks: 76 },
-                            { name: "Communication", marks: 82 }
-                        ]
-                    },
-                    3: {
-                        subjects: [
-                            { name: "Database Systems", marks: 85 },
-                            { name: "Computer Networks", marks: 35 },
-                            { name: "Operating Systems", marks: 88 },
-                            { name: "Software Engineering", marks: 84 },
-                            { name: "Statistics", marks: 79 }
-                        ]
-                    },
-                    4: {
-                        subjects: [
-                            { name: "Web Development", marks: 94 },
-                            { name: "Machine Learning", marks: 86 },
-                            { name: "Compiler Design", marks: 82 },
-                            { name: "Computer Graphics", marks: 88 },
-                            { name: "Project Management", marks: 90 }
-                        ]
-                    }
-                }
-            }
-        ];
-        let admins = JSON.parse(localStorage.getItem('admins')) || [
-            { username: "admin", password: "admin123", name: "System Admin" }
-        ];
+      // 🔥 Replace with your Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyBpzClA5s18uNBAU6T39jFy60ECULYcPoc",
+        authDomain: "studentportal-d48b3.firebaseapp.com",
+        databaseURL: "https://studentportal-d48b3-default-rtdb.firebaseio.com",
+        projectId: "studentportal-d48b3",
+        storageBucket: "studentportal-d48b3.appspot.com",
+        messagingSenderId: "819003837531",
+        appId: "1:819003837531:web:f1b915b2a1a6193856437e"
+      };
 
-        // Save data to localStorage
-        function saveData() {
-            localStorage.setItem('students', JSON.stringify(students));
-            localStorage.setItem('admins', JSON.stringify(admins));
-        }
-
-        // Curriculum templates for different programs and courses
-        const curriculumTemplates = {
-            "B.Tech": {
-                "Computer Science Engineering": {
-                    1: ["Mathematics I", "Physics", "Chemistry", "Programming Fundamentals", "English Communication"],
-                    2: ["Mathematics II", "Data Structures", "Digital Logic Design", "Electronics", "Environmental Science"],
-                    3: ["Database Management Systems", "Computer Networks", "Operating Systems", "Software Engineering", "Discrete Mathematics"],
-                    4: ["Web Development", "Machine Learning", "Compiler Design", "Computer Graphics", "Algorithm Analysis"],
-                    5: ["Artificial Intelligence", "Mobile App Development", "Cloud Computing", "Cybersecurity", "Project Management"],
-                    6: ["Advanced Database Systems", "Distributed Systems", "Human Computer Interaction", "Software Testing", "Elective I"],
-                    7: ["Big Data Analytics", "Internet of Things", "Blockchain Technology", "Elective II", "Major Project I"],
-                    8: ["Industry Internship", "Advanced Topics in CS", "Elective III", "Major Project II", "Seminar"]
-                },
-                "Information Technology": {
-                    1: ["Mathematics I", "Physics", "Chemistry", "IT Fundamentals", "English Communication"],
-                    2: ["Mathematics II", "Data Structures", "Digital Electronics", "Computer Organization", "Technical Writing"],
-                    3: ["Database Systems", "Computer Networks", "Operating Systems", "Web Technologies", "Statistics"],
-                    4: ["Software Engineering", "System Analysis", "Network Security", "Mobile Computing", "Data Mining"],
-                    5: ["Cloud Computing", "Information Security", "Enterprise Systems", "IT Project Management", "Elective I"],
-                    6: ["Advanced Networking", "E-Commerce", "Business Intelligence", "Quality Assurance", "Elective II"],
-                    7: ["IT Service Management", "Digital Forensics", "Advanced Security", "Major Project I", "Elective III"],
-                    8: ["Industry Training", "Emerging Technologies", "Research Methodology", "Major Project II", "Seminar"]
-                },
-                "Electronics and Communication": {
-                    1: ["Mathematics I", "Physics", "Chemistry", "Basic Electronics", "Engineering Drawing"],
-                    2: ["Mathematics II", "Circuit Analysis", "Electronic Devices", "Digital Electronics", "Materials Science"],
-                    3: ["Analog Electronics", "Digital Signal Processing", "Communication Systems", "Electromagnetic Theory", "Control Systems"],
-                    4: ["Microprocessors", "VLSI Design", "Antenna Theory", "Optical Communication", "Power Electronics"],
-                    5: ["Embedded Systems", "Wireless Communication", "Satellite Communication", "Radar Systems", "Elective I"],
-                    6: ["Advanced Communication", "Image Processing", "Biomedical Electronics", "Robotics", "Elective II"],
-                    7: ["5G Technology", "IoT Systems", "Advanced VLSI", "Major Project I", "Elective III"],
-                    8: ["Industry Training", "Research Project", "Emerging Technologies", "Major Project II", "Seminar"]
-                },
-                "Mechanical Engineering": {
-                    1: ["Mathematics I", "Physics", "Chemistry", "Engineering Mechanics", "Engineering Drawing"],
-                    2: ["Mathematics II", "Strength of Materials", "Thermodynamics", "Manufacturing Processes", "Materials Science"],
-                    3: ["Fluid Mechanics", "Heat Transfer", "Machine Design", "Dynamics of Machinery", "Engineering Economics"],
-                    4: ["Internal Combustion Engines", "Refrigeration", "Production Technology", "Finite Element Analysis", "Industrial Engineering"],
-                    5: ["Automobile Engineering", "Power Plant Engineering", "CAD/CAM", "Robotics", "Elective I"],
-                    6: ["Advanced Manufacturing", "Renewable Energy", "Mechatronics", "Quality Control", "Elective II"],
-                    7: ["Advanced Materials", "Automation", "Project Management", "Major Project I", "Elective III"],
-                    8: ["Industry Training", "Advanced Design", "Research Methodology", "Major Project II", "Seminar"]
-                },
-                "Civil Engineering": {
-                    1: ["Mathematics I", "Physics", "Chemistry", "Engineering Mechanics", "Engineering Drawing"],
-                    2: ["Mathematics II", "Strength of Materials", "Fluid Mechanics", "Surveying", "Building Materials"],
-                    3: ["Structural Analysis", "Concrete Technology", "Soil Mechanics", "Hydrology", "Transportation Engineering"],
-                    4: ["Design of Structures", "Foundation Engineering", "Water Resources", "Highway Engineering", "Environmental Engineering"],
-                    5: ["Advanced Structural Design", "Construction Management", "Earthquake Engineering", "Urban Planning", "Elective I"],
-                    6: ["Bridge Engineering", "Advanced Geotechnics", "Water Treatment", "Traffic Engineering", "Elective II"],
-                    7: ["Sustainable Construction", "GIS Applications", "Advanced Concrete", "Major Project I", "Elective III"],
-                    8: ["Industry Training", "Research Project", "Modern Construction", "Major Project II", "Seminar"]
-                }
-            },
-            "M.Tech": {
-                "Computer Science Engineering": {
-                    1: ["Advanced Algorithms", "Research Methodology", "Advanced Database Systems", "Machine Learning", "Elective I"],
-                    2: ["Distributed Systems", "Advanced Networks", "Software Architecture", "Data Analytics", "Elective II"],
-                    3: ["Thesis Work I", "Advanced Topics", "Industry Collaboration", "Seminar I", "Elective III"],
-                    4: ["Thesis Work II", "Dissertation", "Research Publication", "Seminar II", "Viva Voce"]
-                }
-            }
-        };
-        let currentUser = null;
-        let isAdmin = false;
-        let editingStudent = null;
-        // Grade calculation functions
-        function calculateGrade(marks) {
-            if (marks >= 90) return 'A+';
-            if (marks >= 80) return 'A';
-            if (marks >= 70) return 'B+';
-            if (marks >= 60) return 'B';
-            if (marks >= 50) return 'C+';
-            if (marks >= 40) return 'C';
-            return 'F';
-        }
-        function getGradePoints(marks) {
-            if (marks >= 90) return 10;
-            if (marks >= 80) return 9;
-            if (marks >= 70) return 8;
-            if (marks >= 60) return 7;
-            if (marks >= 50) return 6;
-            if (marks >= 40) return 5;
-            return 0;
-        }
-        function calculateSPI(semester) {
-            let totalSubjects = semester.subjects.length;
-            let totalGradePoints = 0;
-            semester.subjects.forEach(subject => {
-                totalGradePoints += getGradePoints(subject.marks);
-            });
-            return totalSubjects > 0 ? (totalGradePoints / totalSubjects).toFixed(2) : 0;
-        }
-        function calculateCGPA(student) {
-            let totalSubjects = 0;
-            let totalGradePoints = 0;
-            Object.values(student.semesters).forEach(semester => {
-                semester.subjects.forEach(subject => {
-                    totalSubjects++;
-                    totalGradePoints += getGradePoints(subject.marks);
-                });
-            });
-            return totalSubjects > 0 ? (totalGradePoints / totalSubjects).toFixed(2) : 0;
-        }
-        function calculateBacklogs(student) {
-            let backlogs = [];
-            Object.entries(student.semesters).forEach(([semNum, semester]) => {
-                semester.subjects.forEach(subject => {
-                    if (subject.marks < 40) {
-                        backlogs.push({
-                            semester: semNum,
-                            subject: subject.name,
-                            marks: subject.marks
-                        });
-                    }
-                });
-            });
-            return backlogs;
-        }
-        // Tab switching functionality
-        document.getElementById('loginTab').addEventListener('click', function() {
-            document.getElementById('loginTab').className = 'flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all bg-white text-indigo-600 shadow-md';
-            document.getElementById('registerTab').className = 'flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all text-white hover:text-white/80';
-            document.getElementById('loginForm').classList.remove('hidden');
-            document.getElementById('registerForm').classList.add('hidden');
-        });
-        document.getElementById('registerTab').addEventListener('click', function() {
-            document.getElementById('registerTab').className = 'flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all bg-white text-indigo-600 shadow-md';
-            document.getElementById('loginTab').className = 'flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all text-white hover:text-white/80';
-            document.getElementById('registerForm').classList.remove('hidden');
-            document.getElementById('loginForm').classList.add('hidden');
-        });
-        document.getElementById('studentTypeTab').addEventListener('click', function() {
-            document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white';
-            document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white';
-            // Show/hide appropriate fields
-            document.getElementById('rollNoField').classList.remove('hidden');
-            document.getElementById('usernameField').classList.add('hidden');
-            document.getElementById('regRollNoField').classList.remove('hidden');
-            document.getElementById('regUsernameField').classList.add('hidden');
-            document.getElementById('regNameField').classList.remove('hidden');
-        });
-        document.getElementById('adminTypeTab').addEventListener('click', function() {
-            document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white';
-            document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white';
-            // Show/hide appropriate fields
-            document.getElementById('rollNoField').classList.add('hidden');
-            document.getElementById('usernameField').classList.remove('hidden');
-            document.getElementById('regRollNoField').classList.add('hidden');
-            document.getElementById('regUsernameField').classList.remove('hidden');
-            document.getElementById('regNameField').classList.remove('hidden');
-        });
-        // Login functionality
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('authError');
-            if (document.getElementById('studentTypeTab').classList.contains('bg-white/20')) {
-                // Student login
-                const rollNo = document.getElementById('rollNo').value;
-                const student = students.find(s => s.rollNo === rollNo && s.password === password);
-                if (student) {
-                    currentUser = student;
-                    isAdmin = false;
-                    showStudentDashboard();
-                } else {
-                    showError('Invalid roll number or password');
-                }
-            } else {
-                // Admin login
-                const username = document.getElementById('username').value;
-                const admin = admins.find(a => a.username === username && a.password === password);
-                if (admin) {
-                    currentUser = admin;
-                    isAdmin = true;
-                    showAdminDashboard();
-                } else {
-                    showError('Invalid admin credentials');
-                }
-            }
-        });
-        // Register functionality
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
-            const name = document.getElementById('regName').value;
-            if (password !== confirmPassword) {
-                showError('Passwords do not match');
-                return;
-            }
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters long');
-                return;
-            }
-            if (document.getElementById('studentTypeTab').classList.contains('bg-white/20')) {
-                // Student registration
-                const rollNo = document.getElementById('regRollNo').value;
-                if (students.find(s => s.rollNo === rollNo)) {
-                    showError('Roll number already exists');
-                    return;
-                }
-                const newStudent = {
-                    rollNo,
-                    name,
-                    password,
-                    currentSemester: 1,
-                    semesters: {}
-                };
-                students.push(newStudent);
-                showSuccess('Student account created successfully! You can now login.');
-            } else {
-                // Admin registration
-                const username = document.getElementById('regUsername').value;
-                if (admins.find(a => a.username === username)) {
-                    showError('Username already exists');
-                    return;
-                }
-                const newAdmin = {
-                    username,
-                    name,
-                    password
-                };
-                admins.push(newAdmin);
-                showSuccess('Admin account created successfully! You can now login.');
-            }
-            // Switch to login tab
-            document.getElementById('loginTab').click();
-            document.getElementById('registerForm').reset();
-            // Save data after registration
-            saveData();
-        });
-        function showError(message) {
-            const errorDiv = document.getElementById('authError');
-            const successDiv = document.getElementById('authSuccess');
-            errorDiv.textContent = message;
-            errorDiv.classList.remove('hidden');
-            successDiv.classList.add('hidden');
-        }
-        function showSuccess(message) {
-            const errorDiv = document.getElementById('authError');
-            const successDiv = document.getElementById('authSuccess');
-            successDiv.textContent = message;
-            successDiv.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-        }
-        function showStudentDashboard() {
-            document.getElementById('authPage').classList.add('hidden');
-            document.getElementById('studentDashboard').classList.remove('hidden');
-            document.getElementById('studentName').textContent = `${currentUser.name} (${currentUser.rollNo})`;
-            displayStudentResults();
-        }
-        function showAdminDashboard() {
-            document.getElementById('authPage').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.remove('hidden');
-            updateAdminStats();
-            showAllStudents();
-        }
-        function displayStudentResults() {
-            const resultsDiv = document.getElementById('studentResults');
-            const cgpa = calculateCGPA(currentUser);
-            const backlogs = calculateBacklogs(currentUser);
-            let html = `
-                <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 card-hover">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Academic Overview</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl text-white">
-                            <h3 class="text-lg font-semibold mb-2">CGPA</h3>
-                            <p class="text-4xl font-bold">${cgpa}</p>
-                        </div>
-                        <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl text-white">
-                            <h3 class="text-lg font-semibold mb-2">Current Semester</h3>
-                            <p class="text-4xl font-bold">${currentUser.currentSemester}</p>
-                        </div>
-                        <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-xl text-white">
-                            <h3 class="text-lg font-semibold mb-2">Backlogs</h3>
-                            <p class="text-4xl font-bold">${backlogs.length}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            // Display semester-wise results
-            Object.entries(currentUser.semesters).forEach(([semNum, semester]) => {
-                const spi = calculateSPI(semester);
-                html += `
-                    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 card-hover">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-2xl font-bold text-gray-800">Semester ${semNum} Results</h3>
-                            <span class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium">SPI: ${spi}</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full table-auto">
-                                <thead>
-                                    <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Subject</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Marks</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Grade</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                `;
-                semester.subjects.forEach(subject => {
-                    const grade = calculateGrade(subject.marks);
-                    const status = subject.marks >= 40 ? 'Pass' : 'Fail';
-                    const statusClass = subject.marks >= 40 ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100';
-                    html += `
-                        <tr class="border-t hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 text-sm font-medium text-gray-800">${subject.name}</td>
-                            <td class="px-6 py-4 text-sm text-gray-800 font-bold">${subject.marks}</td>
-                            <td class="px-6 py-4 text-sm font-bold">${grade}</td>
-                            <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${statusClass}">${status}</span></td>
-                        </tr>
-                    `;
-                });
-                html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-            });
-            // Display backlogs if any
-            if (backlogs.length > 0) {
-                html += `
-                    <div class="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-2xl p-8">
-                        <h3 class="text-2xl font-bold text-red-800 mb-6">Pending Backlogs</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                `;
-                backlogs.forEach(backlog => {
-                    html += `
-                        <div class="bg-white p-4 rounded-xl shadow-md border-l-4 border-red-500">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-gray-800">Semester ${backlog.semester}</p>
-                                    <p class="text-gray-600">${backlog.subject}</p>
-                                </div>
-                                <span class="text-red-600 font-bold text-lg">${backlog.marks}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `
-                        </div>
-                    </div>
-                `;
-            }
-            resultsDiv.innerHTML = html;
-        }
-        function updateAdminStats() {
-            const totalStudentsCount = students.length;
-            let passCount = 0;
-            let backlogCount = 0;
-            students.forEach(student => {
-                const backlogs = calculateBacklogs(student);
-                if (backlogs.length === 0) {
-                    passCount++;
-                } else {
-                    backlogCount++;
-                }
-            });
-            const passRate = totalStudentsCount > 0 ? Math.round((passCount / totalStudentsCount) * 100) : 0;
-            document.getElementById('totalStudents').textContent = totalStudentsCount;
-            document.getElementById('passRate').textContent = `${passRate}%`;
-            document.getElementById('backlogCount').textContent = backlogCount;
-            // Save data after stats update
-            saveData();
-        }
-        function showAllStudents() {
-            document.getElementById('studentsListSection').classList.remove('hidden');
-            document.getElementById('backlogDetailsSection').classList.add('hidden');
-            displayAllStudents();
-        }
-        function showBacklogStudents() {
-            document.getElementById('studentsListSection').classList.add('hidden');
-            document.getElementById('backlogDetailsSection').classList.remove('hidden');
-            displayBacklogStudents();
-        }
-        function displayAllStudents() {
-            const tableBody = document.getElementById('studentsTable');
-            let html = '';
-            students.forEach(student => {
-                const cgpa = calculateCGPA(student);
-                const backlogs = calculateBacklogs(student);
-                html += `
-                    <tr class="border-t hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 text-sm font-bold text-gray-800">${student.rollNo}</td>
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-gray-800 font-medium">${student.name}</div>
-                            <div class="text-xs text-gray-500">${student.program || 'N/A'} - ${student.course || 'N/A'}</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm font-bold text-gray-800">${cgpa}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium ${backlogs.length > 0 ? 'text-red-600 bg-red-100' : 'text-green-600 bg-green-100'}">
-                                ${backlogs.length}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-sm">
-                            <button onclick="editStudent('${student.rollNo}')" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg text-xs hover:from-blue-600 hover:to-blue-700 mr-2 transition-all shadow-md">Edit</button>
-                            <button onclick="deleteStudent('${student.rollNo}')" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-md">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tableBody.innerHTML = html;
-        }
-        function displayBacklogStudents() {
-            const container = document.getElementById('backlogStudentsList');
-            let html = '';
-            students.forEach(student => {
-                const backlogs = calculateBacklogs(student);
-                if (backlogs.length > 0) {
-                    html += `
-                        <div class="bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-200 rounded-xl p-6 mb-6">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800">${student.name}</h3>
-                                    <p class="text-gray-600">Roll No: ${student.rollNo}</p>
-                                    <p class="text-gray-600">Program: ${student.program || 'N/A'} - ${student.course || 'N/A'}</p>
-                                    <p class="text-gray-600">CGPA: ${calculateCGPA(student)}</p>
-                                </div>
-                                <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                                    ${backlogs.length} Backlog${backlogs.length > 1 ? 's' : ''}
-                                </span>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    `;
-                    backlogs.forEach(backlog => {
-                        html += `
-                            <div class="bg-white p-4 rounded-lg shadow-md border-l-4 border-red-500">
-                                <p class="font-semibold text-gray-800">Semester ${backlog.semester}</p>
-                                <p class="text-gray-600 text-sm">${backlog.subject}</p>
-                                <p class="text-red-600 font-bold">${backlog.marks} marks</p>
-                            </div>
-                        `;
-                    });
-                    html += `
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            if (html === '') {
-                html = `
-                    <div class="text-center py-12">
-                        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">No Students with Backlogs</h3>
-                        <p class="text-gray-600">All students have successfully passed their subjects!</p>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        }
-        // Modal functions
-        document.getElementById('addStudentBtn').addEventListener('click', function() {
-            editingStudent = null;
-            document.getElementById('modalTitle').textContent = 'Add Student';
-            document.getElementById('studentForm').reset();
-            document.getElementById('semesterResults').innerHTML = '';
-            document.getElementById('studentModal').classList.remove('hidden');
-        });
-        function editStudent(rollNo) {
-            const student = students.find(s => s.rollNo === rollNo);
-            if (student) {
-                editingStudent = student;
-                document.getElementById('modalTitle').textContent = 'Edit Student';
-                document.getElementById('modalRollNo').value = student.rollNo;
-                document.getElementById('modalStudentName').value = student.name;
-                document.getElementById('modalPassword').value = student.password;
-                document.getElementById('modalProgram').value = student.program || '';
-                document.getElementById('modalCourse').value = student.course || '';
-                document.getElementById('modalSemester').value = student.currentSemester;
-                generateSemesterInputs(student.currentSemester, student);
-                document.getElementById('studentModal').classList.remove('hidden');
-            }
-        }
-        function deleteStudent(rollNo) {
-            if (confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
-                const studentIndex = students.findIndex(s => s.rollNo === rollNo);
-                if (studentIndex !== -1) {
-                    students.splice(studentIndex, 1);
-                    displayAllStudents();
-                    updateAdminStats();
-                    alert('Student deleted successfully!');
-                } else {
-                    alert('Student not found!');
-                }
-                // Save data after deletion
-                saveData();
-            }
-        }
-        document.getElementById('modalSemester').addEventListener('change', function() {
-            const semester = parseInt(this.value);
-            if (semester) {
-                generateSemesterInputs(semester, editingStudent);
-            }
-        });
-        document.getElementById('modalProgram').addEventListener('change', function() {
-            const semester = parseInt(document.getElementById('modalSemester').value);
-            if (semester) {
-                generateSemesterInputs(semester, editingStudent);
-            }
-        });
-        document.getElementById('modalCourse').addEventListener('change', function() {
-            const semester = parseInt(document.getElementById('modalSemester').value);
-            if (semester) {
-                generateSemesterInputs(semester, editingStudent);
-            }
-        });
-        function generateSemesterInputs(maxSemester, student = null) {
-            const container = document.getElementById('semesterResults');
-            const program = document.getElementById('modalProgram').value;
-            const course = document.getElementById('modalCourse').value;
-            let html = '';
-            for (let sem = 1; sem <= maxSemester; sem++) {
-                const semesterData = student?.semesters[sem];
-                html += `
-                    <div class="border-2 border-gray-200 rounded-xl p-6 mb-6 bg-gray-50">
-                        <h4 class="text-xl font-bold text-gray-800 mb-4">Semester ${sem}</h4>
-                        <div id="semester${sem}Subjects" class="space-y-4">
-                `;
-                if (semesterData) {
-                    // If student data exists, use it
-                    semesterData.subjects.forEach((subject, index) => {
-                        html += `
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-lg shadow-sm">
-                                <input type="text" placeholder="Subject Name" value="${subject.name}" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-name focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                                <input type="number" placeholder="Marks (0-100)" value="${subject.marks}" min="0" max="100" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-marks focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                                <button type="button" onclick="removeSubject(this)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md">Remove</button>
-                            </div>
-                        `;
-                    });
-                } else {
-                    // Check if curriculum template exists for this program/course/semester
-                    const templateSubjects = curriculumTemplates[program]?.[course]?.[sem];
-                    if (templateSubjects && templateSubjects.length > 0) {
-                        // Use curriculum template subjects
-                        templateSubjects.forEach(subjectName => {
-                            html += `
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-lg shadow-sm">
-                                    <input type="text" placeholder="Subject Name" value="${subjectName}" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-name focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-blue-50" required readonly>
-                                    <input type="number" placeholder="Marks (0-100)" min="0" max="100" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-marks focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                                    <button type="button" onclick="removeSubject(this)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md">Remove</button>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        // Default empty subjects if no template found
-                        for (let i = 0; i < 5; i++) {
-                            html += `
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-lg shadow-sm">
-                                    <input type="text" placeholder="Subject Name" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-name focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                                    <input type="number" placeholder="Marks (0-100)" min="0" max="100" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-marks focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                                    <button type="button" onclick="removeSubject(this)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md">Remove</button>
-                                </div>
-                            `;
-                        }
-                    }
-                }
-                html += `
-                        </div>
-                        <button type="button" onclick="addSubject(${sem})" class="mt-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md">Add Subject</button>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        }
-        function addSubject(semester) {
-            const container = document.getElementById(`semester${semester}Subjects`);
-            const subjectDiv = document.createElement('div');
-            subjectDiv.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-lg shadow-sm';
-            subjectDiv.innerHTML = `
-                <input type="text" placeholder="Subject Name" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-name focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                <input type="number" placeholder="Marks (0-100)" min="0" max="100" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-marks focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-                <button type="button" onclick="removeSubject(this)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md">Remove</button>
-            `;
-            container.appendChild(subjectDiv);
-        }
-        function removeSubject(button) {
-            button.parentElement.remove();
-        }
-        document.getElementById('studentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const rollNo = document.getElementById('modalRollNo').value;
-            const name = document.getElementById('modalStudentName').value;
-            const password = document.getElementById('modalPassword').value;
-            const currentSemester = parseInt(document.getElementById('modalSemester').value);
-            // Check if roll number already exists (for new students)
-            if (!editingStudent && students.find(s => s.rollNo === rollNo)) {
-                alert('Roll number already exists!');
-                return;
-            }
-            const program = document.getElementById('modalProgram').value;
-            const course = document.getElementById('modalCourse').value;
-            const studentData = {
-                rollNo,
-                name,
-                password,
-                program,
-                course,
-                currentSemester,
-                semesters: {}
+      // Initialize Firebase
+      function initializeFirebase() {
+        if (!window.firebase) {
+          const script = document.createElement('script');
+          script.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+          script.onload = () => {
+            const dbScript = document.createElement('script');
+            dbScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
+            dbScript.onload = () => {
+              firebase.initializeApp(firebaseConfig);
+              console.log("✅ Firebase initialized");
+              loadDataFromFirebase();
             };
-            // Collect semester data
-            for (let sem = 1; sem <= currentSemester; sem++) {
-                const semesterContainer = document.getElementById(`semester${sem}Subjects`);
-                if (semesterContainer) {
-                    const subjectRows = semesterContainer.querySelectorAll('.grid');
-                    studentData.semesters[sem] = {
-                        subjects: []
-                    };
-                    subjectRows.forEach(row => {
-                        const name = row.querySelector('.subject-name').value;
-                        const marks = parseInt(row.querySelector('.subject-marks').value);
-                        if (name && marks !== '') {
-                            studentData.semesters[sem].subjects.push({
-                                name,
-                                marks
-                            });
-                        }
-                    });
-                }
-            }
-            if (editingStudent) {
-                // Update existing student
-                const index = students.findIndex(s => s.rollNo === editingStudent.rollNo);
-                students[index] = studentData;
-            } else {
-                // Add new student
-                students.push(studentData);
-            }
-            closeModal();
-            displayAllStudents();
-            updateAdminStats();
-            // Save data after adding/editing
-            saveData();
-        });
-        function closeModal() {
-            document.getElementById('studentModal').classList.add('hidden');
-        }
-        function logout() {
-            currentUser = null;
-            isAdmin = false;
-            editingStudent = null;
-            document.getElementById('studentDashboard').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.add('hidden');
-            document.getElementById('authPage').classList.remove('hidden');
-            document.getElementById('loginForm').reset();
-            document.getElementById('registerForm').reset();
-            document.getElementById('authError').classList.add('hidden');
-            document.getElementById('authSuccess').classList.add('hidden');
-        }
-        // Initialize
-        updateAdminStats();
-        <script>
-  // 🔥 Paste your Firebase config here
-  const firebaseConfig = {
-    apiKey: "AIzaSyBpzClA5s18uNBAU6T39jFy60ECULYcPoc",
-    authDomain: "studentportal-d48b3.firebaseapp.com",
-    databaseURL: "https://studentportal-d48b3-default-rtdb.firebaseio.com",
-    projectId: "studentportal-d48b3",
-    storageBucket: "studentportal-d48b3.appspot.com",
-    messagingSenderId: "819003837531",
-    appId: "1:819003837531:web:f1b915b2a1a6193856437e",
-    measurementId: "G-RRN5LS8PGS"
-  };
-
-  // Initialize Firebase
-  function initializeFirebase() {
-    if (!window.firebase) {
-      const script = document.createElement('script');
-      script.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
-      script.onload = () => {
-        const dbScript = document.createElement('script');
-        dbScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
-        dbScript.onload = () => {
+            document.body.appendChild(dbScript);
+          };
+          document.body.appendChild(script);
+        } else {
           firebase.initializeApp(firebaseConfig);
           loadDataFromFirebase();
-        };
-        document.body.appendChild(dbScript);
-      };
-      document.body.appendChild(script);
-    } else {
-      firebase.initializeApp(firebaseConfig);
-      loadDataFromFirebase();
-    }
-  }
-
-  // Load data from Firebase
-  function loadDataFromFirebase() {
-    const db = firebase.database();
-    db.ref('students').once('value').then(snapshot => {
-      const data = snapshot.val();
-      students = data ? Object.values(data) : [];
-      displayAllStudents();
-      updateAdminStats();
-    }).catch(err => {
-      console.error("Error loading ", err);
-    });
-  }
-
-  // Save data to Firebase
-  function saveDataToFirebase() {
-    const db = firebase.database();
-    // Convert array to object with rollNo as key
-    const studentsObj = {};
-    students.forEach(s => {
-      studentsObj[s.rollNo] = s;
-    });
-    db.ref('students').set(studentsObj).then(() => {
-      console.log("✅ Data saved to cloud!");
-    }).catch(err => {
-      console.error("❌ Save failed:", err);
-    });
-  }
-
-  // Replace your old saveData() function
-  function saveData() {
-    saveDataToFirebase();
-  }
-
-  // Keep your students and admins arrays
-  let students = [];
-  let admins = [
-    { username: "admin", password: "admin123", name: "System Admin" }
-  ];
-
-  // ... [keep all your existing functions: calculateGrade, showAdminDashboard, etc.]
-
-  // At the end, initialize Firebase
-  window.onload = function() {
-    initializeFirebase();
-  };
-
-  // Make sure updateAdminStats() calls saveData()
-  function updateAdminStats() {
-    const totalStudentsCount = students.length;
-    let passCount = 0;
-    let backlogCount = 0;
-    students.forEach(student => {
-      const backlogs = calculateBacklogs(student);
-      if (backlogs.length === 0) {
-        passCount++;
-      } else {
-        backlogCount++;
+        }
       }
-    });
-    const passRate = totalStudentsCount > 0 ? Math.round((passCount / totalStudentsCount) * 100) : 0;
-    document.getElementById('totalStudents').textContent = totalStudentsCount;
-    document.getElementById('passRate').textContent = `${passRate}%`;
-    document.getElementById('backlogCount').textContent = backlogCount;
-    saveData(); // Save to Firebase
-  }
 
-  // Also call saveData() after adding/deleting students
-  document.getElementById('studentForm').addEventListener('submit', function(e) {
-    // ... your existing code ...
-    saveData(); // Add this line
-  });
+      // Load data from Firebase
+      function loadDataFromFirebase() {
+        const db = firebase.database();
+        db.ref('students').once('value').then(snapshot => {
+          const data = snapshot.val();
+          students = data ? Object.values(data) : [];
+          console.log("✅ Loaded students:", students);
+        }).catch(err => {
+          console.error("❌ Error loading students:", err);
+        });
 
-  function deleteStudent(rollNo) {
-    if (confirm('Are you sure you want to delete this student?')) {
-      const studentIndex = students.findIndex(s => s.rollNo === rollNo);
-      if (studentIndex !== -1) {
-        students.splice(studentIndex, 1);
+        // Load admins
+        db.ref('admins').once('value').then(snapshot => {
+          const data = snapshot.val();
+          admins = data ? Object.values(data) : [
+            { username: "admin", password: "admin123", name: "System Admin" }
+          ];
+        }).catch(err => {
+          console.error("❌ Error loading admins:", err);
+        });
+      }
+
+      // Save data to Firebase
+      function saveDataToFirebase() {
+        const db = firebase.database();
+        const studentsObj = {};
+        students.forEach(s => {
+          studentsObj[s.rollNo] = s;
+        });
+        db.ref('students').set(studentsObj).then(() => {
+          console.log("✅ Students saved to cloud!");
+        }).catch(err => {
+          console.error("❌ Save failed:", err);
+        });
+
+        // Save admins too
+        const adminsObj = {};
+        admins.forEach(a => {
+          adminsObj[a.username] = a;
+        });
+        db.ref('admins').set(adminsObj).then(() => {
+          console.log("✅ Admins saved to cloud!");
+        }).catch(err => {
+          console.error("❌ Admin save failed:", err);
+        });
+      }
+
+      // Replace your old saveData()
+      function saveData() {
+        if (typeof firebase === 'undefined') {
+          console.warn("⚠️ Firebase not loaded yet");
+          setTimeout(saveData, 500); // Retry after 500ms
+          return;
+        }
+        saveDataToFirebase();
+      }
+
+      // Keep your students and admins arrays
+      let students = [];
+      let admins = [
+        { username: "admin", password: "admin123", name: "System Admin" }
+      ];
+
+      let currentUser = null;
+      let isAdmin = false;
+      let editingStudent = null;
+
+      // Grade calculation functions
+      function calculateGrade(marks) {
+        if (marks >= 90) return 'A+';
+        if (marks >= 80) return 'A';
+        if (marks >= 70) return 'B+';
+        if (marks >= 60) return 'B';
+        if (marks >= 50) return 'C+';
+        if (marks >= 40) return 'C';
+        return 'F';
+      }
+
+      function getGradePoints(marks) {
+        if (marks >= 90) return 10;
+        if (marks >= 80) return 9;
+        if (marks >= 70) return 8;
+        if (marks >= 60) return 7;
+        if (marks >= 50) return 6;
+        if (marks >= 40) return 5;
+        return 0;
+      }
+
+      function calculateSPI(semester) {
+        let totalSubjects = semester.subjects.length;
+        let totalGradePoints = 0;
+        semester.subjects.forEach(subject => {
+          totalGradePoints += getGradePoints(subject.marks);
+        });
+        return totalSubjects > 0 ? (totalGradePoints / totalSubjects).toFixed(2) : 0;
+      }
+
+      function calculateCGPA(student) {
+        let totalSubjects = 0;
+        let totalGradePoints = 0;
+        Object.values(student.semesters).forEach(semester => {
+          semester.subjects.forEach(subject => {
+            totalSubjects++;
+            totalGradePoints += getGradePoints(subject.marks);
+          });
+        });
+        return totalSubjects > 0 ? (totalGradePoints / totalSubjects).toFixed(2) : 0;
+      }
+
+      function calculateBacklogs(student) {
+        let backlogs = [];
+        Object.entries(student.semesters).forEach(([semNum, semester]) => {
+          semester.subjects.forEach(subject => {
+            if (subject.marks < 40) {
+              backlogs.push({
+                semester: semNum,
+                subject: subject.name,
+                marks: subject.marks
+              });
+            }
+          });
+        });
+        return backlogs;
+      }
+
+      // Tab switching
+      document.getElementById('loginTab').addEventListener('click', function() {
+        document.getElementById('loginTab').className = 'flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all bg-white text-indigo-600 shadow-md';
+        document.getElementById('registerTab').className = 'flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all text-white hover:text-white/80';
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+      });
+
+      document.getElementById('registerTab').addEventListener('click', function() {
+        document.getElementById('registerTab').className = 'flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all bg-white text-indigo-600 shadow-md';
+        document.getElementById('loginTab').className = 'flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all text-white hover:text-white/80';
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('loginForm').classList.add('hidden');
+      });
+
+      document.getElementById('studentTypeTab').addEventListener('click', function() {
+        document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white';
+        document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white';
+        document.getElementById('rollNoField').classList.remove('hidden');
+        document.getElementById('usernameField').classList.add('hidden');
+        document.getElementById('regRollNoField').classList.remove('hidden');
+        document.getElementById('regUsernameField').classList.add('hidden');
+        document.getElementById('regNameField').classList.remove('hidden');
+      });
+
+      document.getElementById('adminTypeTab').addEventListener('click', function() {
+        document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white';
+        document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white';
+        document.getElementById('rollNoField').classList.add('hidden');
+        document.getElementById('usernameField').classList.remove('hidden');
+        document.getElementById('regRollNoField').classList.add('hidden');
+        document.getElementById('regUsernameField').classList.remove('hidden');
+        document.getElementById('regNameField').classList.remove('hidden');
+      });
+
+      // Login functionality
+      document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('authError');
+        if (document.getElementById('studentTypeTab').classList.contains('bg-white/20')) {
+          const rollNo = document.getElementById('rollNo').value;
+          const student = students.find(s => s.rollNo === rollNo && s.password === password);
+          if (student) {
+            currentUser = student;
+            isAdmin = false;
+            showStudentDashboard();
+          } else {
+            showError('Invalid roll number or password');
+          }
+        } else {
+          const username = document.getElementById('username').value;
+          const admin = admins.find(a => a.username === username && a.password === password);
+          if (admin) {
+            currentUser = admin;
+            isAdmin = true;
+            showAdminDashboard();
+          } else {
+            showError('Invalid admin credentials');
+          }
+        }
+      });
+
+      // Register functionality
+      document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const password = document.getElementById('regPassword').value;
+        const confirmPassword = document.getElementById('regConfirmPassword').value;
+        const name = document.getElementById('regName').value;
+
+        if (password !== confirmPassword) {
+          showError('Passwords do not match');
+          return;
+        }
+        if (password.length < 6) {
+          showError('Password must be at least 6 characters long');
+          return;
+        }
+
+        if (document.getElementById('studentTypeTab').classList.contains('bg-white/20')) {
+          const rollNo = document.getElementById('regRollNo').value;
+          if (students.find(s => s.rollNo === rollNo)) {
+            showError('Roll number already exists');
+            return;
+          }
+          const newStudent = {
+            rollNo,
+            name,
+            password,
+            currentSemester: 1,
+            semesters: {}
+          };
+          students.push(newStudent);
+          showSuccess('Student account created successfully!');
+        } else {
+          const username = document.getElementById('regUsername').value;
+          if (admins.find(a => a.username === username)) {
+            showError('Username already exists');
+            return;
+          }
+          const newAdmin = {
+            username,
+            name,
+            password
+          };
+          admins.push(newAdmin);
+          showSuccess('Admin account created successfully!');
+        }
+
+        // Switch to login tab
+        document.getElementById('loginTab').click();
+        document.getElementById('registerForm').reset();
+
+        // ✅ Save data to Firebase
+        saveData();
+      });
+
+      function showError(message) {
+        const errorDiv = document.getElementById('authError');
+        const successDiv = document.getElementById('authSuccess');
+        errorDiv.textContent = message;
+        errorDiv.classList.remove('hidden');
+        successDiv.classList.add('hidden');
+      }
+
+      function showSuccess(message) {
+        const errorDiv = document.getElementById('authError');
+        const successDiv = document.getElementById('authSuccess');
+        successDiv.textContent = message;
+        successDiv.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
+      }
+
+      function showStudentDashboard() {
+        document.getElementById('authPage').classList.add('hidden');
+        document.getElementById('studentDashboard').classList.remove('hidden');
+        document.getElementById('studentName').textContent = `${currentUser.name} (${currentUser.rollNo})`;
+        displayStudentResults();
+      }
+
+      function showAdminDashboard() {
+        document.getElementById('authPage').classList.add('hidden');
+        document.getElementById('adminDashboard').classList.remove('hidden');
+        updateAdminStats();
+        showAllStudents();
+      }
+
+      function displayStudentResults() {
+        const resultsDiv = document.getElementById('studentResults');
+        const cgpa = calculateCGPA(currentUser);
+        const backlogs = calculateBacklogs(currentUser);
+        let html = `
+          <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 card-hover">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Academic Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl text-white">
+                <h3 class="text-lg font-semibold mb-2">CGPA</h3>
+                <p class="text-4xl font-bold">${cgpa}</p>
+              </div>
+              <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl text-white">
+                <h3 class="text-lg font-semibold mb-2">Current Semester</h3>
+                <p class="text-4xl font-bold">${currentUser.currentSemester}</p>
+              </div>
+              <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-xl text-white">
+                <h3 class="text-lg font-semibold mb-2">Backlogs</h3>
+                <p class="text-4xl font-bold">${backlogs.length}</p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        Object.entries(currentUser.semesters).forEach(([semNum, semester]) => {
+          const spi = calculateSPI(semester);
+          html += `
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 card-hover">
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Semester ${semNum} Results</h3>
+                <span class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium">SPI: ${spi}</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full table-auto">
+                  <thead>
+                    <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
+                      <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Subject</th>
+                      <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Marks</th>
+                      <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Grade</th>
+                      <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+          `;
+          semester.subjects.forEach(subject => {
+            const grade = calculateGrade(subject.marks);
+            const status = subject.marks >= 40 ? 'Pass' : 'Fail';
+            const statusClass = subject.marks >= 40 ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100';
+            html += `
+              <tr class="border-t hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 text-sm font-medium text-gray-800">${subject.name}</td>
+                <td class="px-6 py-4 text-sm text-gray-800 font-bold">${subject.marks}</td>
+                <td class="px-6 py-4 text-sm font-bold">${grade}</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium ${statusClass}">${status}</span></td>
+              </tr>
+            `;
+          });
+          html += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        });
+
+        if (backlogs.length > 0) {
+          html += `
+            <div class="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-2xl p-8">
+              <h3 class="text-2xl font-bold text-red-800 mb-6">Pending Backlogs</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          `;
+          backlogs.forEach(backlog => {
+            html += `
+              <div class="bg-white p-4 rounded-xl shadow-md border-l-4 border-red-500">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <p class="font-semibold text-gray-800">Semester ${backlog.semester}</p>
+                    <p class="text-gray-600">${backlog.subject}</p>
+                  </div>
+                  <span class="text-red-600 font-bold text-lg">${backlog.marks}</span>
+                </div>
+              </div>
+            `;
+          });
+          html += `
+              </div>
+            </div>
+          `;
+        }
+
+        resultsDiv.innerHTML = html;
+      }
+
+      function updateAdminStats() {
+        const totalStudentsCount = students.length;
+        let passCount = 0;
+        let backlogCount = 0;
+        students.forEach(student => {
+          const backlogs = calculateBacklogs(student);
+          if (backlogs.length === 0) passCount++;
+          else backlogCount++;
+        });
+        const passRate = totalStudentsCount > 0 ? Math.round((passCount / totalStudentsCount) * 100) : 0;
+        document.getElementById('totalStudents').textContent = totalStudentsCount;
+        document.getElementById('passRate').textContent = `${passRate}%`;
+        document.getElementById('backlogCount').textContent = backlogCount;
+        saveData(); // Save to Firebase
+      }
+
+      function showAllStudents() {
+        document.getElementById('studentsListSection').classList.remove('hidden');
+        document.getElementById('backlogDetailsSection').classList.add('hidden');
+        displayAllStudents();
+      }
+
+      function showBacklogStudents() {
+        document.getElementById('studentsListSection').classList.add('hidden');
+        document.getElementById('backlogDetailsSection').classList.remove('hidden');
+        displayBacklogStudents();
+      }
+
+      function displayAllStudents() {
+        const tableBody = document.getElementById('studentsTable');
+        let html = '';
+        students.forEach(student => {
+          const cgpa = calculateCGPA(student);
+          const backlogs = calculateBacklogs(student);
+          html += `
+            <tr class="border-t hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 text-sm font-bold text-gray-800">${student.rollNo}</td>
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-800 font-medium">${student.name}</div>
+                <div class="text-xs text-gray-500">${student.program || 'N/A'} - ${student.course || 'N/A'}</div>
+              </td>
+              <td class="px-6 py-4 text-sm font-bold text-gray-800">${cgpa}</td>
+              <td class="px-6 py-4">
+                <span class="px-3 py-1 rounded-full text-xs font-medium ${backlogs.length > 0 ? 'text-red-600 bg-red-100' : 'text-green-600 bg-green-100'}">
+                  ${backlogs.length}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <button onclick="editStudent('${student.rollNo}')" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg text-xs hover:from-blue-600 hover:to-blue-700 mr-2 transition-all shadow-md">Edit</button>
+                <button onclick="deleteStudent('${student.rollNo}')" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-xs hover:from-red-600 hover:to-red-700 transition-all shadow-md">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+        tableBody.innerHTML = html;
+      }
+
+      function displayBacklogStudents() {
+        const container = document.getElementById('backlogStudentsList');
+        let html = '';
+        students.forEach(student => {
+          const backlogs = calculateBacklogs(student);
+          if (backlogs.length > 0) {
+            html += `
+              <div class="bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-200 rounded-xl p-6 mb-6">
+                <div class="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 class="text-xl font-bold text-gray-800">${student.name}</h3>
+                    <p class="text-gray-600">Roll No: ${student.rollNo}</p>
+                    <p class="text-gray-600">Program: ${student.program || 'N/A'} - ${student.course || 'N/A'}</p>
+                    <p class="text-gray-600">CGPA: ${calculateCGPA(student)}</p>
+                  </div>
+                  <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    ${backlogs.length} Backlog${backlogs.length > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            `;
+            backlogs.forEach(backlog => {
+              html += `
+                <div class="bg-white p-4 rounded-lg shadow-md border-l-4 border-red-500">
+                  <p class="font-semibold text-gray-800">Semester ${backlog.semester}</p>
+                  <p class="text-gray-600 text-sm">${backlog.subject}</p>
+                  <p class="text-red-600 font-bold">${backlog.marks} marks</p>
+                </div>
+              `;
+            });
+            html += `
+                </div>
+              </div>
+            `;
+          }
+        });
+        if (html === '') {
+          html = `
+            <div class="text-center py-12">
+              <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-800 mb-2">No Students with Backlogs</h3>
+              <p class="text-gray-600">All students have successfully passed their subjects!</p>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+      }
+
+      document.getElementById('addStudentBtn').addEventListener('click', function() {
+        editingStudent = null;
+        document.getElementById('modalTitle').textContent = 'Add Student';
+        document.getElementById('studentForm').reset();
+        document.getElementById('semesterResults').innerHTML = '';
+        document.getElementById('studentModal').classList.remove('hidden');
+      });
+
+      function editStudent(rollNo) {
+        const student = students.find(s => s.rollNo === rollNo);
+        if (student) {
+          editingStudent = student;
+          document.getElementById('modalTitle').textContent = 'Edit Student';
+          document.getElementById('modalRollNo').value = student.rollNo;
+          document.getElementById('modalStudentName').value = student.name;
+          document.getElementById('modalPassword').value = student.password;
+          document.getElementById('modalProgram').value = student.program || '';
+          document.getElementById('modalCourse').value = student.course || '';
+          document.getElementById('modalSemester').value = student.currentSemester;
+          generateSemesterInputs(student.currentSemester, student);
+          document.getElementById('studentModal').classList.remove('hidden');
+        }
+      }
+
+      function deleteStudent(rollNo) {
+        if (confirm('Are you sure you want to delete this student?')) {
+          const studentIndex = students.findIndex(s => s.rollNo === rollNo);
+          if (studentIndex !== -1) {
+            students.splice(studentIndex, 1);
+            displayAllStudents();
+            updateAdminStats();
+            alert('Student deleted successfully!');
+          } else {
+            alert('Student not found!');
+          }
+          saveData(); // Save to Firebase
+        }
+      }
+
+      document.getElementById('modalSemester').addEventListener('change', function() {
+        const semester = parseInt(this.value);
+        if (semester) generateSemesterInputs(semester, editingStudent);
+      });
+
+      document.getElementById('modalProgram').addEventListener('change', function() {
+        const semester = parseInt(document.getElementById('modalSemester').value);
+        if (semester) generateSemesterInputs(semester, editingStudent);
+      });
+
+      document.getElementById('modalCourse').addEventListener('change', function() {
+        const semester = parseInt(document.getElementById('modalSemester').value);
+        if (semester) generateSemesterInputs(semester, editingStudent);
+      });
+
+      function generateSemesterInputs(maxSemester, student = null) {
+        const container = document.getElementById('semesterResults');
+        const program = document.getElementById('modalProgram').value;
+        const course = document.getElementById('modalCourse').value;
+        let html = '';
+        for (let sem = 1; sem <= maxSemester; sem++) {
+          const semesterData = student?.semesters[sem];
+          html += `
+            <div class="border-2 border-gray-200 rounded-xl p-6 mb-6 bg-gray-50">
+              <h4 class="text-xl font-bold text-gray-800 mb-4">Semester ${sem}</h4>
+              <div id="semester${sem}Subjects" class="space-y-4">
+          `;
+          if (semesterData) {
+            semesterData.subjects.forEach((subject, index) => {
+              html += `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-lg shadow-sm">
+                  <input type="text" placeholder="Subject Name" value="${subject.name}" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-name focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                  <input type="number" placeholder="Marks (0-100)" value="${subject.marks}" min="0" max="100" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-marks focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                  <button type="button" onclick="removeSubject(this)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md">Remove</button>
+                </div>
+              `;
+            });
+          } else {
+            const templateSubjects = ["Mathematics I", "Physics", "Chemistry", "Programming", "English"];
+            templateSubjects.forEach(subjectName => {
+              html += `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-lg shadow-sm">
+                  <input type="text" placeholder="Subject Name" value="${subjectName}" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-name focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-blue-50" required readonly>
+                  <input type="number" placeholder="Marks (0-100)" min="0" max="100" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-marks focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                  <button type="button" onclick="removeSubject(this)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md">Remove</button>
+                </div>
+              `;
+            });
+          }
+          html += `
+              </div>
+              <button type="button" onclick="addSubject(${sem})" class="mt-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md">Add Subject</button>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+      }
+
+      function addSubject(semester) {
+        const container = document.getElementById(`semester${semester}Subjects`);
+        const subjectDiv = document.createElement('div');
+        subjectDiv.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-lg shadow-sm';
+        subjectDiv.innerHTML = `
+          <input type="text" placeholder="Subject Name" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-name focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+          <input type="number" placeholder="Marks (0-100)" min="0" max="100" class="px-4 py-3 border-2 border-gray-300 rounded-lg subject-marks focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+          <button type="button" onclick="removeSubject(this)" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md">Remove</button>
+        `;
+        container.appendChild(subjectDiv);
+      }
+
+      function removeSubject(button) {
+        button.parentElement.remove();
+      }
+
+      document.getElementById('studentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const rollNo = document.getElementById('modalRollNo').value;
+        const name = document.getElementById('modalStudentName').value;
+        const password = document.getElementById('modalPassword').value;
+        const currentSemester = parseInt(document.getElementById('modalSemester').value);
+        const program = document.getElementById('modalProgram').value;
+        const course = document.getElementById('modalCourse').value;
+
+        if (!editingStudent && students.find(s => s.rollNo === rollNo)) {
+          alert('Roll number already exists!');
+          return;
+        }
+
+        const studentData = {
+          rollNo,
+          name,
+          password,
+          program,
+          course,
+          currentSemester,
+          semesters: {}
+        };
+
+        for (let sem = 1; sem <= currentSemester; sem++) {
+          const semesterContainer = document.getElementById(`semester${sem}Subjects`);
+          if (semesterContainer) {
+            const subjectRows = semesterContainer.querySelectorAll('.grid');
+            studentData.semesters[sem] = { subjects: [] };
+            subjectRows.forEach(row => {
+              const name = row.querySelector('.subject-name').value;
+              const marks = parseInt(row.querySelector('.subject-marks').value);
+              if (name && !isNaN(marks)) {
+                studentData.semesters[sem].subjects.push({ name, marks });
+              }
+            });
+          }
+        }
+
+        if (editingStudent) {
+          const index = students.findIndex(s => s.rollNo === editingStudent.rollNo);
+          students[index] = studentData;
+        } else {
+          students.push(studentData);
+        }
+
+        closeModal();
         displayAllStudents();
         updateAdminStats();
-        alert('Student deleted successfully!');
-      } else {
-        alert('Student not found!');
+        saveData(); // Save to Firebase
+      });
+
+      function closeModal() {
+        document.getElementById('studentModal').classList.add('hidden');
       }
-      saveData(); // Save to Firebase
-    }
-  }
-</script>
+
+      function logout() {
+        currentUser = null;
+        isAdmin = false;
+        editingStudent = null;
+        document.getElementById('studentDashboard').classList.add('hidden');
+        document.getElementById('adminDashboard').classList.add('hidden');
+        document.getElementById('authPage').classList.remove('hidden');
+        document.getElementById('loginForm').reset();
+        document.getElementById('registerForm').reset();
+        document.getElementById('authError').classList.add('hidden');
+        document.getElementById('authSuccess').classList.add('hidden');
+      }
+
+      // Initialize
+      window.onload = function() {
+        initializeFirebase();
+      };
     </script>
 </body>
 </html>
