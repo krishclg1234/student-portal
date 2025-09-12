@@ -6,39 +6,15 @@
     <title>Student Result Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .fade-in {
-            animation: fadeIn 0.6s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .slide-in {
-            animation: slideIn 0.4s ease-out;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
+        .fade-in { animation: fadeIn 0.6s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover:hover { transform: translateY(-5px); }
+        .glass-effect { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.18); }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
-    <!-- Login Page Only -->
+    <!-- Login Page -->
     <div id="authPage" class="min-h-screen flex items-center justify-center p-4">
         <div class="glass-effect rounded-3xl shadow-2xl p-8 w-full max-w-md fade-in">
             <div class="text-center mb-8">
@@ -52,21 +28,21 @@
             </div>
             <div class="mb-4">
                 <div class="flex bg-white/10 rounded-lg p-1">
-                    <button id="studentTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white">
+                    <button id="studentTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white">
                         Student
                     </button>
-                    <button id="adminTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white">
+                    <button id="adminTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white">
                         Admin
                     </button>
                 </div>
             </div>
             <!-- Login Form -->
             <form id="loginForm" class="space-y-4">
-                <div id="rollNoField">
+                <div id="rollNoField" class="hidden">
                     <label class="block text-sm font-medium text-white mb-2">Roll Number</label>
                     <input type="text" id="rollNo" class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl focus:ring-2 focus:ring-white focus:border-transparent text-white placeholder-white/60" placeholder="Enter your roll number">
                 </div>
-                <div id="usernameField" class="hidden">
+                <div id="usernameField">
                     <label class="block text-sm font-medium text-white mb-2">Username</label>
                     <input type="text" id="username" class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl focus:ring-2 focus:ring-white focus:border-transparent text-white placeholder-white/60" placeholder="Enter username">
                 </div>
@@ -103,7 +79,7 @@
         </nav>
         <div class="max-w-7xl mx-auto p-6">
             <div id="studentResults" class="fade-in">
-                <!-- Student results will be populated here -->
+                <!-- Results will be populated here -->
             </div>
         </div>
     </div>
@@ -260,9 +236,16 @@
                             <option value="8">Semester 8</option>
                         </select>
                     </div>
+                    <!-- New Fields -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Attendance (%)</label>
-                        <input type="number" id="modalAttendance" min="0" max="100" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                        <input type="number" id="modalAttendance" min="0" max="100" 
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Parent's Phone Number (10 digits)</label>
+                        <input type="text" id="modalParentPhone" placeholder="e.g. 9876543210" pattern="[0-9]{10}" 
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
                     </div>
                 </div>
                 <div id="semesterResults">
@@ -278,16 +261,14 @@
     <script>
       // 🔥 Replace with your Firebase config
       const firebaseConfig = {
-  apiKey: "AIzaSyBpzCla5s18uNBAU6T39jFy60ECULYcPoc",
-  authDomain: "studentportal-d48b3.firebaseapp.com",
-  databaseURL: "https://studentportal-d48b3-default-rtdb.firebaseio.com",
-  projectId: "studentportal-d48b3",
-  storageBucket: "studentportal-d48b3.firebasestorage.app",
-  messagingSenderId: "819003837531",
-  appId: "1:819003837531:web:f1b915b2a1a6193856437e",
-  measurementId: "G-RRN5LS8PGS"
-};
-
+        apiKey: "AIzaSyBpzClA5s18uNBAU6T39jFy60ECULYcPoc",
+        authDomain: "studentportal-d48b3.firebaseapp.com",
+        databaseURL: "https://studentportal-d48b3-default-rtdb.firebaseio.com",
+        projectId: "studentportal-d48b3",
+        storageBucket: "studentportal-d48b3.appspot.com",
+        messagingSenderId: "819003837531",
+        appId: "1:819003837531:web:f1b915b2a1a6193856437e"
+      };
 
       // Initialize Firebase
       function initializeFirebase() {
@@ -399,7 +380,7 @@
         let backlogs = [];
         Object.entries(student.semesters).forEach(([semNum, semester]) => {
           semester.subjects.forEach(subject => {
-            if (subject.marks < 40) {
+            if (subject.marks < 33) {
               backlogs.push({
                 semester: semNum,
                 subject: subject.name,
@@ -413,10 +394,10 @@
 
       // Tab switching
       document.getElementById('studentTypeTab').addEventListener('click', function() {
-        document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white';
-        document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white';
-        document.getElementById('rollNoField').classList.remove('hidden');
-        document.getElementById('usernameField').classList.add('hidden');
+        document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white';
+        document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white';
+        document.getElementById('rollNoField').classList.add('hidden');
+        document.getElementById('usernameField').classList.remove('hidden');
       });
 
       document.getElementById('adminTypeTab').addEventListener('click', function() {
@@ -492,15 +473,15 @@
                 <h3 class="text-lg font-semibold mb-2">Current Semester</h3>
                 <p class="text-4xl font-bold">${currentUser.currentSemester}</p>
               </div>
-              <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-xl text-white">
-                <h3 class="text-lg font-semibold mb-2">Backlogs</h3>
-                <p class="text-4xl font-bold">${backlogs.length}</p>
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl text-center">
+                <h3 class="text-lg font-semibold text-blue-800">Attendance</h3>
+                <p class="text-3xl font-bold text-blue-900">${currentUser.attendance || 0}%</p>
+                <p class="text-sm text-blue-600">Current Semester</p>
               </div>
             </div>
           </div>
         `;
 
-        // 🔥 Feature 1: Auto-Backlog Alert
         if (backlogs.length > 0) {
           html += `
             <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-xl mt-6 animate-pulse">
@@ -554,7 +535,6 @@
           `;
         });
 
-        // 🔮 Feature 2: Smart Pass/Fail Prediction
         const attendance = currentUser.attendance || 0;
         let riskLevel = "Low Risk";
         let riskColor = "text-green-600";
@@ -583,7 +563,6 @@
           </div>
         `;
 
-        // 📱 Feature 3: One-Click Parent Notification
         html += `
           <button onclick="sendParentUpdate('${currentUser.rollNo}')" 
                   class="mt-4 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all shadow-md w-full">
@@ -748,6 +727,7 @@
           document.getElementById('modalCourse').value = student.course || '';
           document.getElementById('modalSemester').value = student.currentSemester;
           document.getElementById('modalAttendance').value = student.attendance || '';
+          document.getElementById('modalParentPhone').value = student.parentPhone || '';
           generateSemesterInputs(student.currentSemester, student);
           document.getElementById('studentModal').classList.remove('hidden');
         }
@@ -851,6 +831,7 @@
         const program = document.getElementById('modalProgram').value;
         const course = document.getElementById('modalCourse').value;
         const attendance = document.getElementById('modalAttendance').value;
+        const parentPhone = document.getElementById('modalParentPhone').value;
 
         if (!editingStudent && students.find(s => s.rollNo === rollNo)) {
           alert('Roll number already exists!');
@@ -865,6 +846,7 @@
           course,
           currentSemester,
           attendance: parseInt(attendance) || 0,
+          parentPhone: parentPhone,
           semesters: {}
         };
 
@@ -900,7 +882,7 @@
         document.getElementById('studentModal').classList.add('hidden');
       }
 
-      // 📱 Feature 3: Parent Notification
+      // 📱 Feature: Parent Notification
       function sendParentUpdate(rollNo) {
         const student = students.find(s => s.rollNo === rollNo);
         if (!student) {
