@@ -392,30 +392,13 @@
         return backlogs;
       }
 
-    // Corrected Tab Switching
-document.getElementById('studentTypeTab').addEventListener('click', function() {
-    // Active: Student, Inactive: Admin
-    document.getElementById('studentTypeTab').classList.remove('text-white/70', 'hover:text-white');
-    document.getElementById('studentTypeTab').classList.add('bg-white/20', 'text-white');
-
-    document.getElementById('adminTypeTab').classList.remove('bg-white/20', 'text-white');
-    document.getElementById('adminTypeTab').classList.add('text-white/70', 'hover:text-white');
-
-    document.getElementById('rollNoField').classList.remove('hidden');
-    document.getElementById('usernameField').classList.add('hidden');
-});
-
-document.getElementById('adminTypeTab').addEventListener('click', function() {
-    // Active: Admin, Inactive: Student
-    document.getElementById('adminTypeTab').classList.remove('text-white/70', 'hover:text-white');
-    document.getElementById('adminTypeTab').classList.add('bg-white/20', 'text-white');
-
-    document.getElementById('studentTypeTab').classList.remove('bg-white/20', 'text-white');
-    document.getElementById('studentTypeTab').classList.add('text-white/70', 'hover:text-white');
-
-    document.getElementById('rollNoField').classList.add('hidden');
-    document.getElementById('usernameField').classList.remove('hidden');
-});
+      // Tab switching
+      document.getElementById('studentTypeTab').addEventListener('click', function() {
+        document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-white/70 hover:text-white';
+        document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white';
+        document.getElementById('rollNoField').classList.add('hidden');
+        document.getElementById('usernameField').classList.remove('hidden');
+      });
 
       document.getElementById('adminTypeTab').addEventListener('click', function() {
         document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-white/20 text-white';
@@ -426,34 +409,34 @@ document.getElementById('adminTypeTab').addEventListener('click', function() {
 
       // Login functionality
       document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const password = document.getElementById('password').value;
-    const errorDiv = document.getElementById('authError');
-    errorDiv.classList.add('hidden');
-
-    if (document.getElementById('studentTypeTab').classList.contains('bg-white/20')) {
-        // Student login
-        const rollNo = document.getElementById('rollNo').value.trim();
-        const student = students.find(s => s.rollNo === rollNo && s.password === password);
-        if (student) {
+        e.preventDefault();
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('authError');
+        
+        if (document.getElementById('studentTypeTab').classList.contains('bg-white/20')) {
+          // Student login
+          const rollNo = document.getElementById('rollNo').value;
+          const student = students.find(s => s.rollNo === rollNo && s.password === password);
+          if (student) {
             currentUser = student;
             isAdmin = false;
             showStudentDashboard();
-        } else {
+          } else {
             showError('Invalid roll number or password');
-        }
-    } else {
-        // Admin login
-        const username = document.getElementById('username').value;
-        if (username === "srms" && password === "srms@2468") {
+          }
+        } else {
+          // Admin login
+          const username = document.getElementById('username').value;
+          if (username === "srms" && password === "srms@2468") {
             currentUser = { name: "Admin" };
             isAdmin = true;
             showAdminDashboard();
-        } else {
+          } else {
             showError('Invalid admin credentials');
+          }
         }
-    }
-});
+      });
+
       function showError(message) {
         const errorDiv = document.getElementById('authError');
         errorDiv.textContent = message;
