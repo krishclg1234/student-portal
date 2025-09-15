@@ -6,13 +6,11 @@
     <title>Student Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase SDK via CDN -->
+    <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase modules
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getDatabase, ref, get, set, update, push, child } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+        import { getDatabase, ref, get, set, update, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-        // 🔐 Your Firebase config (replace if different)
         const firebaseConfig = {
             apiKey: "AIzaSyBpzCla5s18uNBAU6T39jFy60ECULYcPoc",
             authDomain: "studentportal-d48b3.firebaseapp.com",
@@ -23,11 +21,9 @@
             appId: "1:819003837531:web:f1b915b2a1a6193856437e"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Make available globally
         window.firebaseInitialized = true;
         window.db = db;
         window.firebaseRef = ref;
@@ -371,6 +367,7 @@
         </form>
     </div>
 </div>
+
 <script>
 // Global variables
 let students = [];
@@ -462,7 +459,7 @@ async function loadStudentsFromFirebase() {
         }
         updateAdminStats();
         displayAllStudents();
-        checkAndSendNotifications(); // Check after load
+        // Don't auto-send notifications on load
     } catch (error) {
         console.error("Failed to load:", error);
     }
@@ -518,9 +515,11 @@ function calculateAttendancePercentage(student) {
 
 // Send notification → triggers Twilio SMS via Firebase Function
 async function sendNotification(student, type, data) {
-    const msg = type === 'low_attendance'
-        ? `Low attendance: ${data.percentage}%`
-        : `${data.count} backlog(s): ${data.subjects}`;
+    const msg = type === 'daily_attendance'
+        ? `Absent today: ${data.subject}`
+        : type === 'backlog'
+            ? `${data.count} backlog(s): ${data.subjects}`
+            : `Low attendance: ${data.percentage}%`;
 
     await window.firebasePush(window.firebaseRef(window.db, 'notifications'), {
         studentName: student.name,
@@ -532,62 +531,7 @@ async function sendNotification(student, type, data) {
     });
 }
 
-// Check and send alerts immediately (not just Sunday)
-function checkAndSendNotifications() {
-    students.forEach(student => {
-        const attPercent = calculateAttendancePercentage(student);
-        const backlogs = calculateBacklogs(student);
-
-        if (attPercent < 70) {
-            sendNotification(student, 'low_attendance', { percentage: attPercent });
-        }
-        if (backlogs.length > 0) {
-            sendNotification(student, 'backlog', {
-                count: backlogs.length,
-                subjects: backlogs.map(b => b.subject).join(', ')
-            });
-        }
-    });
-}
-
-// Tab switching
-document.getElementById('studentTypeTab').addEventListener('click', () => {
-    document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md';
-    document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white';
-    document.getElementById('rollNoField').classList.remove('hidden');
-    document.getElementById('usernameField').classList.add('hidden');
-});
-document.getElementById('adminTypeTab').addEventListener('click', () => {
-    document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md';
-    document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white';
-    document.getElementById('usernameField').classList.remove('hidden');
-    document.getElementById('rollNoField').classList.add('hidden');
-});
-
-// Admin tabs
-document.getElementById('studentsTabBtn').addEventListener('click', () => switchAdminTab('students'));
-document.getElementById('attendanceTabBtn').addEventListener('click', () => switchAdminTab('attendance'));
-document.getElementById('notificationsTabBtn').addEventListener('click', () => switchAdminTab('notifications'));
-
-function switchAdminTab(tab) {
-    ['students', 'attendance', 'notifications'].forEach(t => {
-        document.getElementById(`${t}Tab`).classList.add('hidden');
-        document.getElementById(`${t}TabBtn`).className = 'px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-600';
-    });
-    document.getElementById(`${tab}Tab`).classList.remove('hidden');
-    document.getElementById(`${tab}TabBtn`).className = 'px-4 py-2 bg-green-600 text-white rounded-lg font-medium';
-}
-
-// Add student button
-document.getElementById('addStudentBtn').addEventListener('click', () => {
-    editingStudent = null;
-    document.getElementById('modalTitle').textContent = 'Add Student';
-    document.getElementById('studentForm').reset();
-    generateSemesterInputs(parseInt(document.getElementById('modalSemester').value));
-    document.getElementById('studentModal').classList.remove('hidden');
-});
-
-// Generate semester inputs dynamically
+// Generate semester inputs
 function generateSemesterInputs(maxSemester, student = null) {
     const container = document.getElementById('semesterResults');
     const program = document.getElementById('modalProgram').value;
@@ -816,7 +760,15 @@ function markAttendance(rollNo, subject, date, status) {
     const student = students.find(s => s.rollNo === rollNo);
     if (!student.attendance) student.attendance = {};
     if (!student.attendance[subject]) student.attendance[subject] = {};
+
+    const oldStatus = student.attendance[subject][date];
     student.attendance[subject][date] = status;
+
+    // Send SMS only if changed to "absent"
+    if (status === 'absent' && oldStatus !== 'absent') {
+        sendNotification(student, 'daily_attendance', { subject });
+    }
+
     loadAttendanceStudents(); // Refresh UI
 }
 
@@ -824,7 +776,17 @@ function saveAttendance() {
     alert('Attendance saved successfully!');
     updateAdminStats();
     syncToFirebase();
-    checkAndSendNotifications();
+
+    // Check for backlogs after saving
+    students.forEach(student => {
+        const backlogs = calculateBacklogs(student);
+        if (backlogs.length > 0) {
+            sendNotification(student, 'backlog', {
+                count: backlogs.length,
+                subjects: backlogs.map(b => b.subject).join(', ')
+            });
+        }
+    });
 }
 
 // Login
@@ -876,7 +838,6 @@ function showAdminDashboard() {
     document.getElementById('adminDashboard').classList.remove('hidden');
     updateAdminStats();
     showAllStudents();
-    checkAndSendNotifications();
 }
 
 function logout() {
@@ -900,9 +861,6 @@ document.getElementById('modalSemester').addEventListener('change', () => {
     const semester = parseInt(document.getElementById('modalSemester').value);
     generateSemesterInputs(semester);
 });
-
-// On page load
-updateAttendanceSubjects();
 
 // Subject dropdown for attendance
 function updateAttendanceSubjects() {
@@ -928,30 +886,6 @@ function updateAttendanceSubjects() {
 document.getElementById('attendanceProgram').addEventListener('change', updateAttendanceSubjects);
 document.getElementById('attendanceCourse').addEventListener('change', updateAttendanceSubjects);
 document.getElementById('attendanceSemester').addEventListener('change', updateAttendanceSubjects);
-</script>
-
-function updateAttendanceSubjects() {
-    const program = document.getElementById('attendanceProgram').value;
-    const course = document.getElementById('attendanceCourse').value;
-    const semester = document.getElementById('attendanceSemester').value;
-    const subjectSelect = document.getElementById('attendanceSubject');
-
-    subjectSelect.innerHTML = '<option value="">Select Subject</option>';
-
-    if (program && course && semester) {
-        const subjects = curriculumTemplates[program]?.[course]?.[semester];
-        if (subjects) {
-            subjects.forEach(subject => {
-                const opt = document.createElement('option');
-                opt.value = subject;
-                opt.textContent = subject;
-                subjectSelect.appendChild(opt);
-            });
-        } else {
-            console.warn("No subjects found for:", program, course, semester);
-        }
-    }
-}
 
 // On page load
 updateAttendanceSubjects();
