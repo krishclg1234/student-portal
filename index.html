@@ -3,934 +3,2390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System</title>
-
-    <!-- Tailwind CSS -->
+    <title>Academic Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Firebase SDK via CDN -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getDatabase, ref, get, set, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
-
-        // 🔐 Your Firebase config (replace with yours if different)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBpzCla5s18uNBAU6T39jFy60ECULYcPoc",
-            authDomain: "studentportal-d48b3.firebaseapp.com",
-            databaseURL: "https://studentportal-d48b3-default-rtdb.firebaseio.com",
-            projectId: "studentportal-d48b3",
-            storageBucket: "studentportal-d48b3.firebasestorage.app",
-            messagingSenderId: "819003837531",
-            appId: "1:819003837531:web:f1b915b2a1a6193856437e"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Make available globally after load
-        window.firebaseInitialized = true;
-        window.db = db;
-        window.firebaseRef = ref;
-        window.firebaseGet = get;
-        window.firebaseSet = set;
-        window.firebasePush = push;
-
-        console.log("✅ Firebase initialized");
-    </script>
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .fade-in { animation: fadeIn 0.6s ease-in; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .gradient-bg { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow { 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(16px);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out; }
+        .animate-slideUp { animation: slideUp 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .slide-in { animation: slideIn 0.4s ease-out; }
-        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
-        .gradient-bg { background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #0f172a 100%); }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
-        .glass-effect { background: rgba(31,41,55,0.8); backdrop-filter: blur(10px); border: 1px solid rgba(75,85,99,0.3); }
-        .dark-card { background: linear-gradient(145deg, #374151, #1f2937); border: 1px solid #4b5563; }
-        .attendance-present { background: linear-gradient(135deg, #059669, #047857); }
-        .attendance-absent { background: linear-gradient(135deg, #dc2626, #b91c1c); }
-        .attendance-neutral { background: linear-gradient(135deg, #6b7280, #4b5563); }
-        .notification-badge { background-color: #ef4444; }
-        .hover-lift:hover { transform: translateY(-2px); }
-        .card-shadow { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
-        .progress-bar { height: 8px; background: linear-gradient(90deg, #48bb78, #38a169); border-radius: 4px; transition: width 0.5s ease; }
-        .progress-bar-danger { background: linear-gradient(90deg, #f56565, #e53e3e); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounceGentle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .hover-lift { transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-primary:hover { background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%); }
+        .btn-success { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+        .btn-success:hover { background: linear-gradient(135deg, #38a169 0%, #2f855a 100%); }
+        .btn-danger { background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); }
+        .btn-danger:hover { background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); }
+        .btn-warning { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
+        .btn-warning:hover { background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%); }
+        .btn-info { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
+        .btn-info:hover { background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%); }
+        .stats-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stats-success { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+        .stats-danger { background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); }
+        .stats-warning { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
+        .stats-info { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
+        .attendance-present { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+        .attendance-absent { background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); }
         .scrollbar-custom::-webkit-scrollbar { width: 8px; }
         .scrollbar-custom::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         .scrollbar-custom::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
         .scrollbar-custom::-webkit-scrollbar-thumb:hover { background: #5a6fd8; }
+        .progress-bar {
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            transition: width 0.5s ease;
+        }
+        .progress-bar-danger {
+            background: linear-gradient(90deg, #f56565 0%, #e53e3e 100%);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .notification-badge {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
     </style>
 </head>
-<body class="gradient-bg min-h-screen">
+<body class="gradient-bg">
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl card-shadow p-8 w-full max-w-md animate-fadeIn hover-lift">
+            <div class="text-center mb-8">
+                <div class="animate-bounce-gentle mb-4">
+                    <i class="fas fa-graduation-cap text-5xl text-purple-600"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Academic Portal</h1>
+                <p class="text-gray-600">Secure Login System</p>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex bg-gray-100 rounded-xl p-1">
+                    <button id="studentTab" class="flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all tab-active">
+                        <i class="fas fa-user-graduate mr-2"></i>Student
+                    </button>
+                    <button id="adminTab" class="flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-user-shield mr-2"></i>Admin
+                    </button>
+                </div>
+            </div>
 
-<!-- Login Page -->
-<div id="authPage" class="min-h-screen flex items-center justify-center p-4">
-    <div class="glass-effect rounded-3xl shadow-2xl p-8 w-full max-w-md fade-in">
-        <div class="text-center mb-8">
-            <div class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border border-gray-600">
-                <svg class="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253z"></path>
-                </svg>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-id-card mr-2 text-purple-600"></i>Roll Number / Admin ID
+                    </label>
+                    <input type="text" id="loginId" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" placeholder="Enter your ID" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2 text-purple-600"></i>Password
+                    </label>
+                    <input type="password" id="loginPassword" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="w-full btn-primary text-white py-3 rounded-xl font-medium transition-all hover-lift">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </button>
+            </form>
+            
+            <div id="loginError" class="mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-xl hidden"></div>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-600 text-sm">Use your Roll Number/Admin ID and password to log in.</p>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Student Portal</h1>
-            <p class="text-gray-300">Admin-Controlled System</p>
         </div>
-        <div class="mb-4">
-            <div class="flex bg-gray-700/50 rounded-xl p-1">
-                <button id="studentTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white">Student</button>
-                <button id="adminTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md">Admin</button>
-            </div>
-        </div>
-        <form id="loginForm" class="space-y-4">
-            <div id="rollNoField" class="hidden">
-                <label class="block text-sm font-medium text-gray-300 mb-2">Roll Number</label>
-                <input type="text" id="rollNo" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-400" placeholder="Enter roll number">
-            </div>
-            <div id="usernameField">
-                <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                <input type="text" id="username" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-400" placeholder="Enter username">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                <input type="password" id="password" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-400" placeholder="Enter password">
-            </div>
-            <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl font-medium hover:from-green-700 hover:to-green-800 transition-colors shadow-lg">Login</button>
-        </form>
-        <div id="authError" class="mt-4 p-3 bg-red-900/50 border border-red-700 text-red-300 rounded-xl hidden"></div>
     </div>
-</div>
 
-<!-- Student Dashboard -->
-<div id="studentDashboard" class="hidden min-h-screen bg-gray-900">
-    <nav class="bg-gray-800 shadow-xl border-b-2 border-green-600">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+    <!-- Student Dashboard -->
+    <div id="studentDashboard" class="hidden min-h-screen p-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="glass-card rounded-2xl card-shadow p-6 mb-6 animate-fadeIn">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800" id="studentName">Student Name</h2>
+                        <p class="text-gray-600" id="studentInfo">Roll No: 21CS001 | Branch: Computer Science</p>
                     </div>
-                    <h1 class="text-xl font-bold text-white">Student Dashboard</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span id="studentName" class="text-gray-300 font-medium"></span>
-                    <button onclick="logout()" class="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-2 rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg">Logout</button>
+                    <button onclick="logout()" class="btn-danger text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
                 </div>
             </div>
-        </div>
-    </nav>
-    <div class="max-w-7xl mx-auto p-6">
-        <div id="studentResults" class="fade-in"></div>
-        <div id="studentAttendance" class="fade-in hidden"></div>
-    </div>
-</div>
 
-<!-- Admin Dashboard -->
-<div id="adminDashboard" class="hidden min-h-screen bg-gray-900">
-    <nav class="bg-gray-800 shadow-xl border-b-2 border-green-600">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                        </svg>
-                    </div>
-                    <h1 class="text-xl font-bold text-white">Admin Dashboard</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="flex space-x-2">
-                        <button id="studentsTabBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium">Students</button>
-                        <button id="attendanceTabBtn" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-600">Attendance</button>
-                        <button id="notificationsTabBtn" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-600">Notifications</button>
-                    </div>
-                    <button id="addStudentBtn" class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-2 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg">Add Student</button>
-                    <button onclick="logout()" class="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-2 rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg">Logout</button>
+            <!-- Navigation Tabs -->
+            <div class="glass-card rounded-2xl card-shadow p-2 mb-6 animate-fadeIn">
+                <div class="flex space-x-2">
+                    <button id="academicTabStudent" onclick="showAcademicView()" class="flex-1 py-3 px-6 rounded-xl text-sm font-medium transition-all tab-active">
+                        <i class="fas fa-chart-line mr-2"></i>Academic Performance
+                    </button>
+                    <button id="attendanceTabStudent" onclick="showAttendanceView()" class="flex-1 py-3 px-6 rounded-xl text-sm font-medium transition-all text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-calendar-check mr-2"></i>Attendance Record
+                    </button>
                 </div>
             </div>
-        </div>
-    </nav>
-    <div class="max-w-7xl mx-auto p-6">
-        <!-- Students Tab -->
-        <div id="studentsTab">
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-                <div class="dark-card p-6 rounded-2xl shadow-xl text-white card-hover cursor-pointer" onclick="showAllStudents()">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold mb-2 text-gray-300">Total Students</h3>
-                            <p id="totalStudents" class="text-4xl font-bold text-green-400">0</p>
-                        </div>
-                        <div class="w-16 h-16 bg-green-600/20 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="dark-card p-6 rounded-2xl shadow-xl text-white card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold mb-2 text-gray-300">Pass Rate</h3>
-                            <p id="passRate" class="text-4xl font-bold text-green-400">0%</p>
-                        </div>
-                        <div class="w-16 h-16 bg-green-600/20 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="dark-card p-6 rounded-2xl shadow-xl text-white card-hover cursor-pointer" onclick="showBacklogStudents()">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold mb-2 text-gray-300">Backlogs</h3>
-                            <p id="backlogCount" class="text-4xl font-bold text-red-400">0</p>
-                        </div>
-                        <div class="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="dark-card p-6 rounded-2xl shadow-xl text-white card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold mb-2 text-gray-300">Low Attendance</h3>
-                            <p id="lowAttendanceCount" class="text-4xl font-bold text-yellow-400">0</p>
-                        </div>
-                        <div class="w-16 h-16 bg-yellow-600/20 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="studentsListSection" class="dark-card rounded-2xl shadow-xl p-6">
-                <h2 class="text-2xl font-bold text-white mb-6">All Students</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full table-auto">
-                        <thead>
-                        <tr class="bg-gray-700/50">
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Roll No</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Name</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">CGPA</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Attendance</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Backlogs</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody id="studentsTable">
-                            <!-- Filled by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div id="backlogDetailsSection" class="hidden dark-card rounded-2xl shadow-xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white">Students with Backlogs</h2>
-                    <button onclick="showAllStudents()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Back to All Students</button>
-                </div>
-                <div id="backlogStudentsList"><!-- Filled by JS --></div>
-            </div>
-        </div>
 
-        <!-- Attendance Tab -->
-        <div id="attendanceTab" class="hidden">
-            <div class="dark-card rounded-2xl shadow-xl p-6 mb-6">
-                <h2 class="text-2xl font-bold text-white mb-6">Daily Attendance</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Date</label>
-                        <input type="date" id="attendanceDate" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white">
+            <!-- Academic View -->
+            <div id="academicView">
+                <!-- Academic Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="stats-card rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-trophy text-3xl text-yellow-300"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Overall CGPA</h3>
+                        <p class="text-4xl font-bold text-yellow-300" id="overallCGPA">0.00</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Program</label>
-                        <select id="attendanceProgram" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white">
-                            <option value="">Select Program</option>
-                            <option value="B.Tech">B.Tech</option>
-                            <option value="M.Tech">M.Tech</option>
-                            <option value="B.E">B.E</option>
-                            <option value="M.E">M.E</option>
-                        </select>
+                    <div class="stats-success rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Current SGPA</h3>
+                        <p class="text-4xl font-bold" id="currentSGPA">0.00</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Course</label>
-                        <select id="attendanceCourse" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white">
-                            <option value="">Select Course</option>
-                            <option value="Computer Science Engineering">Computer Science Engineering</option>
-                            <option value="Information Technology">Information Technology</option>
-                            <option value="Electronics and Communication">Electronics and Communication</option>
-                            <option value="Electrical Engineering">Electrical Engineering</option>
-                            <option value="Mechanical Engineering">Mechanical Engineering</option>
-                            <option value="Civil Engineering">Civil Engineering</option>
-                        </select>
+                    <div class="stats-danger rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-exclamation-triangle text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Total Backlogs</h3>
+                        <p class="text-4xl font-bold" id="totalBacklogs">0</p>
                     </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Semester</label>
-                        <select id="attendanceSemester" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white">
-                            <option value="">Select Semester</option>
-                            <option value="1">1</option><option value="2">2</option>
-                            <option value="3">3</option><option value="4">4</option>
-                            <option value="5">5</option><option value="6">6</option>
-                            <option value="7">7</option><option value="8">8</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
-                        <select id="attendanceSubject" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white">
-                            <option value="">Select Subject</option>
-                        </select>
+                    <div class="stats-warning rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-alt text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Current Semester</h3>
+                        <p class="text-4xl font-bold" id="currentSemester">1</p>
                     </div>
                 </div>
-                <button onclick="loadAttendanceStudents()" class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg">Load Students</button>
-            </div>
-            <div id="attendanceStudentsList" class="dark-card rounded-2xl shadow-xl p-6">
-                <!-- Filled by JS -->
-            </div>
-        </div>
 
-        <!-- Notifications Tab -->
-        <div id="notificationsTab" class="hidden">
-            <div class="dark-card rounded-2xl shadow-xl p-6">
-                <h2 class="text-2xl font-bold text-white mb-6">Parent Notification Logs</h2>
-                <div class="space-y-4" id="notificationsList">
-                    <div class="text-gray-400">Notifications sent to parents will appear here.</div>
+                <!-- Semester Results -->
+                <div class="glass-card rounded-2xl card-shadow p-6 animate-fadeIn">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-graduation-cap mr-2 text-purple-600"></i>Semester Results
+                    </h3>
+                    <div id="semesterResults" class="scrollbar-custom"></div>
+                </div>
+            </div>
+
+            <!-- Attendance View -->
+            <div id="attendanceView" class="hidden">
+                <!-- Attendance Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="stats-success rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-percentage text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Overall Attendance</h3>
+                        <p class="text-4xl font-bold" id="overallAttendance">0%</p>
+                    </div>
+                    <div class="stats-info rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-day text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Present Days</h3>
+                        <p class="text-4xl font-bold" id="presentDays">0</p>
+                    </div>
+                    <div class="stats-danger rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-times text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Absent Days</h3>
+                        <p class="text-4xl font-bold" id="absentDays">0</p>
+                    </div>
+                </div>
+
+                <!-- Subject-wise Attendance -->
+                <div class="glass-card rounded-2xl card-shadow p-6 animate-fadeIn">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-list-check mr-2 text-purple-600"></i>Subject-wise Attendance
+                    </h3>
+                    <div id="subjectAttendance" class="scrollbar-custom"></div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Add/Edit Student Modal -->
-<div id="studentModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="dark-card rounded-2xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h2 id="modalTitle" class="text-3xl font-bold text-white">Add Student</h2>
-            <button onclick="closeModal()" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden min-h-screen p-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="glass-card rounded-2xl card-shadow p-6 mb-6 animate-fadeIn">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Admin Dashboard</h2>
+                        <p class="text-gray-600">Academic Management System</p>
+                    </div>
+                    <button onclick="logout()" class="btn-danger text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Navigation -->
+            <div class="glass-card rounded-2xl card-shadow p-2 mb-6 animate-fadeIn">
+                <div class="flex space-x-2">
+                    <button id="studentsManagementTab" onclick="showStudentsManagement()" class="flex-1 py-3 px-6 rounded-xl text-sm font-medium transition-all tab-active">
+                        <i class="fas fa-users mr-2"></i>Students Management
+                    </button>
+                    <button id="attendanceManagementTab" onclick="showAttendanceManagement()" class="flex-1 py-3 px-6 rounded-xl text-sm font-medium transition-all text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-calendar-check mr-2"></i>Attendance Management
+                    </button>
+                    <button id="notificationsTab" onclick="showNotifications()" class="flex-1 py-3 px-6 rounded-xl text-sm font-medium transition-all text-gray-600 hover:text-gray-800 relative">
+                        <i class="fas fa-bell mr-2"></i>Notifications
+                        <span id="notificationBadge" class="hidden absolute -top-1 -right-1 notification-badge text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Students Management View -->
+            <div id="studentsManagementView">
+                <!-- Admin Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div onclick="showAllStudents()" class="stats-card rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white cursor-pointer transform hover:scale-105 transition-all">
+                        <div class="mb-3">
+                            <i class="fas fa-users text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Total Students</h3>
+                        <p class="text-4xl font-bold" id="totalStudents">0</p>
+                        <p class="text-sm opacity-75 mt-2">Click to view all</p>
+                    </div>
+                    <div onclick="showBacklogStudents()" class="stats-danger rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white cursor-pointer transform hover:scale-105 transition-all">
+                        <div class="mb-3">
+                            <i class="fas fa-exclamation-circle text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Students with Backlogs</h3>
+                        <p class="text-4xl font-bold" id="backlogStudentsCount">0</p>
+                        <p class="text-sm opacity-75 mt-2">Click to view details</p>
+                    </div>
+                    <div onclick="showLowAttendanceStudents()" class="stats-warning rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white cursor-pointer transform hover:scale-105 transition-all">
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-times text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Low Attendance</h3>
+                        <p class="text-4xl font-bold" id="lowAttendanceCount">0</p>
+                        <p class="text-sm opacity-75 mt-2">Below 70%</p>
+                    </div>
+                    <div class="stats-success rounded-2xl card-shadow p-6 text-center animate-fadeIn hover-lift text-white">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Average CGPA</h3>
+                        <p class="text-4xl font-bold" id="avgCGPA">0.00</p>
+                        <p class="text-sm opacity-75 mt-2">Overall performance</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Student Management -->
+                    <div class="lg:col-span-2 glass-card rounded-2xl card-shadow p-6 animate-fadeIn">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-800">
+                                <i class="fas fa-users mr-2 text-purple-600"></i>Student Management
+                            </h3>
+                            <button onclick="showAddStudentForm()" class="btn-success text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                                <i class="fas fa-user-plus mr-2"></i>Add Student
+                            </button>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="searchStudent" placeholder="Search by roll number or name..." class="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                            </div>
+                        </div>
+                        
+                        <div id="studentsList" class="space-y-4 max-h-96 overflow-y-auto scrollbar-custom"></div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="glass-card rounded-2xl card-shadow p-6 animate-fadeIn">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">
+                            <i class="fas fa-bolt mr-2 text-purple-600"></i>Quick Actions
+                        </h3>
+                        <div class="space-y-4">
+                            <button onclick="showGenerateReportModal()" class="w-full btn-info text-white py-3 rounded-xl hover-lift transition-all font-medium">
+                                <i class="fas fa-chart-bar mr-2"></i>Generate Reports
+                            </button>
+                            <button onclick="sendParentBacklogNotifications()" class="w-full btn-danger text-white py-3 rounded-xl hover-lift transition-all font-medium">
+                                <i class="fas fa-paper-plane mr-2"></i>Send Backlog Alerts
+                            </button>
+                            <button onclick="showSendAttendanceSMSModal()" class="w-full btn-warning text-white py-3 rounded-xl hover-lift transition-all font-medium">
+                                <i class="fas fa-sms mr-2"></i>Send Attendance SMS
+                            </button>
+                        </div>
+                        
+                        <div class="mt-8 p-4 bg-gray-100 rounded-xl">
+                            <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-info-circle mr-2 text-purple-600"></i>System Overview
+                            </h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Total Students:</span>
+                                    <span class="font-bold text-purple-600" id="totalStudentsCount">0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">With Backlogs:</span>
+                                    <span class="font-bold text-red-500" id="backlogCount">0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Low Attendance:</span>
+                                    <span class="font-bold text-orange-500" id="lowAttendanceSystemCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Management View -->
+            <div id="attendanceManagementView" class="hidden">
+                <!-- Daily Attendance Section -->
+                <div class="glass-card rounded-2xl card-shadow p-6 mb-6 animate-fadeIn">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <h3 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-calendar-check mr-2 text-purple-600"></i>Daily Attendance Management
+                        </h3>
+                        <div class="flex flex-wrap gap-4">
+                            <select id="dailyAttendanceProgram" class="bg-white border-2 border-gray-200 text-gray-800 px-4 py-2 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                <option value="">Select Program</option>
+                                <option value="B.Tech">B.Tech</option>
+                                <option value="M.Tech">M.Tech</option>
+                                <option value="B.E">B.E</option>
+                            </select>
+                            <select id="dailyAttendanceBranch" class="bg-white border-2 border-gray-200 text-gray-800 px-4 py-2 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                <option value="">Select Branch</option>
+                                <option value="Computer Science Engineering">CSE</option>
+                                <option value="Information Technology">IT</option>
+                                <option value="Electronics and Communication">ECE</option>
+                                <option value="Electrical Engineering">EE</option>
+                                <option value="Mechanical Engineering">ME</option>
+                                <option value="Civil Engineering">CE</option>
+                            </select>
+                            <select id="dailyAttendanceSemester" class="bg-white border-2 border-gray-200 text-gray-800 px-4 py-2 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                <option value="">Select Semester</option>
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option>
+                                <option value="4">Semester 4</option>
+                                <option value="5">Semester 5</option>
+                                <option value="6">Semester 6</option>
+                                <option value="7">Semester 7</option>
+                                <option value="8">Semester 8</option>
+                            </select>
+                            <input type="date" id="dailyAttendanceDate" class="bg-white border-2 border-gray-200 text-gray-800 px-4 py-2 rounded-xl focus:ring-2 focus:ring-purple-500">
+                            <button onclick="loadDailyAttendance()" class="btn-primary text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                                <i class="fas fa-search mr-2"></i>Load Students
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="dailyAttendanceContainer" class="hidden">
+                        <div id="subjectsHeader" class="mb-4"></div>
+                        <div id="dailyAttendanceStudentsList" class="space-y-3 max-h-96 overflow-y-auto scrollbar-custom"></div>
+                        <div class="mt-6 flex justify-between items-center">
+                            <div class="flex space-x-4">
+                                <button onclick="markAllPresentDaily()" class="btn-success text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                                    <i class="fas fa-check-double mr-2"></i>Mark All Present
+                                </button>
+                                <button onclick="markAllAbsentDaily()" class="btn-danger text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                                    <i class="fas fa-times-circle mr-2"></i>Mark All Absent
+                                </button>
+                            </div>
+                            <button onclick="saveDailyAttendance()" class="btn-info text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                                <i class="fas fa-save mr-2"></i>Save & Send Notifications
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance History Section -->
+                <div class="glass-card rounded-2xl card-shadow p-6 animate-fadeIn">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <h3 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-history mr-2 text-purple-600"></i>Attendance History
+                        </h3>
+                        <div class="flex flex-wrap gap-4">
+                            <input type="date" id="historyFromDate" class="bg-white border-2 border-gray-200 text-gray-800 px-4 py-2 rounded-xl focus:ring-2 focus:ring-purple-500">
+                            <input type="date" id="historyToDate" class="bg-white border-2 border-gray-200 text-gray-800 px-4 py-2 rounded-xl focus:ring-2 focus:ring-purple-500">
+                            <select id="historySemester" class="bg-white border-2 border-gray-200 text-gray-800 px-4 py-2 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                <option value="">All Semesters</option>
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option>
+                                <option value="4">Semester 4</option>
+                                <option value="5">Semester 5</option>
+                                <option value="6">Semester 6</option>
+                                <option value="7">Semester 7</option>
+                                <option value="8">Semester 8</option>
+                            </select>
+                            <button onclick="loadAttendanceHistory()" class="btn-warning text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                                <i class="fas fa-search mr-2"></i>View History
+                            </button>
+                        </div>
+                    </div>
+                    <div id="attendanceHistoryContainer" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- Notifications View -->
+            <div id="notificationsView" class="hidden">
+                <div class="glass-card rounded-2xl card-shadow p-6 animate-fadeIn">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-bell mr-2 text-purple-600"></i>Parent Notification System
+                    </h3>
+                    <div id="notificationsList" class="space-y-4"></div>
+                </div>
+            </div>
         </div>
-        <form id="studentForm" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-2">Roll Number</label>
-                    <input type="text" id="modalRollNo" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div id="studentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="glass-card rounded-2xl card-shadow p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-custom">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800" id="modalTitle">Add New Student</h3>
+                <button onclick="closeStudentModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="studentForm" class="space-y-6">
+                <!-- Personal Information -->
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-user mr-2 text-purple-600"></i>Personal Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Roll Number</label>
+                            <input type="text" id="rollNumber" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Student Name</label>
+                            <input type="text" id="studentNameInput" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Program</label>
+                            <select id="program" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                                <option value="">Select Program</option>
+                                <option value="B.Tech">B.Tech (Bachelor of Technology)</option>
+                                <option value="M.Tech">M.Tech (Master of Technology)</option>
+                                <option value="B.E">B.E (Bachelor of Engineering)</option>
+                                <option value="M.E">M.E (Master of Engineering)</option>
+                                <option value="Diploma">Diploma in Engineering</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Course/Branch</label>
+                            <select id="branch" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent" required onchange="loadCurriculumSubjects()">
+                                <option value="">Select Course</option>
+                                <option value="Computer Science Engineering">Computer Science Engineering (CSE)</option>
+                                <option value="Information Technology">Information Technology (IT)</option>
+                                <option value="Electronics and Communication">Electronics and Communication (ECE)</option>
+                                <option value="Electrical Engineering">Electrical Engineering (EE)</option>
+                                <option value="Mechanical Engineering">Mechanical Engineering (ME)</option>
+                                <option value="Civil Engineering">Civil Engineering (CE)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Semester</label>
+                            <select id="currentSem" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                                <option value="">Select Semester</option>
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option>
+                                <option value="4">Semester 4</option>
+                                <option value="5">Semester 5</option>
+                                <option value="6">Semester 6</option>
+                                <option value="7">Semester 7</option>
+                                <option value="8">Semester 8</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input type="password" id="studentPassword" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Default: password123">
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-2">Student Name</label>
-                    <input type="text" id="modalStudentName" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
+
+                <!-- Parent Contact Information -->
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-phone mr-2 text-purple-600"></i>Parent Contact Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Father's Name</label>
+                            <input type="text" id="fatherName" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Father's Phone</label>
+                            <input type="tel" id="fatherPhone" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="+91 XXXXXXXXXX">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mother's Name</label>
+                            <input type="text" id="motherName" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mother's Phone</label>
+                            <input type="tel" id="motherPhone" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="+91 XXXXXXXXXX">
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-2">Password</label>
-                    <input type="password" id="modalPassword" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
+                
+                <div id="semesterMarks" class="space-y-4"></div>
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeStudentModal()" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors">Cancel</button>
+                    <button type="submit" class="px-6 py-3 btn-success text-white rounded-xl hover-lift transition-all font-medium">Save Student</button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Generation Modal -->
+    <div id="reportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="glass-card rounded-2xl card-shadow p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-custom">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Generate Student Report</h3>
+                <button onclick="closeReportModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="reportContent" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-2">Parent's Phone Number</label>
-                    <input type="tel" id="modalParentPhone" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" placeholder="+91 9876543210" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-2">Program</label>
-                    <select id="modalProgram" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
-                        <option value="">Select Program</option>
-                        <option value="B.Tech">B.Tech</option>
-                        <option value="M.Tech">M.Tech</option>
-                        <option value="B.E">B.E</option>
-                        <option value="M.E">M.E</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user-graduate mr-2 text-purple-600"></i>Select Student
+                    </label>
+                    <select id="reportStudentSelect" class="w-full px-4 py-3 bg-white border-2 border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                        <option value="">Select a student...</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-2">Course</label>
-                    <select id="modalCourse" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
-                        <option value="">Select Course</option>
-                        <option value="Computer Science Engineering">Computer Science Engineering</option>
-                        <option value="Information Technology">Information Technology</option>
-                        <option value="Electronics and Communication">Electronics and Communication</option>
-                        <option value="Electrical Engineering">Electrical Engineering</option>
-                        <option value="Mechanical Engineering">Mechanical Engineering</option>
-                        <option value="Civil Engineering">Civil Engineering</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-2">Current Semester</label>
-                    <select id="modalSemester" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
-                        <option value="">Select Semester</option>
-                        <option value="1">Semester 1</option>
-                        <option value="2">Semester 2</option>
-                        <option value="3">Semester 3</option>
-                        <option value="4">Semester 4</option>
-                        <option value="5">Semester 5</option>
-                        <option value="6">Semester 6</option>
-                        <option value="7">Semester 7</option>
-                        <option value="8">Semester 8</option>
-                    </select>
+                <div id="generatedReportDisplay" class="bg-gray-100 p-4 rounded-xl hidden">
+                    <pre id="reportText" class="text-sm font-mono whitespace-pre-wrap"></pre>
+                    <button onclick="downloadReport()" class="mt-4 w-full btn-info text-white py-3 rounded-xl hover-lift transition-all font-medium">
+                        <i class="fas fa-download mr-2"></i>Download Report
+                    </button>
                 </div>
             </div>
-            <div id="semesterResults">
-                <!-- Dynamically added -->
-            </div>
-            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-600">
-                <button type="button" onclick="closeModal()" class="px-8 py-3 border border-gray-600 rounded-xl text-gray-300 hover:bg-gray-700 transition-colors font-medium">Cancel</button>
-                <button type="submit" class="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg font-medium">Save Student</button>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<script>
-// Global variables
-let students = [];
-let admins = [{ username: "admin", password: "admin123", name: "System Admin" }];
-let currentUser = null;
-let isAdmin = false;
-let editingStudent = null;
-
-// Complete curriculum templates
-const curriculumTemplates = {
-    "B.Tech": {
-        "Computer Science Engineering": {
-            1: ["Mathematics I", "Physics", "Chemistry", "Programming Fundamentals", "English Communication"],
-            2: ["Mathematics II", "Data Structures", "Digital Logic Design", "Electronics", "Environmental Science"],
-            3: ["Database Management Systems", "Computer Networks", "Operating Systems", "Software Engineering", "Discrete Mathematics"],
-            4: ["Web Development", "Machine Learning", "Compiler Design", "Algorithm Analysis", "Computer Graphics"],
-            5: ["Cloud Computing", "Cyber Security", "Mobile App Development", "Big Data", "Artificial Intelligence"],
-            6: ["Distributed Systems", "Human Computer Interaction", "Software Testing", "Elective I", "Major Project I"],
-            7: ["Blockchain Technology", "Internet of Things", "Advanced Topics in CS", "Elective II", "Major Project II"],
-            8: ["Industry Internship", "Emerging Technologies", "Elective III", "Seminar", "Capstone Project"]
-        },
-        "Information Technology": {
-            1: ["Mathematics I", "Physics", "Chemistry", "IT Fundamentals", "English Communication"],
-            2: ["Mathematics II", "Data Structures", "Digital Electronics", "Computer Organization", "Technical Writing"],
-            3: ["Database Systems", "Networking", "Operating Systems", "Software Engineering", "Web Technologies"],
-            4: ["Mobile Computing", "AI & ML", "Cloud Computing", "Cyber Security", "Project Management"],
-            5: ["Big Data Analytics", "IoT", "Blockchain", "Elective I", "Minor Project"],
-            6: ["Distributed Systems", "HCI", "Software Testing", "Elective II", "Major Project I"],
-            7: ["Advanced IT", "Elective III", "Research Methodology", "Minor Project II", "Major Project II"],
-            8: ["Industry Training", "Final Year Project", "Seminar", "Internship", "Capstone"]
-        },
-        "Electronics and Communication": {
-            1: ["Mathematics I", "Physics", "Chemistry", "Basic Electronics", "Engineering Drawing"],
-            2: ["Circuit Analysis", "Electronic Devices", "Digital Electronics", "Materials Science", "Engineering Mechanics"],
-            3: ["Analog Electronics", "Communication Systems", "Microprocessors", "Signals & Systems", "EM Theory"],
-            4: ["VLSI Design", "Embedded Systems", "Optical Communications", "RF & Microwave", "Antennas"],
-            5: ["Wireless Networks", "Satellite Communication", "DSP", "Elective I", "Minor Project"],
-            6: ["Smart Systems", "IoT", "Power Electronics", "Elective II", "Major Project I"],
-            7: ["Advanced ECE", "Elective III", "Research", "Minor Project II", "Major Project II"],
-            8: ["Industry Internship", "Final Project", "Seminar", "Professional Practice", "Capstone"]
-        }
-    },
-    "B.E": {
-        "Mechanical Engineering": {
-            1: ["Engineering Mechanics", "Thermodynamics", "Workshop Technology", "Engineering Drawing", "Mathematics I"],
-            2: ["Fluid Mechanics", "Manufacturing Processes", "Strength of Materials", "Mathematics II", "Heat Transfer"],
-            3: ["Design of Machine Elements", "Machine Tools", "Metrology", "Industrial Engineering", "Applied Thermodynamics"],
-            4: ["CAD/CAM", "Production Planning", "Refrigeration", "Elective I", "Minor Project"],
-            5: ["Robotics", "Energy Systems", "Elective II", "Major Project I", "Finite Element Analysis"],
-            6: ["Automotive Engineering", "Renewable Energy", "Elective III", "Major Project II", "Industrial Automation"],
-            7: ["Advanced Mech", "Elective IV", "Research", "Minor Project II", "Capstone"],
-            8: ["Industry Internship", "Final Year Project", "Seminar", "Professional Practice", "Capstone"]
-        },
-        "Civil Engineering": {
-            1: ["Engineering Mechanics", "Surveying", "Soil Mechanics", "Concrete Technology", "Mathematics I"],
-            2: ["Structural Analysis", "Hydraulics", "Transportation Engineering", "Mathematics II", "Geotechnical Engineering"],
-            3: ["Design of Concrete Structures", "Steel Structures", "Water Supply", "Environmental Engineering", "Construction Tech"],
-            4: ["Bridge Engineering", "Urban Planning", "Elective I", "Minor Project", "Hydrology"],
-            5: ["Tunnel Engineering", "Elective II", "Major Project I", "Geomatics", "Building Materials"],
-            6: ["Highway Engineering", "Elective III", "Major Project II", "Sustainable Design", "Earthquake Engineering"],
-            7: ["Advanced Civil", "Elective IV", "Research", "Minor Project II", "Capstone"],
-            8: ["Industry Internship", "Final Year Project", "Seminar", "Professional Practice", "Capstone"]
-        }
-    }
-};
-
-// Wait for Firebase
-async function waitForFirebase() {
-    return new Promise((resolve) => {
-        const check = () => {
-            if (window.firebaseInitialized) resolve();
-            else setTimeout(check, 100);
-        };
-        check();
-    });
-}
-
-// Load students from Firebase
-async function loadStudentsFromFirebase() {
-    await waitForFirebase();
-    try {
-        const snapshot = await window.firebaseGet(window.firebaseRef(window.db, 'students'));
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            students = Object.keys(data).map(key => ({
-                ...data[key],
-                id: key
-            }));
-        }
-        updateAdminStats();
-        displayAllStudents();
-        checkAndSendNotifications(); // Check after load
-    } catch (error) {
-        console.error("Failed to load:", error);
-    }
-}
-
-// Save all students to Firebase
-async function syncToFirebase() {
-    await waitForFirebase();
-    const obj = {};
-    students.forEach(s => obj[s.rollNo] = s);
-    await window.firebaseSet(window.firebaseRef(window.db, 'students'), obj);
-    console.log("💾 Synced to Firebase!");
-}
-
-// Grade helpers
-function calculateGrade(marks) {
-    return marks >= 90 ? 'A+' : marks >= 80 ? 'A' : marks >= 70 ? 'B+' : marks >= 60 ? 'B' : marks >= 50 ? 'C+' : marks >= 40 ? 'C' : 'F';
-}
-function getGradePoints(marks) { return marks >= 90 ? 10 : marks >= 80 ? 9 : marks >= 70 ? 8 : marks >= 60 ? 7 : marks >= 50 ? 6 : marks >= 40 ? 5 : 0; }
-function calculateSPI(sem) {
-    const total = sem.subjects.reduce((sum, s) => sum + getGradePoints(s.marks), 0);
-    return sem.subjects.length > 0 ? (total / sem.subjects.length).toFixed(2) : 0;
-}
-function calculateCGPA(student) {
-    let totalGP = 0, totalSubs = 0;
-    Object.values(student.semesters || {}).forEach(sem => {
-        sem.subjects.forEach(s => {
-            totalGP += getGradePoints(s.marks);
-            totalSubs++;
-        });
-    });
-    return totalSubs > 0 ? (totalGP / totalSubs).toFixed(2) : 0;
-}
-function calculateBacklogs(student) {
-    const list = [];
-    Object.entries(student.semesters || {}).forEach(([sem, data]) => {
-        data.subjects.forEach(s => {
-            if (s.marks < 40) list.push({ semester: sem, subject: s.name, marks: s.marks });
-        });
-    });
-    return list;
-}
-function calculateAttendancePercentage(student) {
-    let total = 0, present = 0;
-    Object.values(student.attendance || {}).forEach(dates => {
-        Object.values(dates).forEach(status => {
-            total++;
-            if (status === 'present') present++;
-        });
-    });
-    return total ? Math.round((present / total) * 100) : 100;
-}
-
-// Send notification → triggers Twilio SMS via Firebase Function
-async function sendNotification(student, type, data) {
-    const msg = type === 'low_attendance'
-        ? `Low attendance: ${data.percentage}%`
-        : `${data.count} backlog(s): ${data.subjects}`;
-
-    await window.firebasePush(window.firebaseRef(window.db, 'notifications'), {
-        studentName: student.name,
-        rollNo: student.rollNo,
-        toPhone: student.parentPhone.replace(/\D/g, ''), // Clean phone number
-        message: `Dear Parent, ${student.name}: ${msg}.`,
-        timestamp: Date.now(),
-        status: 'queued'
-    });
-}
-
-// Check and send alerts immediately (not just Sunday)
-function checkAndSendNotifications() {
-    students.forEach(student => {
-        const attPercent = calculateAttendancePercentage(student);
-        const backlogs = calculateBacklogs(student);
-
-        if (attPercent < 70) {
-            sendNotification(student, 'low_attendance', { percentage: attPercent });
-        }
-        if (backlogs.length > 0) {
-            sendNotification(student, 'backlog', {
-                count: backlogs.length,
-                subjects: backlogs.map(b => b.subject).join(', ')
-            });
-        }
-    });
-}
-
-// Display functions...
-document.getElementById('attendanceDate').valueAsDate = new Date();
-
-// Tab switching
-document.getElementById('studentTypeTab').addEventListener('click', () => {
-    document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md';
-    document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white';
-    document.getElementById('rollNoField').classList.remove('hidden');
-    document.getElementById('usernameField').classList.add('hidden');
-});
-document.getElementById('adminTypeTab').addEventListener('click', () => {
-    document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md';
-    document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white';
-    document.getElementById('usernameField').classList.remove('hidden');
-    document.getElementById('rollNoField').classList.add('hidden');
-});
-
-// Admin tabs
-document.getElementById('studentsTabBtn').addEventListener('click', () => switchAdminTab('students'));
-document.getElementById('attendanceTabBtn').addEventListener('click', () => switchAdminTab('attendance'));
-document.getElementById('notificationsTabBtn').addEventListener('click', () => switchAdminTab('notifications'));
-
-function switchAdminTab(tab) {
-    ['students', 'attendance', 'notifications'].forEach(t => {
-        document.getElementById(`${t}Tab`).classList.add('hidden');
-        document.getElementById(`${t}TabBtn`).className = 'px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-600';
-    });
-    document.getElementById(`${tab}Tab`).classList.remove('hidden');
-    document.getElementById(`${tab}TabBtn`).className = 'px-4 py-2 bg-green-600 text-white rounded-lg font-medium';
-}
-
-// Add student button
-document.getElementById('addStudentBtn').addEventListener('click', () => {
-    editingStudent = null;
-    document.getElementById('modalTitle').textContent = 'Add Student';
-    document.getElementById('studentForm').reset();
-    generateSemesterInputs(parseInt(document.getElementById('modalSemester').value));
-    document.getElementById('studentModal').classList.remove('hidden');
-});
-
-// Form submission
-document.getElementById('studentForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
     
-    const rollNo = document.getElementById('modalRollNo').value.trim();
-    const name = document.getElementById('modalStudentName').value.trim();
-    const password = document.getElementById('modalPassword').value;
-    const parentPhone = document.getElementById('modalParentPhone').value.trim();
-    const program = document.getElementById('modalProgram').value;
-    const course = document.getElementById('modalCourse').value;
-    const currentSemester = parseInt(document.getElementById('modalSemester').value);
+    <!-- Send Attendance SMS Modal -->
+    <div id="sendAttendanceSMSModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="glass-card rounded-2xl card-shadow p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Send Daily Attendance SMS</h3>
+                <button onclick="closeSendAttendanceSMSModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="text-gray-600 mb-4">This will send an attendance report to the parents of students who were marked absent in at least one subject for today's date.</p>
+            <div class="text-center">
+                <button onclick="sendDailyAttendanceSMS()" class="w-full btn-info text-white py-3 rounded-xl hover-lift transition-all font-medium">
+                    <i class="fas fa-paper-plane mr-2"></i>Send SMS to Parents
+                </button>
+            </div>
+        </div>
+    </div>
 
-    const semesters = {};
-    for (let i = 1; i <= currentSemester; i++) {
-        const subjects = Array.from(document.querySelectorAll(`#semester-${i}-subjects .subject-row`)).map(row => ({
-            name: row.querySelector('.subject-name').value,
-            marks: parseInt(row.querySelector('.subject-marks').value)
-        })).filter(s => s.name && !isNaN(s.marks));
-        semesters[i] = { subjects };
-    }
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database-compat.js"></script>
 
-    const studentData = {
-        rollNo, name, password, parentPhone, program, course, currentSemester, semesters,
-        attendance: {}
-    };
+    <script>
+        // Use the Firebase configuration from your image
+        const firebaseConfig = {
+            apiKey: "AIzaSybpzCla5s18uNBAU6T39jFy60ECULYcPoC",
+            authDomain: "studentportal-d48b3.firebaseapp.com",
+            databaseURL: "https://studentportal-d48b3-default-rtdb.firebaseio.com",
+            projectId: "studentportal-d48b3",
+            storageBucket: "studentportal-d48b3.firebaseapp.com",
+            messagingSenderId: "819003837531",
+            appId: "1:819003837531:web:f1b915b2a1a6193856437e",
+            measurementId: "G-RRN5L8PGS"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-    if (editingStudent) {
-        const idx = students.findIndex(s => s.rollNo === editingStudent.rollNo);
-        students[idx] = studentData;
-    } else {
-        students.push(studentData);
-    }
+        // Data storage is now managed by Firebase. These variables will hold local copies.
+        let studentsData = {};
+        let adminsData = {};
+        let dailyAttendanceData = {};
+        let notificationHistory = [];
 
-    closeModal();
-    displayAllStudents();
-    updateAdminStats();
-    await syncToFirebase();
-});
+        let currentUser = null;
+        let isAdmin = false;
+        let currentView = 'all';
+        let isDataLoaded = false;
 
-// Generate semester inputs
-function generateSemesterInputs(maxSemester, student = null) {
-    const container = document.getElementById('semesterResults');
-    const program = document.getElementById('modalProgram').value;
-    const course = document.getElementById('modalCourse').value;
+        // Curriculum templates for different courses
+        const curriculumTemplates = {
+            'Computer Science Engineering': {
+                1: ['Mathematics-I', 'Physics', 'Chemistry', 'Programming Fundamentals', 'English Communication'],
+                2: ['Mathematics-II', 'Data Structures', 'Digital Logic Design', 'Computer Graphics', 'Technical Communication'],
+                3: ['Mathematics-III', 'Database Management Systems', 'Operating Systems', 'Computer Networks', 'Object Oriented Programming'],
+                4: ['Algorithms Analysis', 'Software Engineering', 'Web Technologies', 'Computer Architecture', 'Discrete Mathematics'],
+                5: ['Machine Learning', 'Compiler Design', 'Mobile Application Development', 'Information Security', 'Project Management'],
+                6: ['Artificial Intelligence', 'Cloud Computing', 'Big Data Analytics', 'Human Computer Interaction', 'Elective-I'],
+                7: ['Deep Learning', 'Blockchain Technology', 'Internet of Things', 'Elective-II', 'Major Project-I'],
+                8: ['Advanced Topics in AI', 'Distributed Systems', 'Elective-III', 'Major Project-II', 'Industrial Training']
+            },
+            'Information Technology': {
+                1: ['Mathematics-I', 'Physics', 'Chemistry', 'Programming in C', 'English Communication'],
+                2: ['Mathematics-II', 'Data Structures', 'Digital Electronics', 'Web Programming', 'Technical Communication'],
+                3: ['Mathematics-III', 'Database Systems', 'Operating Systems', 'Computer Networks', 'Java Programming'],
+                4: ['Software Engineering', 'System Analysis Design', 'Network Security', 'Mobile Computing', 'Statistics'],
+                5: ['Information Security', 'Web Services', 'Data Mining', 'Software Testing', 'Project Management'],
+                6: ['Cloud Computing', 'Business Intelligence', 'E-Commerce', 'Quality Assurance', 'Elective-I'],
+                7: ['Enterprise Resource Planning', 'Advanced Database', 'Elective-II', 'Major Project-I', 'Seminar'],
+                8: ['IT Service Management', 'Emerging Technologies', 'Elective-III', 'Major Project-II', 'Industrial Training']
+            },
+            'Electronics and Communication': {
+                1: ['Mathematics-I', 'Physics', 'Chemistry', 'Basic Electronics', 'English Communication'],
+                2: ['Mathematics-II', 'Circuit Analysis', 'Electronic Devices', 'Digital Electronics', 'Technical Communication'],
+                3: ['Mathematics-III', 'Analog Electronics', 'Signals and Systems', 'Network Theory', 'Electromagnetic Theory'],
+                4: ['Communication Systems', 'Microprocessors', 'Control Systems', 'Digital Signal Processing', 'Electronic Measurements'],
+                5: ['Microwave Engineering', 'VLSI Design', 'Embedded Systems', 'Optical Communication', 'Antenna Theory'],
+                6: ['Digital Communication', 'Satellite Communication', 'Mobile Communication', 'Radar Systems', 'Elective-I'],
+                7: ['Advanced Communication', 'Biomedical Electronics', 'Elective-II', 'Major Project-I', 'Seminar'],
+                8: ['Wireless Networks', 'Nano Electronics', 'Elective-III', 'Major Project-II', 'Industrial Training']
+            },
+            'Mechanical Engineering': {
+                1: ['Mathematics-I', 'Physics', 'Chemistry', 'Engineering Graphics', 'English Communication'],
+                2: ['Mathematics-II', 'Engineering Mechanics', 'Material Science', 'Manufacturing Processes', 'Technical Communication'],
+                3: ['Mathematics-III', 'Thermodynamics', 'Fluid Mechanics', 'Strength of Materials', 'Machine Drawing'],
+                4: ['Heat Transfer', 'Machine Design', 'Theory of Machines', 'Manufacturing Technology', 'Engineering Economics'],
+                5: ['Internal Combustion Engines', 'Refrigeration Air Conditioning', 'Industrial Engineering', 'Finite Element Analysis', 'Metrology'],
+                6: ['Automobile Engineering', 'Power Plant Engineering', 'Operations Research', 'CAD/CAM', 'Elective-I'],
+                7: ['Robotics', 'Advanced Manufacturing', 'Elective-II', 'Major Project-I', 'Seminar'],
+                8: ['Renewable Energy', 'Advanced Materials', 'Elective-III', 'Major Project-II', 'Industrial Training']
+            },
+            'Civil Engineering': {
+                1: ['Mathematics-I', 'Physics', 'Chemistry', 'Engineering Graphics', 'English Communication'],
+                2: ['Mathematics-II', 'Engineering Mechanics', 'Building Materials', 'Surveying', 'Technical Communication'],
+                3: ['Mathematics-III', 'Strength of Materials', 'Fluid Mechanics', 'Concrete Technology', 'Structural Analysis'],
+                4: ['Soil Mechanics', 'Steel Structures', 'Water Resources Engineering', 'Transportation Engineering', 'Engineering Geology'],
+                5: ['Foundation Engineering', 'Concrete Structures', 'Environmental Engineering', 'Highway Engineering', 'Construction Management'],
+                6: ['Advanced Structural Design', 'Water Supply Engineering', 'Traffic Engineering', 'Earthquake Engineering', 'Elective-I'],
+                7: ['Bridge Engineering', 'Advanced Foundation', 'Elective-II', 'Major Project-I', 'Seminar'],
+                8: ['Prestressed Concrete', 'Urban Planning', 'Elective-III', 'Major Project-II', 'Industrial Training']
+            },
+            'Electrical Engineering': {
+                1: ['Mathematics-I', 'Physics', 'Chemistry', 'Basic Electrical Engineering', 'English Communication'],
+                2: ['Mathematics-II', 'Circuit Analysis', 'Electronic Devices', 'Digital Electronics', 'Technical Communication'],
+                3: ['Mathematics-III', 'Electrical Machines-I', 'Network Analysis', 'Electromagnetic Fields', 'Measurements'],
+                4: ['Electrical Machines-II', 'Power Systems-I', 'Control Systems', 'Microprocessors', 'Power Electronics'],
+                5: ['Power Systems-II', 'Electric Drives', 'Digital Signal Processing', 'Switchgear Protection', 'Industrial Automation'],
+                6: ['High Voltage Engineering', 'Power System Operation', 'Renewable Energy', 'FACTS Devices', 'Elective-I'],
+                7: ['Smart Grid Technology', 'Electric Vehicles', 'Elective-II', 'Major Project-I', 'Seminar'],
+                8: ['Power Quality', 'Energy Management', 'Elective-III', 'Major Project-II', 'Industrial Training']
+            }
+        };
 
-    if (!program || !course) {
-        container.innerHTML = '<p class="text-red-400">Please select Program and Course first.</p>';
-        return;
-    }
+        const defaultCredits = {
+            'Mathematics-I': 4, 'Mathematics-II': 4, 'Mathematics-III': 4,
+            'Physics': 3, 'Chemistry': 3, 'Biology': 3,
+            'Programming': 4, 'Data Structures': 4, 'Algorithms': 4,
+            'Database Systems': 4, 'Operating Systems': 4, 'Computer Networks': 3,
+            'Software Engineering': 3, 'Web Technology': 3, 'Mobile Computing': 3,
+            'Machine Learning': 4, 'Artificial Intelligence': 4, 'Compiler Design': 4,
+            'Cloud Computing': 3, 'Cybersecurity': 3, 'Project Management': 2,
+            'Communication': 2, 'English': 2, 'Technical Writing': 2
+        };
 
-    container.innerHTML = '';
+        function getSubjectCredits(subjectName) {
+            return defaultCredits[subjectName] || 3;
+        }
 
-    for (let sem = 1; sem <= maxSemester; sem++) {
-        const subjects = curriculumTemplates[program]?.[course]?.[sem] || [];
-        const studentSemData = student?.semesters?.[sem] || { subjects: [] };
+        function calculateGrade(marks) {
+            if (marks >= 90) return 'A+';
+            if (marks >= 80) return 'A';
+            if (marks >= 70) return 'B+';
+            if (marks >= 60) return 'B';
+            if (marks >= 50) return 'C+';
+            if (marks >= 40) return 'C';
+            return 'F';
+        }
 
-        const div = document.createElement('div');
-        div.className = 'mb-6';
-        div.id = `semester-${sem}`;
-        div.innerHTML = `
-            <h3 class="text-lg font-bold text-white mb-3">Semester ${sem}</h3>
-            <div id="semester-${sem}-subjects" class="space-y-2">
-                ${subjects.map((subName, idx) => {
-                    const match = studentSemData.subjects.find(s => s.name === subName);
-                    const marks = match ? match.marks : '';
-                    return `
-                        <div class="flex space-x-2 subject-row">
-                            <input type="text" value="${subName}" class="px-4 py-3 bg-blue-900/50 border border-blue-600 rounded-lg subject-name focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" readonly>
-                            <input type="number" value="${marks}" min="0" max="100" class="px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg subject-marks focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
+        function calculateGradePoints(marks) {
+            if (marks >= 90) return 10;
+            if (marks >= 80) return 9;
+            if (marks >= 70) return 8;
+            if (marks >= 60) return 7;
+            if (marks >= 50) return 6;
+            if (marks >= 40) return 5;
+            return 0;
+        }
+
+        function calculateSubjectAttendance(present, total) {
+            return total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+        }
+
+        function calculateOverallAttendance(student) {
+            let totalPresent = 0;
+            let totalClasses = 0;
+            
+            if (student.attendance) {
+                for (let sem in student.attendance) {
+                    for (let subject in student.attendance[sem]) {
+                        totalPresent += student.attendance[sem][subject].present;
+                        totalClasses += student.attendance[sem][subject].total;
+                    }
+                }
+            }
+            
+            return totalClasses > 0 ? ((totalPresent / totalClasses) * 100).toFixed(1) : 0;
+        }
+
+        function isLowAttendance(student) {
+            return parseFloat(calculateOverallAttendance(student)) < 70;
+        }
+
+        function calculateSGPA(subjects) {
+            let totalCredits = 0;
+            let totalGradePoints = 0;
+            
+            if (!subjects) return 0;
+            
+            for (let subject in subjects) {
+                const marks = subjects[subject].marks;
+                const credits = subjects[subject].credits;
+                totalCredits += credits;
+                totalGradePoints += calculateGradePoints(marks) * credits;
+            }
+            
+            return totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : 0;
+        }
+
+        function calculateCGPA(student) {
+            let totalCredits = 0;
+            let totalGradePoints = 0;
+            
+            if (!student.semesters) return 0;
+
+            for (let sem in student.semesters) {
+                for (let subject in student.semesters[sem].subjects) {
+                    const marks = student.semesters[sem].subjects[subject].marks;
+                    const credits = student.semesters[sem].subjects[subject].credits;
+                    totalCredits += credits;
+                    totalGradePoints += calculateGradePoints(marks) * credits;
+                }
+            }
+            
+            return totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : 0;
+        }
+
+        function calculateBacklogs(student) {
+            let backlogs = 0;
+            if (!student.semesters) return 0;
+
+            for (let sem in student.semesters) {
+                for (let subject in student.semesters[sem].subjects) {
+                    if (student.semesters[sem].subjects[subject].marks < 40) {
+                        backlogs++;
+                    }
+                }
+            }
+            return backlogs;
+        }
+
+        function showAcademicView() {
+            document.getElementById('academicTabStudent').classList.add('tab-active');
+            document.getElementById('attendanceTabStudent').classList.remove('tab-active');
+            document.getElementById('attendanceTabStudent').classList.add('text-gray-600');
+            
+            document.getElementById('academicView').classList.remove('hidden');
+            document.getElementById('attendanceView').classList.add('hidden');
+            
+            displayStudentResults(studentsData[currentUser]);
+        }
+
+        function showAttendanceView() {
+            document.getElementById('attendanceTabStudent').classList.add('tab-active');
+            document.getElementById('academicTabStudent').classList.remove('tab-active');
+            document.getElementById('academicTabStudent').classList.add('text-gray-600');
+            
+            document.getElementById('attendanceView').classList.remove('hidden');
+            document.getElementById('academicView').classList.add('hidden');
+            
+            displayStudentAttendance();
+        }
+
+        function showStudentsManagement() {
+            document.getElementById('studentsManagementTab').classList.add('tab-active');
+            document.getElementById('attendanceManagementTab').classList.remove('tab-active');
+            document.getElementById('attendanceManagementTab').classList.add('text-gray-600');
+            document.getElementById('notificationsTab').classList.remove('tab-active');
+            document.getElementById('notificationsTab').classList.add('text-gray-600');
+            
+            document.getElementById('studentsManagementView').classList.remove('hidden');
+            document.getElementById('attendanceManagementView').classList.add('hidden');
+            document.getElementById('notificationsView').classList.add('hidden');
+            
+            displayStudentsList();
+        }
+
+        function showAttendanceManagement() {
+            document.getElementById('attendanceManagementTab').classList.add('tab-active');
+            document.getElementById('studentsManagementTab').classList.remove('tab-active');
+            document.getElementById('studentsManagementTab').classList.add('text-gray-600');
+            document.getElementById('notificationsTab').classList.remove('tab-active');
+            document.getElementById('notificationsTab').classList.add('text-gray-600');
+            
+            document.getElementById('attendanceManagementView').classList.remove('hidden');
+            document.getElementById('studentsManagementView').classList.add('hidden');
+            document.getElementById('notificationsView').classList.add('hidden');
+            
+            const today = new Date();
+            document.getElementById('dailyAttendanceDate').valueAsDate = today;
+            document.getElementById('historyFromDate').valueAsDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            document.getElementById('historyToDate').valueAsDate = today;
+        }
+
+        function showNotifications() {
+            document.getElementById('notificationsTab').classList.add('tab-active');
+            document.getElementById('studentsManagementTab').classList.remove('tab-active');
+            document.getElementById('studentsManagementTab').classList.add('text-gray-600');
+            document.getElementById('attendanceManagementTab').classList.remove('tab-active');
+            document.getElementById('attendanceManagementTab').classList.add('text-gray-600');
+            
+            document.getElementById('notificationsView').classList.remove('hidden');
+            document.getElementById('studentsManagementView').classList.add('hidden');
+            document.getElementById('attendanceManagementView').classList.add('hidden');
+            
+            displayNotifications();
+        }
+
+        document.getElementById('studentTab').addEventListener('click', function() {
+            this.classList.add('tab-active');
+            document.getElementById('adminTab').classList.remove('tab-active');
+            document.getElementById('adminTab').classList.add('text-gray-600');
+        });
+
+        document.getElementById('adminTab').addEventListener('click', function() {
+            this.classList.add('tab-active');
+            document.getElementById('studentTab').classList.remove('tab-active');
+            document.getElementById('studentTab').classList.add('text-gray-600');
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const loginId = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPassword').value;
+            const isAdminLogin = document.getElementById('adminTab').classList.contains('tab-active');
+            
+            if (isAdminLogin) {
+                 if (adminsData[loginId] && adminsData[loginId].password === password) {
+                    isAdmin = true;
+                    currentUser = loginId;
+                    showAdminDashboard();
+                } else {
+                    showError('Invalid Admin credentials.');
+                }
+            } else {
+                 if (studentsData[loginId] && studentsData[loginId].password === password) {
+                    isAdmin = false;
+                    currentUser = loginId;
+                    showStudentDashboard();
+                } else {
+                    showError('Invalid Student credentials.');
+                }
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => errorDiv.classList.add('hidden'), 3000);
+        }
+
+        function showStudentDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('studentDashboard').classList.remove('hidden');
+            
+            const student = studentsData[currentUser];
+            if (!student) {
+                showError("Student data not found in database.");
+                return;
+            }
+            
+            document.getElementById('studentName').textContent = student.name;
+            document.getElementById('studentInfo').textContent = `Roll No: ${student.rollNumber} | ${student.program || 'B.Tech'} - ${student.branch}`;
+            
+            const cgpa = calculateCGPA(student);
+            const backlogs = calculateBacklogs(student);
+            const currentSem = student.currentSemester;
+            const currentSGPA = student.semesters && student.semesters[currentSem] ? calculateSGPA(student.semesters[currentSem].subjects) : 0;
+            
+            document.getElementById('overallCGPA').textContent = cgpa;
+            document.getElementById('currentSGPA').textContent = currentSGPA;
+            document.getElementById('totalBacklogs').textContent = backlogs;
+            document.getElementById('currentSemester').textContent = currentSem;
+            
+            displayStudentResults(student);
+            displayStudentAttendance();
+        }
+
+        function displayStudentResults(student) {
+            const container = document.getElementById('semesterResults');
+            container.innerHTML = '';
+
+            if (!student.semesters || Object.keys(student.semesters).length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-exclamation-circle text-4xl mb-4"></i><p class="text-lg">No academic data available.</p></div>`;
+                return;
+            }
+
+            for (let sem in student.semesters) {
+                const semesterDiv = document.createElement('div');
+                semesterDiv.className = 'mb-6 p-4 bg-gray-50 rounded-xl';
+                const sgpa = calculateSGPA(student.semesters[sem].subjects);
+                
+                semesterDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-semibold text-gray-800">Semester ${sem}</h4>
+                        <span class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">SGPA: ${sgpa}</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-200">
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-700">Subject</th>
+                                    <th class="px-4 py-2 text-center font-medium text-gray-700">Credits</th>
+                                    <th class="px-4 py-2 text-center font-medium text-gray-700">Marks</th>
+                                    <th class="px-4 py-2 text-center font-medium text-gray-700">Grade</th>
+                                    <th class="px-4 py-2 text-center font-medium text-gray-700">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Object.entries(student.semesters[sem].subjects).map(([subject, data]) => `
+                                    <tr class="border-t border-gray-200">
+                                        <td class="px-4 py-2 font-medium text-gray-800">${subject}</td>
+                                        <td class="px-4 py-2 text-center text-gray-600">${data.credits}</td>
+                                        <td class="px-4 py-2 text-center text-gray-800">${data.marks}</td>
+                                        <td class="px-4 py-2 text-center">
+                                            <span class="px-2 py-1 rounded text-xs font-medium ${data.marks >= 40 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                                ${calculateGrade(data.marks)}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-2 text-center">
+                                            <span class="px-2 py-1 rounded text-xs font-medium ${data.marks >= 40 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                                ${data.marks >= 40 ? 'Pass' : 'Fail'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                container.appendChild(semesterDiv);
+            }
+        }
+
+        function displayStudentAttendance() {
+            const student = studentsData[currentUser];
+            const container = document.getElementById('subjectAttendance');
+            container.innerHTML = '';
+            
+            let totalPresent = 0;
+            let totalClasses = 0;
+            
+            if (student.attendance) {
+                for (let sem in student.attendance) {
+                    for (let subject in student.attendance[sem]) {
+                        totalPresent += student.attendance[sem][subject].present;
+                        totalClasses += student.attendance[sem][subject].total;
+                    }
+                }
+            }
+            
+            const overallPercentage = totalClasses > 0 ? ((totalPresent / totalClasses) * 100).toFixed(1) : 0;
+            
+            document.getElementById('overallAttendance').textContent = overallPercentage + '%';
+            document.getElementById('presentDays').textContent = totalPresent;
+            document.getElementById('absentDays').textContent = totalClasses - totalPresent;
+            
+            if (student.attendance) {
+                for (let sem in student.attendance) {
+                    const semesterDiv = document.createElement('div');
+                    semesterDiv.className = 'mb-6 p-4 bg-gray-50 rounded-xl';
+                    
+                    semesterDiv.innerHTML = `
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Semester ${sem} Attendance</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${Object.entries(student.attendance[sem]).map(([subject, data]) => {
+                                const percentage = calculateSubjectAttendance(data.present, data.total);
+                                const isLow = percentage < 70;
+                                return `
+                                    <div class="bg-white rounded-lg p-4 border-2 ${isLow ? 'border-red-200' : 'border-green-200'}">
+                                        <h5 class="font-medium text-gray-800 mb-2">${subject}</h5>
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-gray-600 text-sm">Present: ${data.present}/${data.total}</span>
+                                            <span class="px-2 py-1 rounded text-xs font-medium ${isLow ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                                                ${percentage}%
+                                            </span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="${isLow ? 'progress-bar-danger' : 'progress-bar'} h-2 rounded-full" style="width: ${percentage}%"></div>
+                                        </div>
+                                        ${isLow ? '<p class="text-red-600 text-xs mt-2">⚠️ Low Attendance</p>' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     `;
-                }).join('')}
-            </div>
-        `;
-        container.appendChild(div);
-    }
-}
-
-// Close modal
-function closeModal() {
-    document.getElementById('studentModal').classList.add('hidden');
-}
-
-// Edit/delete student
-function editStudent(rollNo) {
-    const student = students.find(s => s.rollNo === rollNo);
-    if (student) {
-        editingStudent = student;
-        document.getElementById('modalTitle').textContent = 'Edit Student';
-        document.getElementById('modalRollNo').value = student.rollNo;
-        document.getElementById('modalStudentName').value = student.name;
-        document.getElementById('modalPassword').value = student.password;
-        document.getElementById('modalParentPhone').value = student.parentPhone;
-        document.getElementById('modalProgram').value = student.program;
-        document.getElementById('modalCourse').value = student.course;
-        document.getElementById('modalSemester').value = student.currentSemester;
-        generateSemesterInputs(student.currentSemester, student);
-        document.getElementById('studentModal').classList.remove('hidden');
-    }
-}
-
-function deleteStudent(rollNo) {
-    if (confirm('Are you sure you want to delete this student?')) {
-        students = students.filter(s => s.rollNo !== rollNo);
-        displayAllStudents();
-        updateAdminStats();
-        syncToFirebase();
-    }
-}
-
-// Display all students
-function displayAllStudents() {
-    const tbody = document.getElementById('studentsTable');
-    tbody.innerHTML = students.map(student => {
-        const cgpa = calculateCGPA(student);
-        const backlogs = calculateBacklogs(student).length;
-        const attPercent = calculateAttendancePercentage(student);
-        return `
-            <tr class="border-t border-gray-700">
-                <td class="px-6 py-4 text-sm text-gray-300">${student.rollNo}</td>
-                <td class="px-6 py-4 text-sm text-white">${student.name}</td>
-                <td class="px-6 py-4 text-sm text-green-400">${cgpa}</td>
-                <td class="px-6 py-4 text-sm ${attPercent < 70 ? 'text-red-400' : 'text-green-400'}">${attPercent}%</td>
-                <td class="px-6 py-4 text-sm ${backlogs > 0 ? 'text-red-400' : 'text-green-400'}">${backlogs}</td>
-                <td class="px-6 py-4 text-sm">
-                    <button onclick="editStudent('${student.rollNo}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs mr-2">Edit</button>
-                    <button onclick="deleteStudent('${student.rollNo}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// Show backlog students
-function showBacklogStudents() {
-    const container = document.getElementById('backlogStudentsList');
-    const backlogStudents = students.filter(s => calculateBacklogs(s).length > 0);
-    container.innerHTML = backlogStudents.map(student => {
-        const backlogs = calculateBacklogs(student);
-        return `
-            <div class="bg-gradient-to-r from-red-900/30 to-red-800/30 border border-red-700 rounded-xl p-6 mb-6">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-white">${student.name}</h3>
-                        <p class="text-gray-300">Roll No: ${student.rollNo}</p>
-                        <p class="text-gray-300">CGPA: ${calculateCGPA(student)}</p>
-                        <p class="text-gray-300">📞 ${student.parentPhone}</p>
+                    
+                    container.appendChild(semesterDiv);
+                }
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-calendar-times text-4xl mb-4"></i>
+                        <p class="text-lg">No attendance data available</p>
                     </div>
-                    <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">${backlogs.length} Backlog${backlogs.length > 1 ? 's' : ''}</span>
+                `;
+            }
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            
+            currentView = 'all';
+            displayStudentsList();
+            updateSystemStats();
+            updateNotificationBadge();
+        }
+
+        function showAllStudents() {
+            currentView = 'all';
+            displayStudentsList();
+        }
+
+        function showBacklogStudents() {
+            currentView = 'backlogs';
+            displayStudentsList();
+        }
+
+        function showLowAttendanceStudents() {
+            currentView = 'lowAttendance';
+            displayStudentsList();
+        }
+
+        function loadDailyAttendance() {
+            const program = document.getElementById('dailyAttendanceProgram').value;
+            const branch = document.getElementById('dailyAttendanceBranch').value;
+            const semester = document.getElementById('dailyAttendanceSemester').value;
+            const date = document.getElementById('dailyAttendanceDate').value;
+            
+            if (!program || !branch || !semester || !date) {
+                showErrorMessage('Please select Program, Branch, Semester, and Date.');
+                return;
+            }
+            
+            if (!curriculumTemplates[branch] || !curriculumTemplates[branch][semester]) {
+                showErrorMessage('No curriculum template found for this selection.');
+                return;
+            }
+            
+            const subjects = curriculumTemplates[branch][semester];
+            
+            document.getElementById('dailyAttendanceContainer').classList.remove('hidden');
+            
+            const subjectsHeader = document.getElementById('subjectsHeader');
+            subjectsHeader.innerHTML = `
+                <div class="bg-purple-100 p-4 rounded-xl">
+                    <h4 class="text-lg font-semibold text-purple-800 mb-3">
+                        <i class="fas fa-calendar-day mr-2"></i>Daily Attendance for ${new Date(date).toLocaleDateString()} - Semester ${semester} (${program} - ${branch})
+                    </h4>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                        ${subjects.map(subject => `
+                            <div class="bg-white p-2 rounded-lg text-center">
+                                <i class="fas fa-book text-purple-600 mb-1"></i>
+                                <p class="text-xs font-medium text-gray-800">${subject}</p>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    ${backlogs.map(b => `<div class="dark-card p-4 rounded-lg shadow-md border-l-4 border-red-500"><p class="font-semibold text-white">Semester ${b.semester}</p><p class="text-gray-300 text-sm">${b.subject}</p><p class="text-red-400 font-bold">${b.marks} marks</p></div>`).join('')}
-                </div>
-            </div>
-        `;
-    }).join('');
-    document.getElementById('studentsTab').classList.add('hidden');
-    document.getElementById('backlogDetailsSection').classList.remove('hidden');
-}
+            `;
+            
+            loadDailyAttendanceStudents(date, semester, subjects, program, branch);
+        }
 
-function showAllStudents() {
-    document.getElementById('backlogDetailsSection').classList.add('hidden');
-    document.getElementById('studentsTab').classList.remove('hidden');
-    displayAllStudents();
-}
-
-// Update admin stats
-function updateAdminStats() {
-    const total = students.length;
-    const passCount = students.filter(s => calculateBacklogs(s).length === 0).length;
-    const backlogCount = students.filter(s => calculateBacklogs(s).length > 0).length;
-    const lowAttCount = students.filter(s => calculateAttendancePercentage(s) < 70).length;
-    const passRate = total > 0 ? Math.round((passCount / total) * 100) : 0;
-
-    document.getElementById('totalStudents').textContent = total;
-    document.getElementById('passRate').textContent = `${passRate}%`;
-    document.getElementById('backlogCount').textContent = backlogCount;
-    document.getElementById('lowAttendanceCount').textContent = lowAttCount;
-}
-
-// Attendance tab
-function loadAttendanceStudents() {
-    const date = document.getElementById('attendanceDate').value;
-    const program = document.getElementById('attendanceProgram').value;
-    const course = document.getElementById('attendanceCourse').value;
-    const semester = document.getElementById('attendanceSemester').value;
-    const subject = document.getElementById('attendanceSubject').value;
-
-    if (!date || !program || !course || !semester || !subject) {
-        alert('Please fill all fields');
-        return;
-    }
-
-    const filtered = students.filter(s => 
-        s.program === program && s.course === course && s.currentSemester == semester
-    );
-
-    const container = document.getElementById('attendanceStudentsList');
-    container.innerHTML = `
-        <h3 class="text-xl font-bold text-white mb-4">Mark Attendance - ${subject} (${date})</h3>
-        <div class="space-y-4">
-            ${filtered.map(student => {
-                const currentStatus = student.attendance?.[subject]?.[date] || '';
-                return `
-                    <div class="dark-card p-4 rounded-lg flex justify-between items-center">
-                        <div>
-                            <h4 class="text-white font-semibold">${student.name}</h4>
-                            <p class="text-gray-400 text-sm">${student.rollNo}</p>
+        function loadDailyAttendanceStudents(date, semester, subjects, program, branch) {
+            const container = document.getElementById('dailyAttendanceStudentsList');
+            container.innerHTML = '';
+            
+            const existingData = dailyAttendanceData[date] || {};
+            
+            for (let rollNo in studentsData) {
+                const student = studentsData[rollNo];
+                if (student.program === program && student.branch === branch && student.currentSemester >= parseInt(semester)) {
+                    const studentDiv = document.createElement('div');
+                    studentDiv.className = 'bg-gray-50 p-4 rounded-xl border-2 border-gray-200';
+                    
+                    let subjectsHTML = subjects.map(subject => {
+                        const isPresent = existingData[rollNo] && existingData[rollNo][subject] === true;
+                        const isAbsent = existingData[rollNo] && existingData[rollNo][subject] === false;
+                        
+                        return `
+                            <div class="text-center">
+                                <p class="text-xs font-medium text-gray-700 mb-2">${subject}</p>
+                                <div class="flex flex-col space-y-1">
+                                    <button onclick="markDailyAttendance('${rollNo}', '${subject}', true, this)" 
+                                            class="daily-attendance-btn ${isPresent ? 'bg-green-500 ring-2 ring-green-300' : 'bg-gray-300'} text-white px-2 py-1 rounded text-xs hover-lift transition-all font-medium">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button onclick="markDailyAttendance('${rollNo}', '${subject}', false, this)" 
+                                            class="daily-attendance-btn ${isAbsent ? 'bg-red-500 ring-2 ring-red-300' : 'bg-gray-300'} text-white px-2 py-1 rounded text-xs hover-lift transition-all font-medium">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    studentDiv.innerHTML = `
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-medium text-gray-800">${student.name}</h5>
+                                    <p class="text-sm text-gray-600">${rollNo} | ${student.branch}</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="markStudentAllPresent('${rollNo}')" class="btn-success text-white px-3 py-1 rounded-lg text-xs hover-lift transition-all font-medium">
+                                    <i class="fas fa-check-double mr-1"></i>All Present
+                                </button>
+                                <button onclick="markStudentAllAbsent('${rollNo}')" class="btn-danger text-white px-3 py-1 rounded-lg text-xs hover-lift transition-all font-medium">
+                                    <i class="fas fa-times-circle mr-1"></i>All Absent
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex space-x-2">
-                            <button onclick="markAttendance('${student.rollNo}', '${subject}', '${date}', 'present')"
-                                    class="px-4 py-2 rounded-lg font-medium transition-all ${currentStatus === 'present' ? 'attendance-present text-white' : 'bg-gray-700 text-gray-300 hover:bg-green-600 hover:text-white'}">Present</button>
-                            <button onclick="markAttendance('${student.rollNo}', '${subject}', '${date}', 'absent')"
-                                    class="px-4 py-2 rounded-lg font-medium transition-all ${currentStatus === 'absent' ? 'attendance-absent text-white' : 'bg-gray-700 text-gray-300 hover:bg-red-600 hover:text-white'}">Absent</button>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                            ${subjectsHTML}
+                        </div>
+                    `;
+                    
+                    container.appendChild(studentDiv);
+                }
+            }
+        }
+
+        function markDailyAttendance(rollNo, subject, isPresent, buttonElement) {
+            const date = document.getElementById('dailyAttendanceDate').value;
+            
+            if (!dailyAttendanceData[date]) {
+                dailyAttendanceData[date] = {};
+            }
+            if (!dailyAttendanceData[date][rollNo]) {
+                dailyAttendanceData[date][rollNo] = {};
+            }
+            
+            dailyAttendanceData[date][rollNo][subject] = isPresent;
+            
+            const parentDiv = buttonElement.parentElement;
+            const buttons = parentDiv.children;
+            for (let btn of buttons) {
+                btn.classList.remove('bg-green-500', 'bg-red-500', 'ring-2', 'ring-green-300', 'ring-red-300');
+                btn.classList.add('bg-gray-300');
+            }
+            
+            if (isPresent) {
+                buttonElement.classList.remove('bg-gray-300');
+                buttonElement.classList.add('bg-green-500', 'ring-2', 'ring-green-300');
+            } else {
+                buttonElement.classList.remove('bg-gray-300');
+                buttonElement.classList.add('bg-red-500', 'ring-2', 'ring-red-300');
+            }
+        }
+
+        function markStudentAllPresent(rollNo) {
+            const date = document.getElementById('dailyAttendanceDate').value;
+            const semester = document.getElementById('dailyAttendanceSemester').value;
+            const student = studentsData[rollNo];
+            const subjects = curriculumTemplates[student.branch][semester] || [];
+
+            if (!dailyAttendanceData[date]) {
+                dailyAttendanceData[date] = {};
+            }
+            dailyAttendanceData[date][rollNo] = {};
+            
+            subjects.forEach(subject => {
+                dailyAttendanceData[date][rollNo][subject] = true;
+            });
+            
+            loadDailyAttendanceStudents(date, semester, subjects, student.program, student.branch);
+        }
+
+        function markStudentAllAbsent(rollNo) {
+            const date = document.getElementById('dailyAttendanceDate').value;
+            const semester = document.getElementById('dailyAttendanceSemester').value;
+            const student = studentsData[rollNo];
+            const subjects = curriculumTemplates[student.branch][semester] || [];
+
+            if (!dailyAttendanceData[date]) {
+                dailyAttendanceData[date] = {};
+            }
+            dailyAttendanceData[date][rollNo] = {};
+            
+            subjects.forEach(subject => {
+                dailyAttendanceData[date][rollNo][subject] = false;
+            });
+            
+            loadDailyAttendanceStudents(date, semester, subjects, student.program, student.branch);
+        }
+
+        function markAllPresentDaily() {
+            const date = document.getElementById('dailyAttendanceDate').value;
+            const semester = document.getElementById('dailyAttendanceSemester').value;
+            const program = document.getElementById('dailyAttendanceProgram').value;
+            const branch = document.getElementById('dailyAttendanceBranch').value;
+
+            if (!program || !branch || !semester || !date) {
+                showErrorMessage('Please select Program, Branch, Semester, and Date.');
+                return;
+            }
+
+            const subjects = curriculumTemplates[branch][semester] || [];
+            
+            if (!dailyAttendanceData[date]) {
+                dailyAttendanceData[date] = {};
+            }
+            
+            for (let rollNo in studentsData) {
+                const student = studentsData[rollNo];
+                if (student.program === program && student.branch === branch && student.currentSemester >= parseInt(semester)) {
+                    if (!dailyAttendanceData[date][rollNo]) {
+                        dailyAttendanceData[date][rollNo] = {};
+                    }
+                    subjects.forEach(subject => {
+                        dailyAttendanceData[date][rollNo][subject] = true;
+                    });
+                }
+            }
+            
+            loadDailyAttendanceStudents(date, semester, subjects, program, branch);
+        }
+
+        function markAllAbsentDaily() {
+            const date = document.getElementById('dailyAttendanceDate').value;
+            const semester = document.getElementById('dailyAttendanceSemester').value;
+            const program = document.getElementById('dailyAttendanceProgram').value;
+            const branch = document.getElementById('dailyAttendanceBranch').value;
+
+            if (!program || !branch || !semester || !date) {
+                showErrorMessage('Please select Program, Branch, Semester, and Date.');
+                return;
+            }
+            
+            const subjects = curriculumTemplates[branch][semester] || [];
+            
+            if (!dailyAttendanceData[date]) {
+                dailyAttendanceData[date] = {};
+            }
+            
+            for (let rollNo in studentsData) {
+                const student = studentsData[rollNo];
+                if (student.program === program && student.branch === branch && student.currentSemester >= parseInt(semester)) {
+                    if (!dailyAttendanceData[date][rollNo]) {
+                        dailyAttendanceData[date][rollNo] = {};
+                    }
+                    subjects.forEach(subject => {
+                        dailyAttendanceData[date][rollNo][subject] = false;
+                    });
+                }
+            }
+            
+            loadDailyAttendanceStudents(date, semester, subjects, program, branch);
+        }
+
+        function saveDailyAttendance() {
+            const date = document.getElementById('dailyAttendanceDate').value;
+            const semester = document.getElementById('dailyAttendanceSemester').value;
+            
+            if (!date || !semester) {
+                showErrorMessage('Please select date and semester.');
+                return;
+            }
+            
+            if (!dailyAttendanceData[date]) {
+                showErrorMessage('No attendance data to save.');
+                return;
+            }
+            
+            const attendanceRef = database.ref('attendance/' + date);
+            attendanceRef.set(dailyAttendanceData[date])
+                .then(() => {
+                    showSuccessMessage(`Daily attendance saved to database!`);
+                    
+                    // The following code writes a notification to an outbound queue in Firebase.
+                    // A Firebase Cloud Function should be set up to listen to this queue and call the Twilio API.
+                    const studentsWithAbsence = Object.keys(dailyAttendanceData[date]).filter(rollNo => {
+                        const subjectsAttended = Object.values(dailyAttendanceData[date][rollNo]).filter(p => p).length;
+                        const totalSubjects = Object.keys(dailyAttendanceData[date][rollNo]).length;
+                        return subjectsAttended < totalSubjects;
+                    });
+                    
+                    studentsWithAbsence.forEach(rollNo => {
+                        const student = studentsData[rollNo];
+                        const absentSubjects = Object.keys(dailyAttendanceData[date][rollNo]).filter(subject => !dailyAttendanceData[date][rollNo][subject]);
+                        const presentCount = Object.keys(dailyAttendanceData[date][rollNo]).length - absentSubjects.length;
+
+                        const notification = {
+                            id: Date.now() + Math.random(),
+                            rollNo: rollNo,
+                            studentName: student.name,
+                            type: 'daily_attendance',
+                            subType: (presentCount / Object.keys(dailyAttendanceData[date][rollNo]).length) * 100 < 70 ? 'low_daily' : 'normal_daily',
+                            message: `Dear Parent, your child ${student.name} (${rollNo}) was marked absent in the following subjects on ${new Date(date).toLocaleDateString()}: ${absentSubjects.join(', ')}`,
+                            parentContact: student.parentContact,
+                            date: date,
+                            formattedDate: new Date(date).toLocaleDateString(),
+                            presentCount: presentCount,
+                            totalSubjects: Object.keys(dailyAttendanceData[date][rollNo]).length,
+                            absentSubjects: absentSubjects,
+                            attendancePercentage: ((presentCount / Object.keys(dailyAttendanceData[date][rollNo]).length) * 100).toFixed(1),
+                            status: 'pending',
+                            createdAt: new Date().toLocaleString()
+                        };
+                        database.ref('notifications_outbound').push(notification);
+                    });
+                    
+                    updateSystemStats();
+                    updateNotificationBadge();
+                })
+                .catch(error => {
+                    showErrorMessage('Error saving attendance: ' + error.message);
+                });
+        }
+
+        function loadAttendanceHistory() {
+            const fromDate = document.getElementById('historyFromDate').value;
+            const toDate = document.getElementById('historyToDate').value;
+            const semester = document.getElementById('historySemester').value;
+            const container = document.getElementById('attendanceHistoryContainer');
+            
+            if (!fromDate || !toDate) {
+                showErrorMessage('Please select date range.');
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            const datesRef = database.ref('attendance');
+            datesRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-calendar-times text-4xl mb-4"></i><p class="text-lg">No attendance data found for the selected date range</p></div>`;
+                    return;
+                }
+                
+                const allDates = Object.keys(data).filter(date => date >= fromDate && date <= toDate).sort().reverse();
+                
+                if (allDates.length === 0) {
+                    container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-calendar-times text-4xl mb-4"></i><p class="text-lg">No attendance data found for the selected date range</p></div>`;
+                    return;
+                }
+
+                allDates.forEach(date => {
+                    const dateData = data[date];
+                    const dateDiv = document.createElement('div');
+                    dateDiv.className = 'bg-gray-50 rounded-xl p-4 border border-gray-200';
+                    
+                    let studentsHTML = '';
+                    for (let rollNo in dateData) {
+                        const student = studentsData[rollNo];
+                        if (!student) continue;
+                        
+                        if (semester && student.currentSemester != semester) continue;
+                        
+                        const subjectData = dateData[rollNo];
+                        const presentSubjects = Object.keys(subjectData).filter(subject => subjectData[subject] === true);
+                        const absentSubjects = Object.keys(subjectData).filter(subject => subjectData[subject] === false);
+                        const totalSubjects = Object.keys(subjectData).length;
+                        const attendancePercentage = totalSubjects > 0 ? ((presentSubjects.length / totalSubjects) * 100).toFixed(1) : 0;
+                        
+                        studentsHTML += `
+                            <div class="bg-white p-3 rounded-lg border border-gray-200 mb-2">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div>
+                                        <h6 class="font-medium text-gray-800">${student.name} (${rollNo})</h6>
+                                        <p class="text-sm text-gray-600">Semester ${student.currentSemester}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="px-2 py-1 rounded text-xs font-medium ${attendancePercentage >= 70 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                            ${attendancePercentage}% (${presentSubjects.length}/${totalSubjects})
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span class="text-green-600 font-medium">Present:</span>
+                                        <span class="text-gray-700">${presentSubjects.join(', ') || 'None'}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-red-600 font-medium">Absent:</span>
+                                        <span class="text-gray-700">${absentSubjects.join(', ') || 'None'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    dateDiv.innerHTML = `
+                        <div class="flex justify-between items-center mb-4">
+                            <h5 class="text-lg font-semibold text-gray-800">
+                                <i class="fas fa-calendar-day mr-2 text-purple-600"></i>
+                                ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            </h5>
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                ${Object.keys(dateData).length} Students
+                            </span>
+                        </div>
+                        <div class="space-y-2">
+                            ${studentsHTML}
+                        </div>
+                    `;
+                    
+                    container.appendChild(dateDiv);
+                });
+            });
+        }
+
+        function checkLowAttendanceAndNotify() {
+            for (let rollNo in studentsData) {
+                const student = studentsData[rollNo];
+                const attendance = calculateOverallAttendance(student);
+                const backlogs = calculateBacklogs(student);
+                
+                if (attendance < 70 || backlogs > 0) {
+                    createParentNotification(rollNo, attendance, backlogs);
+                }
+            }
+        }
+
+        function createParentNotification(rollNo, attendance, backlogs) {
+            const student = studentsData[rollNo];
+            const currentDate = new Date().toLocaleDateString();
+            
+            const existingNotification = notificationHistory.find(n => 
+                n.rollNo === rollNo && n.status === 'pending' && n.type !== 'daily_attendance'
+            );
+            
+            if (existingNotification) {
+                return;
+            }
+            
+            let message = `Dear Parent,\n\n📋 ACADEMIC ALERT\n`;
+            message += `Student: ${student.name} (${rollNo})\n`;
+            message += `Date: ${currentDate}\n\n`;
+            
+            if (attendance < 70) {
+                message += `⚠️ OVERALL ATTENDANCE ALERT:\n`;
+                message += `Current overall attendance: ${attendance}% (Below required 70%)\n\n`;
+            }
+            
+            if (backlogs > 0) {
+                message += `⚠️ ACADEMIC PERFORMANCE ALERT:\n`;
+                message += `Student has ${backlogs} backlog subject(s)\n`;
+                
+                const backlogSubjects = getBacklogSubjects(student);
+                if (backlogSubjects.length > 0) {
+                    message += `\nBacklog Subjects:\n`;
+                    backlogSubjects.forEach((subject, index) => {
+                        message += `${index + 1}. ${subject.name} (Marks: ${subject.marks}, Semester: ${subject.semester})\n`;
+                    });
+                }
+                message += `\n`;
+            }
+            
+            message += `Please contact the college immediately to discuss improvement strategies.\n\n`;
+            message += `Best regards,\nAcademic Office\n`;
+            message += `Contact: +91-XXXXXXXXXX`;
+            
+            const notification = {
+                id: Date.now(),
+                rollNo: rollNo,
+                studentName: student.name,
+                type: attendance < 70 ? 'overall_attendance' : 'backlog',
+                message: message,
+                parentContact: student.parentContact,
+                date: currentDate,
+                attendance: attendance,
+                backlogs: backlogs,
+                status: 'pending',
+                createdAt: new Date().toLocaleString()
+            };
+            
+            database.ref('notifications').push(notification);
+        }
+
+        function sendParentBacklogNotifications() {
+            const backlogStudents = Object.values(studentsData).filter(student => calculateBacklogs(student) > 0);
+            if (backlogStudents.length === 0) {
+                showSuccessMessage('No students with backlogs to send alerts to.');
+                return;
+            }
+
+            const message = `This will send academic backlog alerts to the parents of ${backlogStudents.length} students. Are you sure you want to proceed?`;
+            showConfirmationMessage(message, () => {
+                backlogStudents.forEach(student => {
+                    // Trigger the notification creation in a way a Cloud Function can pick it up.
+                    const notification = {
+                        rollNo: student.rollNumber,
+                        type: 'backlog_alert',
+                        message: `Academic Alert: Your child ${student.name} has ${calculateBacklogs(student)} backlog(s). Please contact the academic office.`,
+                        parentPhone: student.parentContact.fatherPhone,
+                        status: 'pending',
+                        createdAt: new Date().toLocaleString()
+                    };
+                    database.ref('notifications_outbound').push(notification);
+                });
+                showSuccessMessage(`${backlogStudents.length} backlog alerts queued. A backend service will send the messages.`);
+            });
+        }
+        
+        function showSendAttendanceSMSModal() {
+            document.getElementById('sendAttendanceSMSModal').classList.remove('hidden');
+        }
+
+        function closeSendAttendanceSMSModal() {
+            document.getElementById('sendAttendanceSMSModal').classList.add('hidden');
+        }
+
+        function sendDailyAttendanceSMS() {
+            const today = document.getElementById('dailyAttendanceDate').value;
+            const attendanceForToday = dailyAttendanceData[today];
+
+            if (!attendanceForToday) {
+                closeSendAttendanceSMSModal();
+                showErrorMessage("No attendance data for today to send.");
+                return;
+            }
+
+            const studentsWithAbsence = Object.keys(attendanceForToday).filter(rollNo => {
+                const subjectsAttended = Object.values(attendanceForToday[rollNo]).filter(p => p).length;
+                const totalSubjects = Object.keys(attendanceForToday[rollNo]).length;
+                return subjectsAttended < totalSubjects;
+            });
+
+            if (studentsWithAbsence.length === 0) {
+                closeSendAttendanceSMSModal();
+                showSuccessMessage("All students were present today. No attendance SMS needed.");
+                return;
+            }
+
+            studentsWithAbsence.forEach(rollNo => {
+                const student = studentsData[rollNo];
+                const absentSubjects = Object.keys(attendanceForToday[rollNo]).filter(subject => !attendanceForToday[rollNo][subject]);
+                const presentCount = Object.keys(attendanceForToday[rollNo]).length - absentSubjects.length;
+                const attendancePercentage = ((presentCount / Object.keys(attendanceForToday[rollNo]).length) * 100).toFixed(1);
+
+                const notification = {
+                    rollNo: rollNo,
+                    studentName: student.name,
+                    type: 'daily_attendance_alert',
+                    message: `Daily Attendance Report: Your child ${student.name} (${rollNo}) was absent in ${absentSubjects.join(', ')} on ${new Date(today).toLocaleDateString()}. Attendance today: ${attendancePercentage}%.`,
+                    parentPhone: student.parentContact.fatherPhone,
+                    status: 'pending',
+                    createdAt: new Date().toLocaleString()
+                };
+                
+                database.ref('notifications_outbound').push(notification);
+            });
+            closeSendAttendanceSMSModal();
+            showSuccessMessage(`${studentsWithAbsence.length} attendance alerts for today's absences have been queued.`);
+        }
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notificationBadge');
+            const notificationsRef = database.ref('notifications_outbound');
+            notificationsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const pendingCount = Object.values(data).filter(n => n.status === 'pending').length;
+                    if (pendingCount > 0) {
+                        badge.textContent = pendingCount;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+        }
+
+        function displayNotifications() {
+            const container = document.getElementById('notificationsList');
+            container.innerHTML = '';
+            
+            const notificationsRef = database.ref('notifications_outbound');
+            notificationsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                container.innerHTML = '';
+                if (!data) {
+                    container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-bell-slash text-4xl mb-4"></i><p class="text-lg">No notifications yet</p></div>`;
+                    return;
+                }
+
+                const allNotifications = Object.values(data).sort((a, b) => new Date(b.createdAt || a.createdAt) - new Date(a.createdAt || b.createdAt));
+
+                const filterTabs = document.createElement('div');
+                filterTabs.className = 'flex space-x-2 mb-6';
+                filterTabs.innerHTML = `
+                    <button onclick="filterNotifications('all', this)" id="filterAll" class="px-4 py-2 rounded-xl text-sm font-medium bg-purple-600 text-white">
+                        All (${allNotifications.length})
+                    </button>
+                    <button onclick="filterNotifications('daily', this)" id="filterDaily" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300">
+                        Daily Reports (${allNotifications.filter(n => n.type === 'daily_attendance_alert').length})
+                    </button>
+                    <button onclick="filterNotifications('backlog', this)" id="filterAcademic" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300">
+                        Backlog Alerts (${allNotifications.filter(n => n.type === 'backlog_alert').length})
+                    </button>
+                    <button onclick="filterNotifications('pending', this)" id="filterPending" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300">
+                        Pending (${allNotifications.filter(n => n.status === 'pending').length})
+                    </button>
+                `;
+                container.appendChild(filterTabs);
+
+                const notificationsContainer = document.createElement('div');
+                notificationsContainer.id = 'notificationsContainer';
+                container.appendChild(notificationsContainer);
+
+                displayFilteredNotifications(allNotifications, 'all');
+            });
+        }
+
+        function filterNotifications(filter, buttonElement) {
+            document.querySelectorAll('[id^="filter"]').forEach(btn => {
+                btn.className = 'px-4 py-2 rounded-xl text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300';
+            });
+            buttonElement.className = 'px-4 py-2 rounded-xl text-sm font-medium bg-purple-600 text-white';
+
+            database.ref('notifications_outbound').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                const allNotifications = data ? Object.values(data).sort((a, b) => new Date(b.createdAt || a.createdAt) - new Date(a.createdAt || b.createdAt)) : [];
+                
+                let filteredNotifications = allNotifications;
+                if (filter === 'daily') {
+                    filteredNotifications = allNotifications.filter(n => n.type === 'daily_attendance_alert');
+                } else if (filter === 'backlog') {
+                    filteredNotifications = allNotifications.filter(n => n.type === 'backlog_alert');
+                } else if (filter === 'pending') {
+                    filteredNotifications = allNotifications.filter(n => n.status === 'pending');
+                }
+                
+                displayFilteredNotifications(filteredNotifications, filter);
+            });
+        }
+
+        function displayFilteredNotifications(notifications, filter) {
+            const container = document.getElementById('notificationsContainer');
+            container.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-bell-slash text-4xl mb-4"></i><p class="text-lg">No ${filter} notifications found</p></div>`;
+                return;
+            }
+            
+            notifications.forEach(notification => {
+                const notificationDiv = document.createElement('div');
+                let borderColor = 'border-gray-500';
+                let typeLabel = 'General';
+                let typeIcon = 'fas fa-bell';
+                
+                if (notification.type === 'daily_attendance_alert') {
+                    borderColor = notification.subType === 'low_daily' ? 'border-red-500' : 'border-blue-500';
+                    typeLabel = 'Daily Attendance Report';
+                    typeIcon = 'fas fa-calendar-day';
+                } else if (notification.type === 'backlog_alert') {
+                    borderColor = 'border-orange-500';
+                    typeLabel = 'Backlog Alert';
+                    typeIcon = 'fas fa-exclamation-triangle';
+                }
+                
+                notificationDiv.className = `p-4 bg-gray-50 rounded-xl mb-4 border-l-4 ${borderColor}`;
+                
+                notificationDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h5 class="font-semibold text-gray-800">${notification.studentName} (${notification.rollNo})</h5>
+                            <p class="text-sm text-gray-600">
+                                <i class="${typeIcon} mr-1"></i>${typeLabel}
+                            </p>
+                            ${notification.type === 'daily_attendance_alert' ? `
+                                <p class="text-xs text-gray-500 mt-1">
+                                    ${new Date(notification.date).toLocaleDateString()} | Present: ${notification.presentCount}/${notification.totalSubjects} (${notification.attendancePercentage}%)
+                                </p>
+                            ` : ''}
+                        </div>
+                        <div class="text-right">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium ${notification.status === 'sent' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${notification.status === 'sent' ? 'Sent' : 'Pending'}
+                            </span>
+                            <p class="text-xs text-gray-500 mt-1">${notification.createdAt}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg mb-3 border border-gray-200">
+                        <pre class="text-sm text-gray-700 whitespace-pre-wrap">${notification.message}</pre>
+                    </div>
+                    <div class="flex justify-between items-center text-sm text-gray-600">
+                        <div>
+                            <p><i class="fas fa-phone mr-1 text-purple-600"></i>Parent: ${notification.parentPhone || 'N/A'}</p>
+                        </div>
+                        <div class="text-right">
+                            ${notification.sentDate ? `<p><i class="fas fa-check-circle mr-1 text-green-600"></i>Sent: ${notification.sentDate}</p>` : ''}
                         </div>
                     </div>
                 `;
-            }).join('')}
-        </div>
-        <div class="mt-6 text-center">
-            <button onclick="saveAttendance()" class="bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg font-medium">Save Attendance</button>
-        </div>
-    `;
-}
-
-function markAttendance(rollNo, subject, date, status) {
-    const student = students.find(s => s.rollNo === rollNo);
-    if (!student.attendance) student.attendance = {};
-    if (!student.attendance[subject]) student.attendance[subject] = {};
-    student.attendance[subject][date] = status;
-    loadAttendanceStudents(); // Refresh UI
-}
-
-function saveAttendance() {
-    alert('Attendance saved successfully!');
-    updateAdminStats();
-    syncToFirebase();
-    checkAndSendNotifications();
-}
-
-// Login
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const password = document.getElementById('password').value;
-    const errorDiv = document.getElementById('authError');
-
-    if (document.getElementById('studentTypeTab').classList.contains('bg-green-600')) {
-        const rollNo = document.getElementById('rollNo').value;
-        const student = students.find(s => s.rollNo === rollNo && s.password === password);
-        if (student) {
-            currentUser = student;
-            isAdmin = false;
-            showStudentDashboard();
-        } else {
-            showError('Invalid roll number or password');
+                
+                container.appendChild(notificationDiv);
+            });
         }
-    } else {
-        const username = document.getElementById('username').value;
-        const admin = admins.find(a => a.username === username && a.password === password);
-        if (admin) {
-            currentUser = admin;
-            isAdmin = true;
-            showAdminDashboard();
-            await loadStudentsFromFirebase();
-        } else {
-            showError('Invalid admin credentials');
+
+        function displayStudentsList() {
+            const container = document.getElementById('studentsList');
+            container.innerHTML = '';
+            
+            let studentsToShow = [];
+            
+            for (let rollNo in studentsData) {
+                const student = studentsData[rollNo];
+                const cgpa = calculateCGPA(student);
+                const backlogs = calculateBacklogs(student);
+                const backlogSubjects = getBacklogSubjects(student);
+                const attendance = calculateOverallAttendance(student);
+                const isLowAttendance = parseFloat(attendance) < 70;
+                
+                if (currentView === 'all' || 
+                    (currentView === 'backlogs' && backlogs > 0) ||
+                    (currentView === 'lowAttendance' && isLowAttendance)) {
+                    studentsToShow.push({
+                        rollNo,
+                        student,
+                        cgpa,
+                        backlogs,
+                        backlogSubjects,
+                        attendance,
+                        isLowAttendance
+                    });
+                }
+            }
+            
+            if (studentsToShow.length === 0) {
+                let message = 'No students found!';
+                if (currentView === 'backlogs') message = 'No students with backlogs found!';
+                if (currentView === 'lowAttendance') message = 'No students with low attendance found!';
+                
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-users text-4xl mb-4"></i>
+                        <p class="text-lg">${message}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            studentsToShow.forEach(({rollNo, student, cgpa, backlogs, backlogSubjects, attendance, isLowAttendance}) => {
+                const studentDiv = document.createElement('div');
+                studentDiv.className = 'glass-card p-5 rounded-xl hover-lift transition-all border-2 border-gray-200';
+                
+                let alertInfo = '';
+                if (currentView === 'backlogs' && backlogSubjects.length > 0) {
+                    alertInfo = `
+                        <div class="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                            <h5 class="text-sm font-semibold text-red-700 mb-2">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>Backlog Subjects:
+                            </h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${backlogSubjects.map(subject => `
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                                        ${subject.name} (${subject.marks})
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else if (currentView === 'lowAttendance' && isLowAttendance) {
+                    alertInfo = `
+                        <div class="mt-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                            <h5 class="text-sm font-semibold text-orange-700 mb-2">
+                                <i class="fas fa-calendar-times mr-1"></i>Low Attendance Alert:
+                            </h5>
+                            <p class="text-orange-600 text-sm">Current attendance: ${attendance}% (Below required 70%)</p>
+                        </div>
+                    `;
+                }
+                
+                studentDiv.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-user-graduate text-purple-600 mr-2"></i>
+                                <h4 class="font-bold text-gray-800 text-lg">${student.name}</h4>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                                <p><i class="fas fa-id-card mr-1 text-purple-600"></i><strong>Roll:</strong> ${rollNo}</p>
+                                <p><i class="fas fa-graduation-cap mr-1 text-purple-600"></i><strong>Program:</strong> ${student.program || 'B.Tech'}</p>
+                                <p><i class="fas fa-code-branch mr-1 text-purple-600"></i><strong>Branch:</strong> ${student.branch}</p>
+                                <p><i class="fas fa-calendar mr-1 text-purple-600"></i><strong>Semester:</strong> ${student.currentSemester}</p>
+                                <p><i class="fas fa-chart-line mr-1 text-purple-600"></i><strong>CGPA:</strong> <span class="font-bold text-purple-600">${cgpa}</span></p>
+                                <p><i class="fas fa-percentage mr-1 text-purple-600"></i><strong>Attendance:</strong> <span class="font-bold ${isLowAttendance ? 'text-red-500' : 'text-green-500'}">${attendance}%</span></p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium ${backlogs > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                                    <i class="fas ${backlogs > 0 ? 'fa-exclamation-triangle' : 'fa-check-circle'} mr-1"></i>
+                                    ${backlogs > 0 ? `${backlogs} Backlogs` : 'No Backlogs'}
+                                </span>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium ${isLowAttendance ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}">
+                                    <i class="fas ${isLowAttendance ? 'fa-calendar-times' : 'fa-calendar-check'} mr-1"></i>
+                                    ${isLowAttendance ? 'Low Attendance' : 'Good Attendance'}
+                                </span>
+                            </div>
+                            ${alertInfo}
+                        </div>
+                        <div class="flex flex-col space-y-2 ml-4">
+                            <button onclick="editStudent('${rollNo}')" class="btn-info text-white px-4 py-2 rounded-xl text-sm hover-lift transition-all font-medium">
+                                <i class="fas fa-edit mr-1"></i>Edit
+                            </button>
+                            <button onclick="deleteStudent('${rollNo}')" class="btn-danger text-white px-4 py-2 rounded-xl text-sm hover-lift transition-all font-medium">
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(studentDiv);
+            });
         }
-    }
-});
 
-function showError(message) {
-    const errorDiv = document.getElementById('authError');
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('hidden');
-}
+        function getBacklogSubjects(student) {
+            const backlogSubjects = [];
+            if (!student.semesters) return backlogSubjects;
+            for (let sem in student.semesters) {
+                for (let subject in student.semesters[sem].subjects) {
+                    const marks = student.semesters[sem].subjects[subject].marks;
+                    if (marks < 40) {
+                        backlogSubjects.push({
+                            name: subject,
+                            marks: marks,
+                            semester: sem
+                        });
+                    }
+                }
+            }
+            return backlogSubjects;
+        }
 
-function showStudentDashboard() {
-    document.getElementById('authPage').classList.add('hidden');
-    document.getElementById('studentDashboard').classList.remove('hidden');
-    document.getElementById('studentName').textContent = `${currentUser.name} (${currentUser.rollNo})`;
-    displayStudentResults();
-    displayStudentAttendance();
-}
+        function updateSystemStats() {
+            const totalStudents = Object.keys(studentsData).length;
+            const backlogStudents = Object.values(studentsData).filter(student => calculateBacklogs(student) > 0).length;
+            const lowAttendanceStudents = Object.values(studentsData).filter(student => isLowAttendance(student)).length;
+            
+            let totalCGPA = 0;
+            let studentCount = 0;
+            for (let rollNo in studentsData) {
+                const cgpa = parseFloat(calculateCGPA(studentsData[rollNo]));
+                if (cgpa > 0) {
+                    totalCGPA += cgpa;
+                    studentCount++;
+                }
+            }
+            const avgCGPA = studentCount > 0 ? (totalCGPA / studentCount).toFixed(2) : '0.00';
+            
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('totalStudentsCount').textContent = totalStudents;
+            document.getElementById('backlogStudentsCount').textContent = backlogStudents;
+            document.getElementById('backlogCount').textContent = backlogStudents;
+            document.getElementById('lowAttendanceCount').textContent = lowAttendanceStudents;
+            document.getElementById('lowAttendanceSystemCount').textContent = lowAttendanceStudents;
+            document.getElementById('avgCGPA').textContent = avgCGPA;
+        }
 
-function showAdminDashboard() {
-    document.getElementById('authPage').classList.add('hidden');
-    document.getElementById('adminDashboard').classList.remove('hidden');
-    updateAdminStats();
-    showAllStudents();
-    checkAndSendNotifications();
-}
+        function showAddStudentForm() {
+            document.getElementById('modalTitle').textContent = 'Add New Student';
+            document.getElementById('studentForm').reset();
+            document.getElementById('studentModal').classList.remove('hidden');
+            document.getElementById('rollNumber').disabled = false;
+            generateSemesterInputs();
+        }
 
-function logout() {
-    currentUser = null;
-    isAdmin = false;
-    document.getElementById('authPage').classList.remove('hidden');
-    document.getElementById('studentDashboard').classList.add('hidden');
-    document.getElementById('adminDashboard').classList.add('hidden');
-}
+        function editStudent(rollNo) {
+            const student = studentsData[rollNo];
+            if (!student) {
+                showErrorMessage('Student not found in database.');
+                return;
+            }
+            document.getElementById('modalTitle').textContent = 'Edit Student';
+            document.getElementById('rollNumber').value = student.rollNumber;
+            document.getElementById('rollNumber').disabled = false; 
+            document.getElementById('studentNameInput').value = student.name;
+            document.getElementById('program').value = student.program || 'B.Tech';
+            document.getElementById('branch').value = student.branch;
+            document.getElementById('currentSem').value = student.currentSemester;
+            document.getElementById('fatherName').value = student.parentContact?.fatherName || '';
+            document.getElementById('fatherPhone').value = student.parentContact?.fatherPhone || '';
+            document.getElementById('motherName').value = student.parentContact?.motherName || '';
+            document.getElementById('motherPhone').value = student.parentContact?.motherPhone || '';
+            document.getElementById('studentModal').classList.remove('hidden');
+            generateSemesterInputs(student);
+        }
 
-// Initial setup
-document.getElementById('attendanceProgram').addEventListener('change', updateAttendanceSubjects);
-document.getElementById('attendanceCourse').addEventListener('change', updateAttendanceSubjects);
-document.getElementById('attendanceSemester').addEventListener('change', updateAttendanceSubjects);
+        function generateSemesterInputs(student = null) {
+            const container = document.getElementById('semesterMarks');
+            const currentSem = parseInt(document.getElementById('currentSem').value) || 1;
+            const branch = document.getElementById('branch').value;
+            const program = document.getElementById('program').value;
+            container.innerHTML = '';
+            
+            for (let sem = 1; sem <= currentSem; sem++) {
+                const semDiv = document.createElement('div');
+                semDiv.className = 'bg-gray-50 rounded-xl p-4';
+                semDiv.innerHTML = `
+                    <h4 class="font-semibold text-gray-800 mb-3">
+                        <i class="fas fa-calendar-alt mr-2 text-purple-600"></i>Semester ${sem} Subjects
+                    </h4>
+                    <div id="sem${sem}Subjects" class="space-y-3"></div>
+                    <button type="button" onclick="addSubject(${sem})" class="mt-3 btn-success text-white px-4 py-2 rounded-xl text-sm hover-lift transition-all font-medium">
+                        <i class="fas fa-plus mr-1"></i>Add Custom Subject
+                    </button>
+                `;
+                container.appendChild(semDiv);
+                
+                if (student && student.semesters && student.semesters[sem]) {
+                    for (let subject in student.semesters[sem].subjects) {
+                        addSubject(sem, subject, student.semesters[sem].subjects[subject]);
+                    }
+                } else if (program && branch && curriculumTemplates[branch] && curriculumTemplates[branch][sem]) {
+                    const templateSubjects = curriculumTemplates[branch][sem];
+                    templateSubjects.forEach(subjectName => {
+                        addSubject(sem, subjectName, { marks: '', credits: getSubjectCredits(subjectName) });
+                    });
+                } else {
+                    addSubject(sem);
+                }
+            }
+        }
 
-function updateAttendanceSubjects() {
-    const program = document.getElementById('attendanceProgram').value;
-    const course = document.getElementById('attendanceCourse').value;
-    const semester = document.getElementById('attendanceSemester').value;
-    const select = document.getElementById('attendanceSubject');
-    
-    if (program && course && semester) {
-        const subjects = curriculumTemplates[program]?.[course]?.[semester] || [];
-        select.innerHTML = '<option value="">Select Subject</option>';
-        subjects.forEach(sub => {
-            const opt = document.createElement('option');
-            opt.value = sub;
-            opt.textContent = sub;
-            select.appendChild(opt);
+        function loadCurriculumSubjects() {
+            const program = document.getElementById('program').value;
+            const branch = document.getElementById('branch').value;
+            const currentSem = parseInt(document.getElementById('currentSem').value);
+            
+            if (program && branch && currentSem && curriculumTemplates[branch]) {
+                generateSemesterInputs();
+            }
+        }
+
+        function addSubject(semester, subjectName = '', subjectData = { marks: '', credits: '' }) {
+            const container = document.getElementById(`sem${semester}Subjects`);
+            const subjectDiv = document.createElement('div');
+            subjectDiv.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 items-end';
+            subjectDiv.innerHTML = `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-book mr-1 text-purple-600"></i>Subject Name
+                    </label>
+                    <input type="text" class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" value="${subjectName}" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-chart-bar mr-1 text-purple-600"></i>Marks
+                    </label>
+                    <input type="number" min="0" max="100" class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" value="${subjectData.marks}" required>
+                </div>
+                <div class="flex items-end">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn-danger text-white px-4 py-3 rounded-xl hover-lift transition-all font-medium">
+                        <i class="fas fa-trash mr-1"></i>Remove
+                    </button>
+                </div>
+            `;
+            container.appendChild(subjectDiv);
+        }
+
+        document.getElementById('currentSem').addEventListener('change', function() {
+            generateSemesterInputs();
         });
-    } else {
-        select.innerHTML = '<option value="">Select Subject</option>';
-    }
-}
 
-// On page load
-updateAttendanceSubjects();
-</script>
+        document.getElementById('program').addEventListener('change', function() {
+            if (document.getElementById('branch').value && document.getElementById('currentSem').value) {
+                generateSemesterInputs();
+            }
+        });
 
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const rollNumber = document.getElementById('rollNumber').value;
+            const name = document.getElementById('studentNameInput').value;
+            const program = document.getElementById('program').value;
+            const branch = document.getElementById('branch').value;
+            const currentSem = parseInt(document.getElementById('currentSem').value);
+            const password = document.getElementById('studentPassword').value || 'password123';
+            
+            const studentData = {
+                name: name,
+                rollNumber: rollNumber,
+                program: program,
+                branch: branch,
+                currentSemester: currentSem,
+                password: password,
+                parentContact: {
+                    fatherName: document.getElementById('fatherName').value,
+                    fatherPhone: document.getElementById('fatherPhone').value,
+                    motherName: document.getElementById('motherName').value,
+                    motherPhone: document.getElementById('motherPhone').value
+                },
+                semesters: {},
+                attendance: {}
+            };
+            
+            if (studentsData[rollNumber]) {
+                studentData.semesters = { ...studentsData[rollNumber].semesters };
+                studentData.attendance = { ...studentsData[rollNumber].attendance };
+            }
+            
+            for (let sem = 1; sem <= currentSem; sem++) {
+                const semContainer = document.getElementById(`sem${sem}Subjects`);
+                if (semContainer) {
+                    const subjectDivs = semContainer.children;
+                    if (!studentData.semesters[sem]) {
+                        studentData.semesters[sem] = { subjects: {} };
+                    }
+                    if (!studentData.attendance[sem]) {
+                        studentData.attendance[sem] = {};
+                    }
+                    
+                    for (let i = 0; i < subjectDivs.length; i++) {
+                        const inputs = subjectDivs[i].querySelectorAll('input');
+                        const subjectName = inputs[0].value;
+                        const marks = parseInt(inputs[1].value);
+                        
+                        if (subjectName && marks !== '') {
+                            studentData.semesters[sem].subjects[subjectName] = {
+                                credits: getSubjectCredits(subjectName),
+                                marks: marks
+                            };
+                            
+                            if (!studentData.attendance[sem][subjectName]) {
+                                studentData.attendance[sem][subjectName] = { present: 0, total: 0 };
+                            }
+                        }
+                    }
+                }
+            }
+            
+            database.ref('students/' + rollNumber).set(studentData)
+                .then(() => {
+                    closeStudentModal();
+                    showSuccessMessage('Student saved successfully!');
+                })
+                .catch(error => {
+                    showErrorMessage('Error saving student: ' + error.message);
+                });
+        });
+
+        function closeStudentModal() {
+            document.getElementById('studentModal').classList.add('hidden');
+        }
+
+        function deleteStudent(rollNo) {
+            const message = `Are you sure you want to delete student ${studentsData[rollNo].name} (${rollNo})? This action cannot be undone.`;
+            showConfirmationMessage(message, () => {
+                database.ref('students/' + rollNo).remove()
+                    .then(() => {
+                        showSuccessMessage('Student deleted successfully!');
+                    })
+                    .catch(error => {
+                        showErrorMessage('Error deleting student: ' + error.message);
+                    });
+            });
+        }
+
+        function showGenerateReportModal() {
+            const reportModal = document.getElementById('reportModal');
+            const studentSelect = document.getElementById('reportStudentSelect');
+            studentSelect.innerHTML = '<option value="">Select a student...</option>';
+            for (const rollNo in studentsData) {
+                const student = studentsData[rollNo];
+                const option = document.createElement('option');
+                option.value = rollNo;
+                option.textContent = `${student.name} (${rollNo})`;
+                studentSelect.appendChild(option);
+            }
+            reportModal.classList.remove('hidden');
+
+            document.getElementById('reportStudentSelect').addEventListener('change', (e) => {
+                const rollNo = e.target.value;
+                if (rollNo) {
+                    generateReport(rollNo);
+                } else {
+                    document.getElementById('generatedReportDisplay').classList.add('hidden');
+                }
+            });
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+            document.getElementById('generatedReportDisplay').classList.add('hidden');
+        }
+
+        function generateReport(rollNo) {
+            const student = studentsData[rollNo];
+            if (!student) return;
+
+            let reportText = `--- Academic Report for ${student.name} (${student.rollNumber}) ---\n\n`;
+            reportText += `Program: ${student.program}\n`;
+            reportText += `Branch: ${student.branch}\n`;
+            reportText += `Current Semester: ${student.currentSemester}\n`;
+            reportText += `Overall CGPA: ${calculateCGPA(student)}\n`;
+            reportText += `Total Backlogs: ${calculateBacklogs(student)}\n`;
+            reportText += `Overall Attendance: ${calculateOverallAttendance(student)}%\n\n`;
+            reportText += `--- Semester-wise Performance ---\n`;
+            
+            if (student.semesters) {
+                for (const sem in student.semesters) {
+                    reportText += `\nSemester ${sem} (SGPA: ${calculateSGPA(student.semesters[sem].subjects)}):\n`;
+                    for (const subject in student.semesters[sem].subjects) {
+                        const data = student.semesters[sem].subjects[subject];
+                        reportText += `  - ${subject}: Marks=${data.marks}, Credits=${data.credits}, Grade=${calculateGrade(data.marks)}\n`;
+                    }
+                }
+            } else {
+                reportText += "No semester results available.\n";
+            }
+
+            reportText += `\n--- Attendance Details ---\n`;
+            if (student.attendance) {
+                for (const sem in student.attendance) {
+                    reportText += `\nSemester ${sem}:\n`;
+                    for (const subject in student.attendance[sem]) {
+                        const data = student.attendance[sem][subject];
+                        reportText += `  - ${subject}: Present=${data.present}/${data.total} (${calculateSubjectAttendance(data.present, data.total)}%)\n`;
+                    }
+                }
+            } else {
+                reportText += "No attendance data available.\n";
+            }
+
+            const reportBlob = new Blob([reportText], { type: 'text/plain' });
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(reportBlob);
+            downloadLink.download = `report_${student.rollNumber}.txt`;
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            document.getElementById('reportText').textContent = reportText;
+            document.getElementById('generatedReportDisplay').classList.remove('hidden');
+
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+        
+        function downloadReport() {
+            const reportText = document.getElementById('reportText').textContent;
+            const studentRollNo = document.getElementById('reportStudentSelect').value;
+            const filename = `report_${studentRollNo}.txt`;
+            
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportText));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function exportData() {
+            showSuccessMessage('Export feature would download student data in various formats (CSV, PDF, Excel).');
+        }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
+            successDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+            document.body.appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showConfirmationMessage(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            modal.innerHTML = `
+                <div class="glass-card rounded-2xl card-shadow p-6 w-full max-w-sm">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Confirm Action</h3>
+                    <p class="text-gray-600 mb-6">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors">Cancel</button>
+                        <button onclick="confirmAndExecute(this, ${onConfirm})" class="px-6 py-3 btn-danger text-white rounded-xl hover-lift transition-all font-medium">Confirm</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function confirmAndExecute(button, callback) {
+            button.parentElement.parentElement.parentElement.remove();
+            callback();
+        }
+
+        function logout() {
+            currentUser = null;
+            isAdmin = false;
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('studentDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+        }
+
+        document.getElementById('searchStudent').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const students = document.querySelectorAll('#studentsList > div');
+            
+            students.forEach(studentDiv => {
+                const studentText = studentDiv.textContent.toLowerCase();
+                if (studentText.includes(searchTerm)) {
+                    studentDiv.style.display = 'block';
+                } else {
+                    studentDiv.style.display = 'none';
+                }
+            });
+        });
+
+        window.addEventListener('load', function() {
+            database.ref('students').on('value', (snapshot) => {
+                studentsData = snapshot.val() || {};
+                if (isDataLoaded && isAdmin) {
+                    displayStudentsList();
+                    updateSystemStats();
+                } else if (isDataLoaded && currentUser) {
+                    showStudentDashboard();
+                }
+            });
+            
+            database.ref('admins').on('value', (snapshot) => {
+                adminsData = snapshot.val() || {};
+            });
+
+            database.ref('attendance').on('value', (snapshot) => {
+                dailyAttendanceData = snapshot.val() || {};
+            });
+            
+            database.ref('notifications').on('value', (snapshot) => {
+                notificationHistory = Object.values(snapshot.val() || {});
+            });
+
+            database.ref('notifications_outbound').on('value', (snapshot) => {
+                // This listener is for a potential Cloud Function to send SMS.
+                // The client-side code will not handle this, but it's good to monitor.
+                // The actual SMS sending logic would be in a separate, server-side function.
+            });
+            
+            updateNotificationBadge();
+
+            database.ref('students').once('value').then(snapshot => {
+                if (!snapshot.exists()) {
+                    database.ref('students').set({
+                        '21CS001': {
+                            name: 'Rahul Sharma', rollNumber: '21CS001', program: 'B.Tech', branch: 'Computer Science Engineering', currentSemester: 4, password: 'password123',
+                            parentContact: { fatherName: 'Suresh Sharma', fatherPhone: '+919876543210', motherName: 'Priya Sharma', motherPhone: '+919876543211' },
+                            semesters: {
+                                1: { subjects: { 'Mathematics-I': { marks: 85, credits: 4 }, 'Physics': { marks: 78, credits: 3 }, 'Chemistry': { marks: 82, credits: 3 }, 'Programming Fundamentals': { marks: 92, credits: 4 }, 'English Communication': { marks: 75, credits: 2 }}},
+                                2: { subjects: { 'Mathematics-II': { marks: 88, credits: 4 }, 'Data Structures': { marks: 90, credits: 4 }, 'Digital Logic Design': { marks: 85, credits: 3 }, 'Computer Graphics': { marks: 87, credits: 3 }, 'Technical Communication': { marks: 80, credits: 2 }}},
+                                3: { subjects: { 'Mathematics-III': { marks: 89, credits: 4 }, 'Database Management Systems': { marks: 86, credits: 4 }, 'Operating Systems': { marks: 84, credits: 3 }, 'Computer Networks': { marks: 91, credits: 3 }, 'Object Oriented Programming': { marks: 88, credits: 3 }}},
+                                4: { subjects: { 'Algorithms Analysis': { marks: 92, credits: 4 }, 'Software Engineering': { marks: 85, credits: 4 }, 'Web Technologies': { marks: 87, credits: 3 }, 'Computer Architecture': { marks: 89, credits: 3 }, 'Discrete Mathematics': { marks: 83, credits: 2 }}}
+                            },
+                            attendance: {
+                                1: { 'Mathematics-I': { present: 45, total: 50 }, 'Physics': { present: 42, total: 50 }},
+                                2: { 'Mathematics-II': { present: 44, total: 50 }, 'Data Structures': { present: 49, total: 50 }},
+                                3: { 'Mathematics-III': { present: 46, total: 50 }, 'Database Management Systems': { present: 47, total: 50 }},
+                                4: { 'Algorithms Analysis': { present: 48, total: 50 }, 'Software Engineering': { present: 46, total: 50 }}
+                            }
+                        },
+                        '21CS002': {
+                            name: 'Priya Patel', rollNumber: '21CS002', program: 'B.Tech', branch: 'Computer Science Engineering', currentSemester: 4, password: 'password123',
+                            parentContact: { fatherName: 'Rajesh Patel', fatherPhone: '+919876543212', motherName: 'Meera Patel', motherPhone: '+919876543213' },
+                            semesters: {
+                                1: { subjects: { 'Mathematics-I': { marks: 92, credits: 4 }, 'Physics': { marks: 88, credits: 3 }, 'Chemistry': { marks: 90, credits: 3 }, 'Programming Fundamentals': { marks: 95, credits: 4 }, 'English Communication': { marks: 85, credits: 2 }}},
+                                2: { subjects: { 'Mathematics-II': { marks: 94, credits: 4 }, 'Data Structures': { marks: 96, credits: 4 }, 'Digital Logic Design': { marks: 89, credits: 3 }, 'Computer Graphics': { marks: 91, credits: 3 }, 'Technical Communication': { marks: 87, credits: 2 }}},
+                                3: { subjects: { 'Mathematics-III': { marks: 93, credits: 4 }, 'Database Management Systems': { marks: 97, credits: 4 }, 'Operating Systems': { marks: 90, credits: 3 }, 'Computer Networks': { marks: 94, credits: 3 }, 'Object Oriented Programming': { marks: 92, credits: 3 }}},
+                                4: { subjects: { 'Algorithms Analysis': { marks: 98, credits: 4 }, 'Software Engineering': { marks: 95, credits: 4 }, 'Web Technologies': { marks: 93, credits: 3 }, 'Computer Architecture': { marks: 96, credits: 3 }, 'Discrete Mathematics': { marks: 89, credits: 2 }}}
+                            },
+                            attendance: {
+                                1: { 'Mathematics-I': { present: 49, total: 50 }, 'Physics': { present: 48, total: 50 }},
+                                2: { 'Mathematics-II': { present: 48, total: 50 }, 'Data Structures': { present: 50, total: 50 }},
+                                3: { 'Mathematics-III': { present: 49, total: 50 }, 'Database Management Systems': { present: 50, total: 50 }},
+                                4: { 'Algorithms Analysis': { present: 50, total: 50 }, 'Software Engineering': { present: 49, total: 50 }}
+                            }
+                        },
+                        '21CS003': {
+                            name: 'Amit Kumar', rollNumber: '21CS003', program: 'B.Tech', branch: 'Computer Science Engineering', currentSemester: 4, password: 'password123',
+                            parentContact: { fatherName: 'Vijay Kumar', fatherPhone: '+919876543214', motherName: 'Sunita Kumar', motherPhone: '+919876543215' },
+                            semesters: {
+                                1: { subjects: { 'Mathematics-I': { marks: 65, credits: 4 }, 'Physics': { marks: 58, credits: 3 }, 'Chemistry': { marks: 62, credits: 3 }, 'Programming Fundamentals': { marks: 72, credits: 4 }, 'English Communication': { marks: 55, credits: 2 }}},
+                                2: { subjects: { 'Mathematics-II': { marks: 68, credits: 4 }, 'Data Structures': { marks: 70, credits: 4 }, 'Digital Logic Design': { marks: 65, credits: 3 }, 'Computer Graphics': { marks: 67, credits: 3 }, 'Technical Communication': { marks: 60, credits: 2 }}},
+                                3: { subjects: { 'Mathematics-III': { marks: 35, credits: 4 }, 'Database Management Systems': { marks: 66, credits: 4 }, 'Operating Systems': { marks: 64, credits: 3 }, 'Computer Networks': { marks: 71, credits: 3 }, 'Object Oriented Programming': { marks: 68, credits: 3 }}},
+                                4: { subjects: { 'Algorithms Analysis': { marks: 72, credits: 4 }, 'Software Engineering': { marks: 65, credits: 4 }, 'Web Technologies': { marks: 67, credits: 3 }, 'Computer Architecture': { marks: 69, credits: 3 }, 'Discrete Mathematics': { marks: 38, credits: 2 }}}
+                            },
+                            attendance: {
+                                1: { 'Mathematics-I': { present: 32, total: 50 }, 'Physics': { present: 30, total: 50 }},
+                                2: { 'Mathematics-II' : { present: 34, total: 50 }, 'Data Structures': { present: 36, total: 50 }},
+                                3: { 'Mathematics-III': { present: 33, total: 50 }, 'Database Management Systems': { present: 37, total: 50 }},
+                                4: { 'Algorithms Analysis': { present: 38, total: 50 }, 'Software Engineering': { present: 36, total: 50 }}
+                            }
+                        }
+                    });
+                }
+            });
+            database.ref('admins').set({
+                'srms': {
+                    name: 'System Administrator',
+                    adminId: 'srms',
+                    password: 'srms@2468'
+                }
+            });
+            isDataLoaded = true;
+        });
+    </script>
 </body>
 </html>
