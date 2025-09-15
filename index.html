@@ -4,13 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Management System</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase SDK -->
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDK via CDN -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getDatabase, ref, get, set, update, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+        import { getDatabase, ref, get, set, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
+        // 🔐 Your Firebase config (replace with yours if different)
         const firebaseConfig = {
             apiKey: "AIzaSyBpzCla5s18uNBAU6T39jFy60ECULYcPoc",
             authDomain: "studentportal-d48b3.firebaseapp.com",
@@ -21,15 +27,16 @@
             appId: "1:819003837531:web:f1b915b2a1a6193856437e"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Make available globally after load
         window.firebaseInitialized = true;
         window.db = db;
         window.firebaseRef = ref;
         window.firebaseGet = get;
         window.firebaseSet = set;
-        window.firebaseUpdate = update;
         window.firebasePush = push;
 
         console.log("✅ Firebase initialized");
@@ -48,6 +55,15 @@
         .attendance-present { background: linear-gradient(135deg, #059669, #047857); }
         .attendance-absent { background: linear-gradient(135deg, #dc2626, #b91c1c); }
         .attendance-neutral { background: linear-gradient(135deg, #6b7280, #4b5563); }
+        .notification-badge { background-color: #ef4444; }
+        .hover-lift:hover { transform: translateY(-2px); }
+        .card-shadow { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+        .progress-bar { height: 8px; background: linear-gradient(90deg, #48bb78, #38a169); border-radius: 4px; transition: width 0.5s ease; }
+        .progress-bar-danger { background: linear-gradient(90deg, #f56565, #e53e3e); }
+        .scrollbar-custom::-webkit-scrollbar { width: 8px; }
+        .scrollbar-custom::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .scrollbar-custom::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover { background: #5a6fd8; }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
@@ -459,7 +475,7 @@ async function loadStudentsFromFirebase() {
         }
         updateAdminStats();
         displayAllStudents();
-        // Don't auto-send notifications on load
+        checkAndSendNotifications(); // Check after load
     } catch (error) {
         console.error("Failed to load:", error);
     }
@@ -515,11 +531,9 @@ function calculateAttendancePercentage(student) {
 
 // Send notification → triggers Twilio SMS via Firebase Function
 async function sendNotification(student, type, data) {
-    const msg = type === 'daily_attendance'
-        ? `Absent today: ${data.subject}`
-        : type === 'backlog'
-            ? `${data.count} backlog(s): ${data.subjects}`
-            : `Low attendance: ${data.percentage}%`;
+    const msg = type === 'low_attendance'
+        ? `Low attendance: ${data.percentage}%`
+        : `${data.count} backlog(s): ${data.subjects}`;
 
     await window.firebasePush(window.firebaseRef(window.db, 'notifications'), {
         studentName: student.name,
@@ -531,44 +545,63 @@ async function sendNotification(student, type, data) {
     });
 }
 
-// Generate semester inputs
-function generateSemesterInputs(maxSemester, student = null) {
-    const container = document.getElementById('semesterResults');
-    const program = document.getElementById('modalProgram').value;
-    const course = document.getElementById('modalCourse').value;
+// Check and send alerts immediately (not just Sunday)
+function checkAndSendNotifications() {
+    students.forEach(student => {
+        const attPercent = calculateAttendancePercentage(student);
+        const backlogs = calculateBacklogs(student);
 
-    if (!program || !course) {
-        container.innerHTML = '<p class="text-red-400">Please select Program and Course first.</p>';
-        return;
-    }
-
-    container.innerHTML = '';
-
-    for (let sem = 1; sem <= maxSemester; sem++) {
-        const subjects = curriculumTemplates[program]?.[course]?.[sem] || [];
-        const studentSemData = student?.semesters?.[sem] || { subjects: [] };
-
-        const div = document.createElement('div');
-        div.className = 'mb-6';
-        div.id = `semester-${sem}`;
-        div.innerHTML = `
-            <h3 class="text-lg font-bold text-white mb-3">Semester ${sem}</h3>
-            <div id="semester-${sem}-subjects" class="space-y-2">
-                ${subjects.map((subName, idx) => {
-                    const match = studentSemData.subjects.find(s => s.name === subName);
-                    const marks = match ? match.marks : '';
-                    return `
-                        <div class="flex space-x-2 subject-row">
-                            <input type="text" value="${subName}" class="px-4 py-3 bg-blue-900/50 border border-blue-600 rounded-lg subject-name focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" readonly>
-                            <input type="number" value="${marks}" min="0" max="100" class="px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg subject-marks focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-        container.appendChild(div);
-    }
+        if (attPercent < 70) {
+            sendNotification(student, 'low_attendance', { percentage: attPercent });
+        }
+        if (backlogs.length > 0) {
+            sendNotification(student, 'backlog', {
+                count: backlogs.length,
+                subjects: backlogs.map(b => b.subject).join(', ')
+            });
+        }
+    });
 }
+
+// Display functions...
+document.getElementById('attendanceDate').valueAsDate = new Date();
+
+// Tab switching
+document.getElementById('studentTypeTab').addEventListener('click', () => {
+    document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md';
+    document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white';
+    document.getElementById('rollNoField').classList.remove('hidden');
+    document.getElementById('usernameField').classList.add('hidden');
+});
+document.getElementById('adminTypeTab').addEventListener('click', () => {
+    document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md';
+    document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white';
+    document.getElementById('usernameField').classList.remove('hidden');
+    document.getElementById('rollNoField').classList.add('hidden');
+});
+
+// Admin tabs
+document.getElementById('studentsTabBtn').addEventListener('click', () => switchAdminTab('students'));
+document.getElementById('attendanceTabBtn').addEventListener('click', () => switchAdminTab('attendance'));
+document.getElementById('notificationsTabBtn').addEventListener('click', () => switchAdminTab('notifications'));
+
+function switchAdminTab(tab) {
+    ['students', 'attendance', 'notifications'].forEach(t => {
+        document.getElementById(`${t}Tab`).classList.add('hidden');
+        document.getElementById(`${t}TabBtn`).className = 'px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-600';
+    });
+    document.getElementById(`${tab}Tab`).classList.remove('hidden');
+    document.getElementById(`${tab}TabBtn`).className = 'px-4 py-2 bg-green-600 text-white rounded-lg font-medium';
+}
+
+// Add student button
+document.getElementById('addStudentBtn').addEventListener('click', () => {
+    editingStudent = null;
+    document.getElementById('modalTitle').textContent = 'Add Student';
+    document.getElementById('studentForm').reset();
+    generateSemesterInputs(parseInt(document.getElementById('modalSemester').value));
+    document.getElementById('studentModal').classList.remove('hidden');
+});
 
 // Form submission
 document.getElementById('studentForm').addEventListener('submit', async function(e) {
@@ -608,6 +641,45 @@ document.getElementById('studentForm').addEventListener('submit', async function
     updateAdminStats();
     await syncToFirebase();
 });
+
+// Generate semester inputs
+function generateSemesterInputs(maxSemester, student = null) {
+    const container = document.getElementById('semesterResults');
+    const program = document.getElementById('modalProgram').value;
+    const course = document.getElementById('modalCourse').value;
+
+    if (!program || !course) {
+        container.innerHTML = '<p class="text-red-400">Please select Program and Course first.</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    for (let sem = 1; sem <= maxSemester; sem++) {
+        const subjects = curriculumTemplates[program]?.[course]?.[sem] || [];
+        const studentSemData = student?.semesters?.[sem] || { subjects: [] };
+
+        const div = document.createElement('div');
+        div.className = 'mb-6';
+        div.id = `semester-${sem}`;
+        div.innerHTML = `
+            <h3 class="text-lg font-bold text-white mb-3">Semester ${sem}</h3>
+            <div id="semester-${sem}-subjects" class="space-y-2">
+                ${subjects.map((subName, idx) => {
+                    const match = studentSemData.subjects.find(s => s.name === subName);
+                    const marks = match ? match.marks : '';
+                    return `
+                        <div class="flex space-x-2 subject-row">
+                            <input type="text" value="${subName}" class="px-4 py-3 bg-blue-900/50 border border-blue-600 rounded-lg subject-name focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" readonly>
+                            <input type="number" value="${marks}" min="0" max="100" class="px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg subject-marks focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        container.appendChild(div);
+    }
+}
 
 // Close modal
 function closeModal() {
@@ -760,15 +832,7 @@ function markAttendance(rollNo, subject, date, status) {
     const student = students.find(s => s.rollNo === rollNo);
     if (!student.attendance) student.attendance = {};
     if (!student.attendance[subject]) student.attendance[subject] = {};
-
-    const oldStatus = student.attendance[subject][date];
     student.attendance[subject][date] = status;
-
-    // Send SMS only if changed to "absent"
-    if (status === 'absent' && oldStatus !== 'absent') {
-        sendNotification(student, 'daily_attendance', { subject });
-    }
-
     loadAttendanceStudents(); // Refresh UI
 }
 
@@ -776,17 +840,7 @@ function saveAttendance() {
     alert('Attendance saved successfully!');
     updateAdminStats();
     syncToFirebase();
-
-    // Check for backlogs after saving
-    students.forEach(student => {
-        const backlogs = calculateBacklogs(student);
-        if (backlogs.length > 0) {
-            sendNotification(student, 'backlog', {
-                count: backlogs.length,
-                subjects: backlogs.map(b => b.subject).join(', ')
-            });
-        }
-    });
+    checkAndSendNotifications();
 }
 
 // Login
@@ -838,6 +892,7 @@ function showAdminDashboard() {
     document.getElementById('adminDashboard').classList.remove('hidden');
     updateAdminStats();
     showAllStudents();
+    checkAndSendNotifications();
 }
 
 function logout() {
@@ -849,20 +904,10 @@ function logout() {
 }
 
 // Initial setup
-document.getElementById('modalProgram').addEventListener('change', () => {
-    const semester = parseInt(document.getElementById('modalSemester').value);
-    if (semester) generateSemesterInputs(semester);
-});
-document.getElementById('modalCourse').addEventListener('change', () => {
-    const semester = parseInt(document.getElementById('modalSemester').value);
-    if (semester) generateSemesterInputs(semester);
-});
-document.getElementById('modalSemester').addEventListener('change', () => {
-    const semester = parseInt(document.getElementById('modalSemester').value);
-    generateSemesterInputs(semester);
-});
+document.getElementById('attendanceProgram').addEventListener('change', updateAttendanceSubjects);
+document.getElementById('attendanceCourse').addEventListener('change', updateAttendanceSubjects);
+document.getElementById('attendanceSemester').addEventListener('change', updateAttendanceSubjects);
 
-// Subject dropdown for attendance
 function updateAttendanceSubjects() {
     const program = document.getElementById('attendanceProgram').value;
     const course = document.getElementById('attendanceCourse').value;
@@ -882,10 +927,6 @@ function updateAttendanceSubjects() {
         select.innerHTML = '<option value="">Select Subject</option>';
     }
 }
-
-document.getElementById('attendanceProgram').addEventListener('change', updateAttendanceSubjects);
-document.getElementById('attendanceCourse').addEventListener('change', updateAttendanceSubjects);
-document.getElementById('attendanceSemester').addEventListener('change', updateAttendanceSubjects);
 
 // On page load
 updateAttendanceSubjects();
