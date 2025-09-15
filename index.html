@@ -371,7 +371,6 @@
         </form>
     </div>
 </div>
-
 <script>
 // Global variables
 let students = [];
@@ -379,9 +378,8 @@ let admins = [{ username: "admin", password: "admin123", name: "System Admin" }]
 let currentUser = null;
 let isAdmin = false;
 let editingStudent = null;
-let notifications = [];
 
-// Curriculum templates
+// Complete curriculum templates
 const curriculumTemplates = {
     "B.Tech": {
         "Computer Science Engineering": {
@@ -412,7 +410,7 @@ const curriculumTemplates = {
             5: ["Wireless Networks", "Satellite Communication", "DSP", "Elective I", "Minor Project"],
             6: ["Smart Systems", "IoT", "Power Electronics", "Elective II", "Major Project I"],
             7: ["Advanced ECE", "Elective III", "Research", "Minor Project II", "Major Project II"],
-            8: ["Industry Internship", "Final Project", "Seminar", "Capstone", "Professional Practice"]
+            8: ["Industry Internship", "Final Project", "Seminar", "Professional Practice", "Capstone"]
         }
     },
     "B.E": {
@@ -438,6 +436,7 @@ const curriculumTemplates = {
         }
     }
 };
+
 // Wait for Firebase
 async function waitForFirebase() {
     return new Promise((resolve) => {
@@ -533,14 +532,14 @@ async function sendNotification(student, type, data) {
     });
 }
 
+// Check and send alerts immediately (not just Sunday)
 function checkAndSendNotifications() {
     students.forEach(student => {
-        const attendancePercentage = calculateAttendancePercentage(student);
+        const attPercent = calculateAttendancePercentage(student);
         const backlogs = calculateBacklogs(student);
 
-        // Always check for alerts — not just on Sunday
-        if (attendancePercentage < 70) {
-            sendNotification(student, 'low_attendance', { percentage: attendancePercentage });
+        if (attPercent < 70) {
+            sendNotification(student, 'low_attendance', { percentage: attPercent });
         }
         if (backlogs.length > 0) {
             sendNotification(student, 'backlog', {
@@ -550,9 +549,6 @@ function checkAndSendNotifications() {
         }
     });
 }
-
-// Display functions...
-document.getElementById('attendanceDate').valueAsDate = new Date();
 
 // Tab switching
 document.getElementById('studentTypeTab').addEventListener('click', () => {
@@ -590,6 +586,45 @@ document.getElementById('addStudentBtn').addEventListener('click', () => {
     generateSemesterInputs(parseInt(document.getElementById('modalSemester').value));
     document.getElementById('studentModal').classList.remove('hidden');
 });
+
+// Generate semester inputs dynamically
+function generateSemesterInputs(maxSemester, student = null) {
+    const container = document.getElementById('semesterResults');
+    const program = document.getElementById('modalProgram').value;
+    const course = document.getElementById('modalCourse').value;
+
+    if (!program || !course) {
+        container.innerHTML = '<p class="text-red-400">Please select Program and Course first.</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    for (let sem = 1; sem <= maxSemester; sem++) {
+        const subjects = curriculumTemplates[program]?.[course]?.[sem] || [];
+        const studentSemData = student?.semesters?.[sem] || { subjects: [] };
+
+        const div = document.createElement('div');
+        div.className = 'mb-6';
+        div.id = `semester-${sem}`;
+        div.innerHTML = `
+            <h3 class="text-lg font-bold text-white mb-3">Semester ${sem}</h3>
+            <div id="semester-${sem}-subjects" class="space-y-2">
+                ${subjects.map((subName, idx) => {
+                    const match = studentSemData.subjects.find(s => s.name === subName);
+                    const marks = match ? match.marks : '';
+                    return `
+                        <div class="flex space-x-2 subject-row">
+                            <input type="text" value="${subName}" class="px-4 py-3 bg-blue-900/50 border border-blue-600 rounded-lg subject-name focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" readonly>
+                            <input type="number" value="${marks}" min="0" max="100" class="px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg subject-marks focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        container.appendChild(div);
+    }
+}
 
 // Form submission
 document.getElementById('studentForm').addEventListener('submit', async function(e) {
@@ -629,30 +664,6 @@ document.getElementById('studentForm').addEventListener('submit', async function
     updateAdminStats();
     await syncToFirebase();
 });
-
-// Generate semester inputs
-function generateSemesterInputs(semester, student = null) {
-    const container = document.getElementById('semesterResults');
-    container.innerHTML = '';
-    for (let i = 1; i <= semester; i++) {
-        const semSubjects = student?.semesters?.[i]?.subjects || [];
-        const div = document.createElement('div');
-        div.className = 'mb-6';
-        div.id = `semester-${i}`;
-        div.innerHTML = `
-            <h3 class="text-lg font-bold text-white mb-3">Semester ${i}</h3>
-            <div id="semester-${i}-subjects" class="space-y-2">
-                ${semSubjects.map(s => `
-                    <div class="flex space-x-2 subject-row">
-                        <input type="text" value="${s.name}" class="px-4 py-3 bg-blue-900/50 border border-blue-600 rounded-lg subject-name focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" readonly>
-                        <input type="number" value="${s.marks}" min="0" max="100" class="px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg subject-marks focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        container.appendChild(div);
-    }
-}
 
 // Close modal
 function closeModal() {
@@ -812,13 +823,8 @@ function markAttendance(rollNo, subject, date, status) {
 function saveAttendance() {
     alert('Attendance saved successfully!');
     updateAdminStats();
-    syncToFirebase();           // Save all student data to Firebase
-    checkAndSendNotifications(); // Check immediately for low attendance/backlogs → trigger SMS
-}
-
-// Notifications tab
-function displayNotifications() {
-    // This will be populated by Firebase later
+    syncToFirebase();
+    checkAndSendNotifications();
 }
 
 // Login
@@ -882,9 +888,47 @@ function logout() {
 }
 
 // Initial setup
+document.getElementById('modalProgram').addEventListener('change', () => {
+    const semester = parseInt(document.getElementById('modalSemester').value);
+    if (semester) generateSemesterInputs(semester);
+});
+document.getElementById('modalCourse').addEventListener('change', () => {
+    const semester = parseInt(document.getElementById('modalSemester').value);
+    if (semester) generateSemesterInputs(semester);
+});
+document.getElementById('modalSemester').addEventListener('change', () => {
+    const semester = parseInt(document.getElementById('modalSemester').value);
+    generateSemesterInputs(semester);
+});
+
+// On page load
+updateAttendanceSubjects();
+
+// Subject dropdown for attendance
+function updateAttendanceSubjects() {
+    const program = document.getElementById('attendanceProgram').value;
+    const course = document.getElementById('attendanceCourse').value;
+    const semester = document.getElementById('attendanceSemester').value;
+    const select = document.getElementById('attendanceSubject');
+    
+    if (program && course && semester) {
+        const subjects = curriculumTemplates[program]?.[course]?.[semester] || [];
+        select.innerHTML = '<option value="">Select Subject</option>';
+        subjects.forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value = sub;
+            opt.textContent = sub;
+            select.appendChild(opt);
+        });
+    } else {
+        select.innerHTML = '<option value="">Select Subject</option>';
+    }
+}
+
 document.getElementById('attendanceProgram').addEventListener('change', updateAttendanceSubjects);
 document.getElementById('attendanceCourse').addEventListener('change', updateAttendanceSubjects);
 document.getElementById('attendanceSemester').addEventListener('change', updateAttendanceSubjects);
+</script>
 
 function updateAttendanceSubjects() {
     const program = document.getElementById('attendanceProgram').value;
