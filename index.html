@@ -5,6 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+
+    // Twilio config
+        // DO NOT STORE SECRETS IN FRONTEND CODE!
+        // Use Firebase Cloud Functions instead.
+    const authToken = 'abb1ba5ea699df28076935e9839b3019';
+    const twilioPhoneNumber = '+12135772051';
+
+    // === Auto-SMS: Check Low Attendance & Backlogs ===
+    function checkLowAttendanceAndNotify() {
+        Object.keys(studentsData).forEach(rollNo => {
+            const student = studentsData[rollNo];
+            const attendance = parseFloat(calculateOverallAttendance(student));
+            const backlogs = calculateBacklogs(student);
+
+            const existingNotification = notificationHistory.find(n => 
+                n.rollNo === rollNo && n.status === 'pending'
+            );
+
+            if (!existingNotification && (attendance < 70 || backlogs > 0)) {
+                const currentDate = new Date().toISOString().split('T')[0];
+                const message = `
+Academic Alert - Immediate Attention Required
+---------------------------------------------
+Student: ${student.name} (${rollNo})
+Date: ${currentDate}
+
+${attendance < 70 ? `⚠️ LOW ATTENDANCE: ${attendance}% (Below 70%)` : ''}
+${backlogs > 0 ? `📚 BACKLOGS: ${backlogs} subject(s)` : ''}
+
+Please contact college administration urgently.
+Contact: +91-XXXXXXXXXX
+                `.trim();
+
+                const notification = {
+                    id: Date.now(),
+                    rollNo: rollNo,
+                    studentName: student.name,
+                    type: 'academic_alert',
+                    subType: attendance < 70 ? 'low_attendance' : 'backlog',
+                    message: message,
+                    parentPhone: student.parentContact?.fatherPhone || student.parentContact?.motherPhone,
+                    date: currentDate,
+                    attendance: attendance,
+                    backlogs: backlogs,
+                    status: 'pending',
+                    createdAt: new Date().toLocaleString()
+                };
+
+                database.ref('notifications_outbound').push(notification)
+                    .then(() => {
+                        console.log("Notification saved for", rollNo);
+                        notificationHistory.push(notification);
+                    })
+                    .catch(err => {
+                        console.error("Failed to save notification:", err);
+                    });
+            }
+        });
+
+        updateNotificationBadge();
+    }
+
+    // === Call Auto-Check After Loading Data ===
+    window.addEventListener('load', function() {
+        database.ref('students').on('value', (snapshot) => {
+            studentsData = snapshot.val() || {};
+            checkLowAttendanceAndNotify();
+            if (isAdmin) {
+                displayStudentsList();
+                updateSystemStats();
+            } else if (currentUser) {
+                showStudentDashboard();
+            }
+        });
+
+        database.ref('admins').on('value', (snapshot) => {
+            adminsData = snapshot.val() || {};
+        });
+    });
+</script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -615,8 +697,8 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -632,6 +714,23 @@
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+
+        // === Success & Error Message Functions ===
+    function showSuccessMessage(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
+        successDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+        document.body.appendChild(successDiv);
+        setTimeout(() => successDiv.remove(), 3000);
+    }
+
+    function showErrorMessage(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+        document.body.appendChild(errorDiv);
+        setTimeout(() => errorDiv.remove(), 5000);
+    }
 
         let studentsData = {};
         let adminsData = {};
@@ -2117,18 +2216,34 @@
         }
 
         function deleteStudent(rollNo) {
-            const message = `Are you sure you want to delete student ${studentsData[rollNo].name} (${rollNo})? This action cannot be undone.`;
-            showConfirmationMessage(message, () => {
-                database.ref('students/' + rollNo).remove()
-                    .then(() => {
-                        showSuccessMessage('Student deleted successfully!');
-                    })
-                    .catch(error => {
-                        showErrorMessage('Error deleting student: ' + error.message);
-                    });
-            });
-        }
+    const student = studentsData[rollNo];
+    if (!student) {
+        showErrorMessage('Student not found in database.');
+        return;
+    }
 
+    const confirmation = `Are you sure you want to delete ${student.name} (${rollNo})? This action cannot be undone.`;
+
+    if (confirm(confirmation)) {
+        // ✅ Delete from Firebase Realtime Database
+        database.ref('students/' + rollNo).remove()
+            .then(() => {
+                // ✅ Remove from local data
+                delete studentsData[rollNo];
+
+                // ✅ Update UI
+                displayStudentsList();
+                updateSystemStats();
+
+                // ✅ Show success message
+                showSuccessMessage(`✅ Student "${student.name}" (${rollNo}) deleted successfully!`);
+            })
+            .catch((error) => {
+                console.error("Delete failed:", error);
+                showErrorMessage(`❌ Failed to delete student: ${error.message}`);
+            });
+    }
+}
         function showGenerateReportModal() {
             const reportModal = document.getElementById('reportModal');
             const studentSelect = document.getElementById('reportStudentSelect');
