@@ -388,15 +388,56 @@ const curriculumTemplates = {
             1: ["Mathematics I", "Physics", "Chemistry", "Programming Fundamentals", "English Communication"],
             2: ["Mathematics II", "Data Structures", "Digital Logic Design", "Electronics", "Environmental Science"],
             3: ["Database Management Systems", "Computer Networks", "Operating Systems", "Software Engineering", "Discrete Mathematics"],
-            4: ["Web Development", "Machine Learning", "Compiler Design", "Algorithm Analysis", "Computer Graphics"]
+            4: ["Web Development", "Machine Learning", "Compiler Design", "Algorithm Analysis", "Computer Graphics"],
+            5: ["Cloud Computing", "Cyber Security", "Mobile App Development", "Big Data", "Artificial Intelligence"],
+            6: ["Distributed Systems", "Human Computer Interaction", "Software Testing", "Elective I", "Major Project I"],
+            7: ["Blockchain Technology", "Internet of Things", "Advanced Topics in CS", "Elective II", "Major Project II"],
+            8: ["Industry Internship", "Emerging Technologies", "Elective III", "Seminar", "Capstone Project"]
+        },
+        "Information Technology": {
+            1: ["Mathematics I", "Physics", "Chemistry", "IT Fundamentals", "English Communication"],
+            2: ["Mathematics II", "Data Structures", "Digital Electronics", "Computer Organization", "Technical Writing"],
+            3: ["Database Systems", "Networking", "Operating Systems", "Software Engineering", "Web Technologies"],
+            4: ["Mobile Computing", "AI & ML", "Cloud Computing", "Cyber Security", "Project Management"],
+            5: ["Big Data Analytics", "IoT", "Blockchain", "Elective I", "Minor Project"],
+            6: ["Distributed Systems", "HCI", "Software Testing", "Elective II", "Major Project I"],
+            7: ["Advanced IT", "Elective III", "Research Methodology", "Minor Project II", "Major Project II"],
+            8: ["Industry Training", "Final Year Project", "Seminar", "Internship", "Capstone"]
         },
         "Electronics and Communication": {
             1: ["Mathematics I", "Physics", "Chemistry", "Basic Electronics", "Engineering Drawing"],
-            2: ["Circuit Analysis", "Electronic Devices", "Digital Electronics", "Materials Science", "Engineering Mechanics"]
+            2: ["Circuit Analysis", "Electronic Devices", "Digital Electronics", "Materials Science", "Engineering Mechanics"],
+            3: ["Analog Electronics", "Communication Systems", "Microprocessors", "Signals & Systems", "EM Theory"],
+            4: ["VLSI Design", "Embedded Systems", "Optical Communications", "RF & Microwave", "Antennas"],
+            5: ["Wireless Networks", "Satellite Communication", "DSP", "Elective I", "Minor Project"],
+            6: ["Smart Systems", "IoT", "Power Electronics", "Elective II", "Major Project I"],
+            7: ["Advanced ECE", "Elective III", "Research", "Minor Project II", "Major Project II"],
+            8: ["Industry Internship", "Final Project", "Seminar", "Capstone", "Professional Practice"]
+        }
+    },
+    "B.E": {
+        "Mechanical Engineering": {
+            1: ["Engineering Mechanics", "Thermodynamics", "Workshop Technology", "Engineering Drawing", "Mathematics I"],
+            2: ["Fluid Mechanics", "Manufacturing Processes", "Strength of Materials", "Mathematics II", "Heat Transfer"],
+            3: ["Design of Machine Elements", "Machine Tools", "Metrology", "Industrial Engineering", "Applied Thermodynamics"],
+            4: ["CAD/CAM", "Production Planning", "Refrigeration", "Elective I", "Minor Project"],
+            5: ["Robotics", "Energy Systems", "Elective II", "Major Project I", "Finite Element Analysis"],
+            6: ["Automotive Engineering", "Renewable Energy", "Elective III", "Major Project II", "Industrial Automation"],
+            7: ["Advanced Mech", "Elective IV", "Research", "Minor Project II", "Capstone"],
+            8: ["Industry Internship", "Final Year Project", "Seminar", "Professional Practice", "Capstone"]
+        },
+        "Civil Engineering": {
+            1: ["Engineering Mechanics", "Surveying", "Soil Mechanics", "Concrete Technology", "Mathematics I"],
+            2: ["Structural Analysis", "Hydraulics", "Transportation Engineering", "Mathematics II", "Geotechnical Engineering"],
+            3: ["Design of Concrete Structures", "Steel Structures", "Water Supply", "Environmental Engineering", "Construction Tech"],
+            4: ["Bridge Engineering", "Urban Planning", "Elective I", "Minor Project", "Hydrology"],
+            5: ["Tunnel Engineering", "Elective II", "Major Project I", "Geomatics", "Building Materials"],
+            6: ["Highway Engineering", "Elective III", "Major Project II", "Sustainable Design", "Earthquake Engineering"],
+            7: ["Advanced Civil", "Elective IV", "Research", "Minor Project II", "Capstone"],
+            8: ["Industry Internship", "Final Year Project", "Seminar", "Professional Practice", "Capstone"]
         }
     }
 };
-
 // Wait for Firebase
 async function waitForFirebase() {
     return new Promise((resolve) => {
@@ -492,14 +533,14 @@ async function sendNotification(student, type, data) {
     });
 }
 
-// Check and send alerts
-async function checkAndSendNotifications() {
+function checkAndSendNotifications() {
     students.forEach(student => {
-        const attPercent = calculateAttendancePercentage(student);
+        const attendancePercentage = calculateAttendancePercentage(student);
         const backlogs = calculateBacklogs(student);
 
-        if (attPercent < 70) {
-            sendNotification(student, 'low_attendance', { percentage: attPercent });
+        // Always check for alerts — not just on Sunday
+        if (attendancePercentage < 70) {
+            sendNotification(student, 'low_attendance', { percentage: attendancePercentage });
         }
         if (backlogs.length > 0) {
             sendNotification(student, 'backlog', {
@@ -771,8 +812,8 @@ function markAttendance(rollNo, subject, date, status) {
 function saveAttendance() {
     alert('Attendance saved successfully!');
     updateAdminStats();
-    syncToFirebase();
-    checkAndSendNotifications();
+    syncToFirebase();           // Save all student data to Firebase
+    checkAndSendNotifications(); // Check immediately for low attendance/backlogs → trigger SMS
 }
 
 // Notifications tab
@@ -849,19 +890,22 @@ function updateAttendanceSubjects() {
     const program = document.getElementById('attendanceProgram').value;
     const course = document.getElementById('attendanceCourse').value;
     const semester = document.getElementById('attendanceSemester').value;
-    const select = document.getElementById('attendanceSubject');
-    
+    const subjectSelect = document.getElementById('attendanceSubject');
+
+    subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+
     if (program && course && semester) {
-        const subjects = curriculumTemplates[program]?.[course]?.[semester] || [];
-        select.innerHTML = '<option value="">Select Subject</option>';
-        subjects.forEach(sub => {
-            const opt = document.createElement('option');
-            opt.value = sub;
-            opt.textContent = sub;
-            select.appendChild(opt);
-        });
-    } else {
-        select.innerHTML = '<option value="">Select Subject</option>';
+        const subjects = curriculumTemplates[program]?.[course]?.[semester];
+        if (subjects) {
+            subjects.forEach(subject => {
+                const opt = document.createElement('option');
+                opt.value = subject;
+                opt.textContent = subject;
+                subjectSelect.appendChild(opt);
+            });
+        } else {
+            console.warn("No subjects found for:", program, course, semester);
+        }
     }
 }
 
