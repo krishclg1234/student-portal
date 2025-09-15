@@ -12,7 +12,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getDatabase, ref, get, set, update, push, child } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-        // Your Firebase config (replace with yours)
+        // 🔐 Your Firebase config (replace if different)
         const firebaseConfig = {
             apiKey: "AIzaSyBpzCla5s18uNBAU6T39jFy60ECULYcPoc",
             authDomain: "studentportal-d48b3.firebaseapp.com",
@@ -27,7 +27,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Make Firebase available globally
+        // Make available globally
         window.firebaseInitialized = true;
         window.db = db;
         window.firebaseRef = ref;
@@ -35,54 +35,23 @@
         window.firebaseSet = set;
         window.firebaseUpdate = update;
         window.firebasePush = push;
-        window.firebaseChild = child;
 
         console.log("✅ Firebase initialized");
     </script>
 
     <style>
-        .fade-in {
-            animation: fadeIn 0.6s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .slide-in {
-            animation: slideIn 0.4s ease-out;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #0f172a 100%);
-        }
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-        }
-        .glass-effect {
-            background: rgba(31, 41, 55, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(75, 85, 99, 0.3);
-        }
-        .dark-card {
-            background: linear-gradient(145deg, #374151, #1f2937);
-            border: 1px solid #4b5563;
-        }
-        .attendance-present {
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-        .attendance-absent {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-        }
-        .attendance-neutral {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-        }
+        .fade-in { animation: fadeIn 0.6s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        .gradient-bg { background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #0f172a 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        .glass-effect { background: rgba(31,41,55,0.8); backdrop-filter: blur(10px); border: 1px solid rgba(75,85,99,0.3); }
+        .dark-card { background: linear-gradient(145deg, #374151, #1f2937); border: 1px solid #4b5563; }
+        .attendance-present { background: linear-gradient(135deg, #059669, #047857); }
+        .attendance-absent { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .attendance-neutral { background: linear-gradient(135deg, #6b7280, #4b5563); }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
@@ -96,26 +65,21 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253z"></path>
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Student Management</h1>
-            <p class="text-gray-300">Professional Portal System</p>
+            <h1 class="text-3xl font-bold text-white mb-2">Student Portal</h1>
+            <p class="text-gray-300">Admin-Controlled System</p>
         </div>
         <div class="mb-4">
             <div class="flex bg-gray-700/50 rounded-xl p-1">
-                <button id="studentTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md">
-                    Student
-                </button>
-                <button id="adminTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white">
-                    Admin
-                </button>
+                <button id="studentTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white">Student</button>
+                <button id="adminTypeTab" class="flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md">Admin</button>
             </div>
         </div>
-        <!-- Login Form -->
         <form id="loginForm" class="space-y-4">
-            <div id="rollNoField">
+            <div id="rollNoField" class="hidden">
                 <label class="block text-sm font-medium text-gray-300 mb-2">Roll Number</label>
-                <input type="text" id="rollNo" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-400" placeholder="Enter your roll number">
+                <input type="text" id="rollNo" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-400" placeholder="Enter roll number">
             </div>
-            <div id="usernameField" class="hidden">
+            <div id="usernameField">
                 <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
                 <input type="text" id="username" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-400" placeholder="Enter username">
             </div>
@@ -123,9 +87,7 @@
                 <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
                 <input type="password" id="password" class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white placeholder-gray-400" placeholder="Enter password">
             </div>
-            <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl font-medium hover:from-green-700 hover:to-green-800 transition-colors shadow-lg">
-                Login
-            </button>
+            <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl font-medium hover:from-green-700 hover:to-green-800 transition-colors shadow-lg">Login</button>
         </form>
         <div id="authError" class="mt-4 p-3 bg-red-900/50 border border-red-700 text-red-300 rounded-xl hidden"></div>
     </div>
@@ -145,10 +107,6 @@
                     <h1 class="text-xl font-bold text-white">Student Dashboard</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="flex space-x-4">
-                        <button id="studentResultsTab" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium">Results</button>
-                        <button id="studentAttendanceTab" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-600">Attendance</button>
-                    </div>
                     <span id="studentName" class="text-gray-300 font-medium"></span>
                     <button onclick="logout()" class="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-2 rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg">Logout</button>
                 </div>
@@ -332,9 +290,9 @@
         <!-- Notifications Tab -->
         <div id="notificationsTab" class="hidden">
             <div class="dark-card rounded-2xl shadow-xl p-6">
-                <h2 class="text-2xl font-bold text-white mb-6">Parent Notifications</h2>
+                <h2 class="text-2xl font-bold text-white mb-6">Parent Notification Logs</h2>
                 <div class="space-y-4" id="notificationsList">
-                    <!-- Filled by JS -->
+                    <div class="text-gray-400">Notifications sent to parents will appear here.</div>
                 </div>
             </div>
         </div>
@@ -415,189 +373,501 @@
 </div>
 
 <script>
-    // Global variables
-    let students = [];
-    let admins = [{ username: "admin", password: "admin123", name: "System Admin" }];
-    let currentUser = null;
-    let isAdmin = false;
-    let editingStudent = null;
-    let notifications = [];
+// Global variables
+let students = [];
+let admins = [{ username: "admin", password: "admin123", name: "System Admin" }];
+let currentUser = null;
+let isAdmin = false;
+let editingStudent = null;
+let notifications = [];
 
-    // Curriculum templates
-    const curriculumTemplates = {
-        "B.Tech": {
-            "Computer Science Engineering": {
-                1: ["Mathematics I", "Physics", "Chemistry", "Programming Fundamentals", "English Communication"],
-                2: ["Mathematics II", "Data Structures", "Digital Logic Design", "Electronics", "Environmental Science"],
-                3: ["Database Management Systems", "Computer Networks", "Operating Systems", "Software Engineering", "Discrete Mathematics"],
-                4: ["Web Development", "Machine Learning", "Compiler Design", "Algorithm Analysis", "Computer Graphics"]
-            },
-            "Electronics and Communication": {
-                1: ["Mathematics I", "Physics", "Chemistry", "Basic Electronics", "Engineering Drawing"],
-                2: ["Circuit Analysis", "Electronic Devices", "Digital Electronics", "Materials Science", "Engineering Mechanics"]
-            }
+// Curriculum templates
+const curriculumTemplates = {
+    "B.Tech": {
+        "Computer Science Engineering": {
+            1: ["Mathematics I", "Physics", "Chemistry", "Programming Fundamentals", "English Communication"],
+            2: ["Mathematics II", "Data Structures", "Digital Logic Design", "Electronics", "Environmental Science"],
+            3: ["Database Management Systems", "Computer Networks", "Operating Systems", "Software Engineering", "Discrete Mathematics"],
+            4: ["Web Development", "Machine Learning", "Compiler Design", "Algorithm Analysis", "Computer Graphics"]
+        },
+        "Electronics and Communication": {
+            1: ["Mathematics I", "Physics", "Chemistry", "Basic Electronics", "Engineering Drawing"],
+            2: ["Circuit Analysis", "Electronic Devices", "Digital Electronics", "Materials Science", "Engineering Mechanics"]
         }
+    }
+};
+
+// Wait for Firebase
+async function waitForFirebase() {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (window.firebaseInitialized) resolve();
+            else setTimeout(check, 100);
+        };
+        check();
+    });
+}
+
+// Load students from Firebase
+async function loadStudentsFromFirebase() {
+    await waitForFirebase();
+    try {
+        const snapshot = await window.firebaseGet(window.firebaseRef(window.db, 'students'));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            students = Object.keys(data).map(key => ({
+                ...data[key],
+                id: key
+            }));
+        }
+        updateAdminStats();
+        displayAllStudents();
+        checkAndSendNotifications(); // Check after load
+    } catch (error) {
+        console.error("Failed to load:", error);
+    }
+}
+
+// Save all students to Firebase
+async function syncToFirebase() {
+    await waitForFirebase();
+    const obj = {};
+    students.forEach(s => obj[s.rollNo] = s);
+    await window.firebaseSet(window.firebaseRef(window.db, 'students'), obj);
+    console.log("💾 Synced to Firebase!");
+}
+
+// Grade helpers
+function calculateGrade(marks) {
+    return marks >= 90 ? 'A+' : marks >= 80 ? 'A' : marks >= 70 ? 'B+' : marks >= 60 ? 'B' : marks >= 50 ? 'C+' : marks >= 40 ? 'C' : 'F';
+}
+function getGradePoints(marks) { return marks >= 90 ? 10 : marks >= 80 ? 9 : marks >= 70 ? 8 : marks >= 60 ? 7 : marks >= 50 ? 6 : marks >= 40 ? 5 : 0; }
+function calculateSPI(sem) {
+    const total = sem.subjects.reduce((sum, s) => sum + getGradePoints(s.marks), 0);
+    return sem.subjects.length > 0 ? (total / sem.subjects.length).toFixed(2) : 0;
+}
+function calculateCGPA(student) {
+    let totalGP = 0, totalSubs = 0;
+    Object.values(student.semesters || {}).forEach(sem => {
+        sem.subjects.forEach(s => {
+            totalGP += getGradePoints(s.marks);
+            totalSubs++;
+        });
+    });
+    return totalSubs > 0 ? (totalGP / totalSubs).toFixed(2) : 0;
+}
+function calculateBacklogs(student) {
+    const list = [];
+    Object.entries(student.semesters || {}).forEach(([sem, data]) => {
+        data.subjects.forEach(s => {
+            if (s.marks < 40) list.push({ semester: sem, subject: s.name, marks: s.marks });
+        });
+    });
+    return list;
+}
+function calculateAttendancePercentage(student) {
+    let total = 0, present = 0;
+    Object.values(student.attendance || {}).forEach(dates => {
+        Object.values(dates).forEach(status => {
+            total++;
+            if (status === 'present') present++;
+        });
+    });
+    return total ? Math.round((present / total) * 100) : 100;
+}
+
+// Send notification → triggers Twilio SMS via Firebase Function
+async function sendNotification(student, type, data) {
+    const msg = type === 'low_attendance'
+        ? `Low attendance: ${data.percentage}%`
+        : `${data.count} backlog(s): ${data.subjects}`;
+
+    await window.firebasePush(window.firebaseRef(window.db, 'notifications'), {
+        studentName: student.name,
+        rollNo: student.rollNo,
+        toPhone: student.parentPhone.replace(/\D/g, ''), // Clean phone number
+        message: `Dear Parent, ${student.name}: ${msg}.`,
+        timestamp: Date.now(),
+        status: 'queued'
+    });
+}
+
+// Check and send alerts
+async function checkAndSendNotifications() {
+    students.forEach(student => {
+        const attPercent = calculateAttendancePercentage(student);
+        const backlogs = calculateBacklogs(student);
+
+        if (attPercent < 70) {
+            sendNotification(student, 'low_attendance', { percentage: attPercent });
+        }
+        if (backlogs.length > 0) {
+            sendNotification(student, 'backlog', {
+                count: backlogs.length,
+                subjects: backlogs.map(b => b.subject).join(', ')
+            });
+        }
+    });
+}
+
+// Display functions...
+document.getElementById('attendanceDate').valueAsDate = new Date();
+
+// Tab switching
+document.getElementById('studentTypeTab').addEventListener('click', () => {
+    document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md';
+    document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white';
+    document.getElementById('rollNoField').classList.remove('hidden');
+    document.getElementById('usernameField').classList.add('hidden');
+});
+document.getElementById('adminTypeTab').addEventListener('click', () => {
+    document.getElementById('adminTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all bg-green-600 text-white shadow-md';
+    document.getElementById('studentTypeTab').className = 'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all text-gray-300 hover:text-white';
+    document.getElementById('usernameField').classList.remove('hidden');
+    document.getElementById('rollNoField').classList.add('hidden');
+});
+
+// Admin tabs
+document.getElementById('studentsTabBtn').addEventListener('click', () => switchAdminTab('students'));
+document.getElementById('attendanceTabBtn').addEventListener('click', () => switchAdminTab('attendance'));
+document.getElementById('notificationsTabBtn').addEventListener('click', () => switchAdminTab('notifications'));
+
+function switchAdminTab(tab) {
+    ['students', 'attendance', 'notifications'].forEach(t => {
+        document.getElementById(`${t}Tab`).classList.add('hidden');
+        document.getElementById(`${t}TabBtn`).className = 'px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-600';
+    });
+    document.getElementById(`${tab}Tab`).classList.remove('hidden');
+    document.getElementById(`${tab}TabBtn`).className = 'px-4 py-2 bg-green-600 text-white rounded-lg font-medium';
+}
+
+// Add student button
+document.getElementById('addStudentBtn').addEventListener('click', () => {
+    editingStudent = null;
+    document.getElementById('modalTitle').textContent = 'Add Student';
+    document.getElementById('studentForm').reset();
+    generateSemesterInputs(parseInt(document.getElementById('modalSemester').value));
+    document.getElementById('studentModal').classList.remove('hidden');
+});
+
+// Form submission
+document.getElementById('studentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const rollNo = document.getElementById('modalRollNo').value.trim();
+    const name = document.getElementById('modalStudentName').value.trim();
+    const password = document.getElementById('modalPassword').value;
+    const parentPhone = document.getElementById('modalParentPhone').value.trim();
+    const program = document.getElementById('modalProgram').value;
+    const course = document.getElementById('modalCourse').value;
+    const currentSemester = parseInt(document.getElementById('modalSemester').value);
+
+    const semesters = {};
+    for (let i = 1; i <= currentSemester; i++) {
+        const subjects = Array.from(document.querySelectorAll(`#semester-${i}-subjects .subject-row`)).map(row => ({
+            name: row.querySelector('.subject-name').value,
+            marks: parseInt(row.querySelector('.subject-marks').value)
+        })).filter(s => s.name && !isNaN(s.marks));
+        semesters[i] = { subjects };
+    }
+
+    const studentData = {
+        rollNo, name, password, parentPhone, program, course, currentSemester, semesters,
+        attendance: {}
     };
 
-    // Wait for Firebase
-    async function waitForFirebase() {
-        return new Promise((resolve) => {
-            const check = () => {
-                if (window.firebaseInitialized) resolve();
-                else setTimeout(check, 100);
-            };
-            check();
-        });
+    if (editingStudent) {
+        const idx = students.findIndex(s => s.rollNo === editingStudent.rollNo);
+        students[idx] = studentData;
+    } else {
+        students.push(studentData);
     }
 
-    // Load students from Firebase
-    async function loadStudentsFromFirebase() {
-        await waitForFirebase();
-        try {
-            const snapshot = await window.firebaseGet(window.firebaseRef(window.db, 'students'));
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                students = Object.keys(data).map(key => ({
-                    ...data[key],
-                    id: key
-                }));
-            } else {
-                console.log("No data found.");
-            }
-            updateAdminStats();
-            displayAllStudents();
-        } catch (error) {
-            console.error("Failed to load:", error);
-        }
-    }
+    closeModal();
+    displayAllStudents();
+    updateAdminStats();
+    await syncToFirebase();
+});
 
-    // Save all students to Firebase
-    async function syncToFirebase() {
-        await waitForFirebase();
-        const obj = {};
-        students.forEach(s => obj[s.rollNo] = s);
-        await window.firebaseSet(window.firebaseRef(window.db, 'students'), obj);
-        console.log("💾 Synced to Firebase!");
+// Generate semester inputs
+function generateSemesterInputs(semester, student = null) {
+    const container = document.getElementById('semesterResults');
+    container.innerHTML = '';
+    for (let i = 1; i <= semester; i++) {
+        const semSubjects = student?.semesters?.[i]?.subjects || [];
+        const div = document.createElement('div');
+        div.className = 'mb-6';
+        div.id = `semester-${i}`;
+        div.innerHTML = `
+            <h3 class="text-lg font-bold text-white mb-3">Semester ${i}</h3>
+            <div id="semester-${i}-subjects" class="space-y-2">
+                ${semSubjects.map(s => `
+                    <div class="flex space-x-2 subject-row">
+                        <input type="text" value="${s.name}" class="px-4 py-3 bg-blue-900/50 border border-blue-600 rounded-lg subject-name focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" readonly>
+                        <input type="number" value="${s.marks}" min="0" max="100" class="px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg subject-marks focus:ring-2 focus:ring-green-500 focus:border-green-500 text-white" required>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(div);
     }
+}
 
-    // Grade helpers
-    function calculateGrade(marks) {
-        return marks >= 90 ? 'A+' : marks >= 80 ? 'A' : marks >= 70 ? 'B+' : marks >= 60 ? 'B' : marks >= 50 ? 'C+' : marks >= 40 ? 'C' : 'F';
+// Close modal
+function closeModal() {
+    document.getElementById('studentModal').classList.add('hidden');
+}
+
+// Edit/delete student
+function editStudent(rollNo) {
+    const student = students.find(s => s.rollNo === rollNo);
+    if (student) {
+        editingStudent = student;
+        document.getElementById('modalTitle').textContent = 'Edit Student';
+        document.getElementById('modalRollNo').value = student.rollNo;
+        document.getElementById('modalStudentName').value = student.name;
+        document.getElementById('modalPassword').value = student.password;
+        document.getElementById('modalParentPhone').value = student.parentPhone;
+        document.getElementById('modalProgram').value = student.program;
+        document.getElementById('modalCourse').value = student.course;
+        document.getElementById('modalSemester').value = student.currentSemester;
+        generateSemesterInputs(student.currentSemester, student);
+        document.getElementById('studentModal').classList.remove('hidden');
     }
-    function getGradePoints(marks) { return marks >= 90 ? 10 : marks >= 80 ? 9 : marks >= 70 ? 8 : marks >= 60 ? 7 : marks >= 50 ? 6 : marks >= 40 ? 5 : 0; }
-    function calculateSPI(sem) {
-        const total = sem.subjects.reduce((sum, s) => sum + getGradePoints(s.marks), 0);
-        return sem.subjects.length > 0 ? (total / sem.subjects.length).toFixed(2) : 0;
-    }
-    function calculateCGPA(student) {
-        let totalGP = 0, totalSubs = 0;
-        Object.values(student.semesters || {}).forEach(sem => {
-            sem.subjects.forEach(s => {
-                totalGP += getGradePoints(s.marks);
-                totalSubs++;
-            });
-        });
-        return totalSubs > 0 ? (totalGP / totalSubs).toFixed(2) : 0;
-    }
-    function calculateBacklogs(student) {
-        const list = [];
-        Object.entries(student.semesters || {}).forEach(([sem, data]) => {
-            data.subjects.forEach(s => {
-                if (s.marks < 40) list.push({ semester: sem, subject: s.name, marks: s.marks });
-            });
-        });
-        return list;
-    }
-    function calculateAttendancePercentage(student) {
-        let total = 0, present = 0;
-        Object.values(student.attendance || {}).forEach(dates => {
-            Object.values(dates).forEach(status => {
-                total++;
-                if (status === 'present') present++;
-            });
-        });
-        return total ? Math.round((present / total) * 100) : 100;
-    }
+}
 
-    // Send notification → triggers Twilio SMS via Firebase Function
-    async function sendNotification(student, type, data) {
-        const msg = type === 'low_attendance'
-            ? `Low attendance: ${data.percentage}%`
-            : `${data.count} backlog(s): ${data.subjects}`;
-
-        await window.firebasePush(window.firebaseRef(window.db, 'notifications'), {
-            studentName: student.name,
-            rollNo: student.rollNo,
-            toPhone: student.parentPhone.replace(/\D/g, '').trim(),
-            message: `Dear Parent, ${student.name}: ${msg}.`,
-            timestamp: Date.now(),
-            status: 'queued'
-        });
-    }
-
-    // Check and send alerts
-    async function checkAndSendNotifications() {
-        students.forEach(student => {
-            const attPercent = calculateAttendancePercentage(student);
-            const backlogs = calculateBacklogs(student);
-
-            if (attPercent < 70) {
-                sendNotification(student, 'low_attendance', { percentage: attPercent });
-            }
-            if (backlogs.length > 0) {
-                sendNotification(student, 'backlog', {
-                    count: backlogs.length,
-                    subjects: backlogs.map(b => b.subject).join(', ')
-                });
-            }
-        });
-    }
-
-    // Display functions...
-    document.getElementById('attendanceDate').valueAsDate = new Date();
-
-    // Tab switching logic (already in original code)
-    // [Login, Dashboard, Edit, Delete etc.] – kept same but now synced to Firebase
-
-    // Override saveAttendance to sync
-    async function saveAttendance() {
-        alert('Attendance saved!');
-        await syncToFirebase();
-        checkAndSendNotifications();
-    }
-
-    // On form submit, sync after save
-    document.getElementById('studentForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        // ... collect data ...
-        if (editingStudent) {
-            const idx = students.findIndex(s => s.rollNo === editingStudent.rollNo);
-            students[idx] = { ...studentData };
-        } else {
-            students.push(studentData);
-        }
-        closeModal();
+function deleteStudent(rollNo) {
+    if (confirm('Are you sure you want to delete this student?')) {
+        students = students.filter(s => s.rollNo !== rollNo);
         displayAllStudents();
         updateAdminStats();
-        await syncToFirebase();
-    });
+        syncToFirebase();
+    }
+}
 
-    // Initial load
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        // Handle login...
-        if (isAdmin) {
-            showAdminDashboard();
-            await loadStudentsFromFirebase(); // Load from Firebase
+// Display all students
+function displayAllStudents() {
+    const tbody = document.getElementById('studentsTable');
+    tbody.innerHTML = students.map(student => {
+        const cgpa = calculateCGPA(student);
+        const backlogs = calculateBacklogs(student).length;
+        const attPercent = calculateAttendancePercentage(student);
+        return `
+            <tr class="border-t border-gray-700">
+                <td class="px-6 py-4 text-sm text-gray-300">${student.rollNo}</td>
+                <td class="px-6 py-4 text-sm text-white">${student.name}</td>
+                <td class="px-6 py-4 text-sm text-green-400">${cgpa}</td>
+                <td class="px-6 py-4 text-sm ${attPercent < 70 ? 'text-red-400' : 'text-green-400'}">${attPercent}%</td>
+                <td class="px-6 py-4 text-sm ${backlogs > 0 ? 'text-red-400' : 'text-green-400'}">${backlogs}</td>
+                <td class="px-6 py-4 text-sm">
+                    <button onclick="editStudent('${student.rollNo}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs mr-2">Edit</button>
+                    <button onclick="deleteStudent('${student.rollNo}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Show backlog students
+function showBacklogStudents() {
+    const container = document.getElementById('backlogStudentsList');
+    const backlogStudents = students.filter(s => calculateBacklogs(s).length > 0);
+    container.innerHTML = backlogStudents.map(student => {
+        const backlogs = calculateBacklogs(student);
+        return `
+            <div class="bg-gradient-to-r from-red-900/30 to-red-800/30 border border-red-700 rounded-xl p-6 mb-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-white">${student.name}</h3>
+                        <p class="text-gray-300">Roll No: ${student.rollNo}</p>
+                        <p class="text-gray-300">CGPA: ${calculateCGPA(student)}</p>
+                        <p class="text-gray-300">📞 ${student.parentPhone}</p>
+                    </div>
+                    <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">${backlogs.length} Backlog${backlogs.length > 1 ? 's' : ''}</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    ${backlogs.map(b => `<div class="dark-card p-4 rounded-lg shadow-md border-l-4 border-red-500"><p class="font-semibold text-white">Semester ${b.semester}</p><p class="text-gray-300 text-sm">${b.subject}</p><p class="text-red-400 font-bold">${b.marks} marks</p></div>`).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+    document.getElementById('studentsTab').classList.add('hidden');
+    document.getElementById('backlogDetailsSection').classList.remove('hidden');
+}
+
+function showAllStudents() {
+    document.getElementById('backlogDetailsSection').classList.add('hidden');
+    document.getElementById('studentsTab').classList.remove('hidden');
+    displayAllStudents();
+}
+
+// Update admin stats
+function updateAdminStats() {
+    const total = students.length;
+    const passCount = students.filter(s => calculateBacklogs(s).length === 0).length;
+    const backlogCount = students.filter(s => calculateBacklogs(s).length > 0).length;
+    const lowAttCount = students.filter(s => calculateAttendancePercentage(s) < 70).length;
+    const passRate = total > 0 ? Math.round((passCount / total) * 100) : 0;
+
+    document.getElementById('totalStudents').textContent = total;
+    document.getElementById('passRate').textContent = `${passRate}%`;
+    document.getElementById('backlogCount').textContent = backlogCount;
+    document.getElementById('lowAttendanceCount').textContent = lowAttCount;
+}
+
+// Attendance tab
+function loadAttendanceStudents() {
+    const date = document.getElementById('attendanceDate').value;
+    const program = document.getElementById('attendanceProgram').value;
+    const course = document.getElementById('attendanceCourse').value;
+    const semester = document.getElementById('attendanceSemester').value;
+    const subject = document.getElementById('attendanceSubject').value;
+
+    if (!date || !program || !course || !semester || !subject) {
+        alert('Please fill all fields');
+        return;
+    }
+
+    const filtered = students.filter(s => 
+        s.program === program && s.course === course && s.currentSemester == semester
+    );
+
+    const container = document.getElementById('attendanceStudentsList');
+    container.innerHTML = `
+        <h3 class="text-xl font-bold text-white mb-4">Mark Attendance - ${subject} (${date})</h3>
+        <div class="space-y-4">
+            ${filtered.map(student => {
+                const currentStatus = student.attendance?.[subject]?.[date] || '';
+                return `
+                    <div class="dark-card p-4 rounded-lg flex justify-between items-center">
+                        <div>
+                            <h4 class="text-white font-semibold">${student.name}</h4>
+                            <p class="text-gray-400 text-sm">${student.rollNo}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="markAttendance('${student.rollNo}', '${subject}', '${date}', 'present')"
+                                    class="px-4 py-2 rounded-lg font-medium transition-all ${currentStatus === 'present' ? 'attendance-present text-white' : 'bg-gray-700 text-gray-300 hover:bg-green-600 hover:text-white'}">Present</button>
+                            <button onclick="markAttendance('${student.rollNo}', '${subject}', '${date}', 'absent')"
+                                    class="px-4 py-2 rounded-lg font-medium transition-all ${currentStatus === 'absent' ? 'attendance-absent text-white' : 'bg-gray-700 text-gray-300 hover:bg-red-600 hover:text-white'}">Absent</button>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+        <div class="mt-6 text-center">
+            <button onclick="saveAttendance()" class="bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg font-medium">Save Attendance</button>
+        </div>
+    `;
+}
+
+function markAttendance(rollNo, subject, date, status) {
+    const student = students.find(s => s.rollNo === rollNo);
+    if (!student.attendance) student.attendance = {};
+    if (!student.attendance[subject]) student.attendance[subject] = {};
+    student.attendance[subject][date] = status;
+    loadAttendanceStudents(); // Refresh UI
+}
+
+function saveAttendance() {
+    alert('Attendance saved successfully!');
+    updateAdminStats();
+    syncToFirebase();
+    checkAndSendNotifications();
+}
+
+// Notifications tab
+function displayNotifications() {
+    // This will be populated by Firebase later
+}
+
+// Login
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('authError');
+
+    if (document.getElementById('studentTypeTab').classList.contains('bg-green-600')) {
+        const rollNo = document.getElementById('rollNo').value;
+        const student = students.find(s => s.rollNo === rollNo && s.password === password);
+        if (student) {
+            currentUser = student;
+            isAdmin = false;
+            showStudentDashboard();
+        } else {
+            showError('Invalid roll number or password');
         }
-    });
+    } else {
+        const username = document.getElementById('username').value;
+        const admin = admins.find(a => a.username === username && a.password === password);
+        if (admin) {
+            currentUser = admin;
+            isAdmin = true;
+            showAdminDashboard();
+            await loadStudentsFromFirebase();
+        } else {
+            showError('Invalid admin credentials');
+        }
+    }
+});
 
-    // Initialize
-    document.getElementById('attendanceProgram').addEventListener('change', updateAttendanceSubjects);
-    document.getElementById('attendanceCourse').addEventListener('change', updateAttendanceSubjects);
-    document.getElementById('attendanceSemester').addEventListener('change', updateAttendanceSubjects);
+function showError(message) {
+    const errorDiv = document.getElementById('authError');
+    errorDiv.textContent = message;
+    errorDiv.classList.remove('hidden');
+}
+
+function showStudentDashboard() {
+    document.getElementById('authPage').classList.add('hidden');
+    document.getElementById('studentDashboard').classList.remove('hidden');
+    document.getElementById('studentName').textContent = `${currentUser.name} (${currentUser.rollNo})`;
+    displayStudentResults();
+    displayStudentAttendance();
+}
+
+function showAdminDashboard() {
+    document.getElementById('authPage').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    updateAdminStats();
+    showAllStudents();
+    checkAndSendNotifications();
+}
+
+function logout() {
+    currentUser = null;
+    isAdmin = false;
+    document.getElementById('authPage').classList.remove('hidden');
+    document.getElementById('studentDashboard').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.add('hidden');
+}
+
+// Initial setup
+document.getElementById('attendanceProgram').addEventListener('change', updateAttendanceSubjects);
+document.getElementById('attendanceCourse').addEventListener('change', updateAttendanceSubjects);
+document.getElementById('attendanceSemester').addEventListener('change', updateAttendanceSubjects);
+
+function updateAttendanceSubjects() {
+    const program = document.getElementById('attendanceProgram').value;
+    const course = document.getElementById('attendanceCourse').value;
+    const semester = document.getElementById('attendanceSemester').value;
+    const select = document.getElementById('attendanceSubject');
+    
+    if (program && course && semester) {
+        const subjects = curriculumTemplates[program]?.[course]?.[semester] || [];
+        select.innerHTML = '<option value="">Select Subject</option>';
+        subjects.forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value = sub;
+            opt.textContent = sub;
+            select.appendChild(opt);
+        });
+    } else {
+        select.innerHTML = '<option value="">Select Subject</option>';
+    }
+}
+
+// On page load
+updateAttendanceSubjects();
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e92ac953b28534',t:'MTc1Nzc4MjQ3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
