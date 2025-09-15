@@ -619,7 +619,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database-compat.js"></script>
 
     <script>
-        // Use the Firebase configuration from your image
         const firebaseConfig = {
             apiKey: "AIzaSybpzCla5s18uNBAU6T39jFy60ECULYcPoC",
             authDomain: "studentportal-d48b3.firebaseapp.com",
@@ -631,11 +630,9 @@
             measurementId: "G-RRN5L8PGS"
         };
         
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Data storage is now managed by Firebase. These variables will hold local copies.
         let studentsData = {};
         let adminsData = {};
         let dailyAttendanceData = {};
@@ -646,7 +643,6 @@
         let currentView = 'all';
         let isDataLoaded = false;
 
-        // Curriculum templates for different courses
         const curriculumTemplates = {
             'Computer Science Engineering': {
                 1: ['Mathematics-I', 'Physics', 'Chemistry', 'Programming Fundamentals', 'English Communication'],
@@ -1156,7 +1152,6 @@
                     
                     let subjectsHTML = subjects.map(subject => {
                         const isPresent = existingData[rollNo] && existingData[rollNo][subject] === true;
-                        const isAbsent = existingData[rollNo] && existingData[rollNo][subject] === false;
                         
                         return `
                             <div class="text-center">
@@ -1167,7 +1162,7 @@
                                         <i class="fas fa-check"></i>
                                     </button>
                                     <button onclick="markDailyAttendance('${rollNo}', '${subject}', false, this)" 
-                                            class="daily-attendance-btn ${isAbsent ? 'bg-red-500 ring-2 ring-red-300' : 'bg-gray-300'} text-white px-2 py-1 rounded text-xs hover-lift transition-all font-medium">
+                                            class="daily-attendance-btn ${!isPresent ? 'bg-red-500 ring-2 ring-red-300' : 'bg-gray-300'} text-white px-2 py-1 rounded text-xs hover-lift transition-all font-medium">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>
@@ -1352,8 +1347,6 @@
                 .then(() => {
                     showSuccessMessage(`Daily attendance saved to database!`);
                     
-                    // The following code writes a notification to an outbound queue in Firebase.
-                    // A Firebase Cloud Function should be set up to listen to this queue and call the Twilio API.
                     const studentsWithAbsence = Object.keys(dailyAttendanceData[date]).filter(rollNo => {
                         const subjectsAttended = Object.values(dailyAttendanceData[date][rollNo]).filter(p => p).length;
                         const totalSubjects = Object.keys(dailyAttendanceData[date][rollNo]).length;
@@ -1564,7 +1557,6 @@
             const message = `This will send academic backlog alerts to the parents of ${backlogStudents.length} students. Are you sure you want to proceed?`;
             showConfirmationMessage(message, () => {
                 backlogStudents.forEach(student => {
-                    // Trigger the notification creation in a way a Cloud Function can pick it up.
                     const notification = {
                         rollNo: student.rollNumber,
                         type: 'backlog_alert',
@@ -2229,10 +2221,6 @@
             document.body.removeChild(element);
         }
 
-        function exportData() {
-            showSuccessMessage('Export feature would download student data in various formats (CSV, PDF, Excel).');
-        }
-
         function showSuccessMessage(message) {
             const successDiv = document.createElement('div');
             successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
@@ -2249,7 +2237,7 @@
             setTimeout(() => errorDiv.remove(), 5000);
         }
 
-        function showConfirmationMessage(message, onConfirm) {
+        function showConfirmationMessage(message, onConfirm, data) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
             modal.innerHTML = `
@@ -2258,16 +2246,20 @@
                     <p class="text-gray-600 mb-6">${message}</p>
                     <div class="flex justify-end space-x-3">
                         <button onclick="this.parentElement.parentElement.parentElement.remove()" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors">Cancel</button>
-                        <button onclick="confirmAndExecute(this, ${onConfirm})" class="px-6 py-3 btn-danger text-white rounded-xl hover-lift transition-all font-medium">Confirm</button>
+                        <button onclick="confirmAndExecute(this, ${onConfirm}, '${data}')" class="px-6 py-3 btn-danger text-white rounded-xl hover-lift transition-all font-medium">Confirm</button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
         }
 
-        function confirmAndExecute(button, callback) {
+        function confirmAndExecute(button, callback, data) {
             button.parentElement.parentElement.parentElement.remove();
-            callback();
+            if (data) {
+                callback(data);
+            } else {
+                callback();
+            }
         }
 
         function logout() {
