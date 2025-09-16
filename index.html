@@ -256,10 +256,6 @@
                     <button id="attendanceManagementTab" onclick="showAttendanceManagement()" class="flex-1 py-3 px-6 rounded-xl text-sm font-medium transition-all text-gray-600 hover:text-gray-800">
                         <i class="fas fa-calendar-check mr-2"></i>Attendance Management
                     </button>
-                    <button id="notificationsTab" onclick="showNotifications()" class="flex-1 py-3 px-6 rounded-xl text-sm font-medium transition-all text-gray-600 hover:text-gray-800 relative">
-                        <i class="fas fa-bell mr-2"></i>Notifications
-                        <span id="notificationBadge" class="hidden absolute -top-1 -right-1 notification-badge text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                    </button>
                 </div>
             </div>
 
@@ -335,29 +331,6 @@
                             <button onclick="sendParentBacklogNotifications()" class="w-full btn-danger text-white py-3 rounded-xl hover-lift transition-all font-medium">
                                 <i class="fas fa-paper-plane mr-2"></i>Send Backlog Alerts
                             </button>
-                            <button onclick="showSendAttendanceSMSModal()" class="w-full btn-warning text-white py-3 rounded-xl hover-lift transition-all font-medium">
-                                <i class="fas fa-sms mr-2"></i>Send Attendance SMS
-                            </button>
-                        </div>
-                        
-                        <div class="mt-8 p-4 bg-gray-100 rounded-xl">
-                            <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
-                                <i class="fas fa-info-circle mr-2 text-purple-600"></i>System Overview
-                            </h4>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">Total Students:</span>
-                                    <span class="font-bold text-purple-600" id="totalStudentsCount">0</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">With Backlogs:</span>
-                                    <span class="font-bold text-red-500" id="backlogCount">0</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">Low Attendance:</span>
-                                    <span class="font-bold text-orange-500" id="lowAttendanceSystemCount">0</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -410,15 +383,13 @@
                         <div id="dailyAttendanceStudentsList" class="space-y-3 max-h-96 overflow-y-auto scrollbar-custom"></div>
                         <div class="mt-6 flex justify-between items-center">
                             <div class="flex space-x-4">
-                                <button onclick="markAllPresentDaily()" class="btn-success text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
-                                    <i class="fas fa-check-double mr-2"></i>Mark All Present
-                                </button>
-                                <button onclick="markAllAbsentDaily()" class="btn-danger text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
-                                    <i class="fas fa-times-circle mr-2"></i>Mark All Absent
-                                </button>
+                    
                             </div>
                             <button onclick="saveDailyAttendance()" class="btn-info text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
-                                <i class="fas fa-save mr-2"></i>Save & Send Notifications
+                                <i class="fas fa-save mr-2"></i>Save Attendance
+                            </button>
+                            <button onclick="sendDailyAttendanceSMS()" class="btn-warning text-white py-3 px-6 rounded-xl hover-lift transition-all font-medium">
+                                <i class="fas fa-sms mr-2"></i>Send Parents
                             </button>
                         </div>
                     </div>
@@ -450,16 +421,6 @@
                         </div>
                     </div>
                     <div id="attendanceHistoryContainer" class="space-y-4"></div>
-                </div>
-            </div>
-
-            <!-- Notifications View -->
-            <div id="notificationsView" class="hidden">
-                <div class="glass-card rounded-2xl card-shadow p-6 animate-fadeIn">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
-                        <i class="fas fa-bell mr-2 text-purple-600"></i>Parent Notification System
-                    </h3>
-                    <div id="notificationsList" class="space-y-4"></div>
                 </div>
             </div>
         </div>
@@ -597,23 +558,6 @@
         </div>
     </div>
     
-    <!-- Send Attendance SMS Modal -->
-    <div id="sendAttendanceSMSModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="glass-card rounded-2xl card-shadow p-6 w-full max-w-md">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-800">Send Daily Attendance SMS</h3>
-                <button onclick="closeSendAttendanceSMSModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <p class="text-gray-600 mb-4">This will send an attendance report to the parents of students who were marked absent in at least one subject for today's date.</p>
-            <div class="text-center">
-                <button onclick="sendDailyAttendanceSMS()" class="w-full btn-info text-white py-3 rounded-xl hover-lift transition-all font-medium">
-                    <i class="fas fa-paper-plane mr-2"></i>Send SMS to Parents
-                </button>
-            </div>
-        </div>
-    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database-compat.js"></script>
@@ -839,12 +783,9 @@
             document.getElementById('studentsManagementTab').classList.add('tab-active');
             document.getElementById('attendanceManagementTab').classList.remove('tab-active');
             document.getElementById('attendanceManagementTab').classList.add('text-gray-600');
-            document.getElementById('notificationsTab').classList.remove('tab-active');
-            document.getElementById('notificationsTab').classList.add('text-gray-600');
             
             document.getElementById('studentsManagementView').classList.remove('hidden');
             document.getElementById('attendanceManagementView').classList.add('hidden');
-            document.getElementById('notificationsView').classList.add('hidden');
             
             displayStudentsList();
         }
@@ -853,31 +794,14 @@
             document.getElementById('attendanceManagementTab').classList.add('tab-active');
             document.getElementById('studentsManagementTab').classList.remove('tab-active');
             document.getElementById('studentsManagementTab').classList.add('text-gray-600');
-            document.getElementById('notificationsTab').classList.remove('tab-active');
-            document.getElementById('notificationsTab').classList.add('text-gray-600');
             
             document.getElementById('attendanceManagementView').classList.remove('hidden');
             document.getElementById('studentsManagementView').classList.add('hidden');
-            document.getElementById('notificationsView').classList.add('hidden');
             
             const today = new Date();
             document.getElementById('dailyAttendanceDate').valueAsDate = today;
             document.getElementById('historyFromDate').valueAsDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
             document.getElementById('historyToDate').valueAsDate = today;
-        }
-
-        function showNotifications() {
-            document.getElementById('notificationsTab').classList.add('tab-active');
-            document.getElementById('studentsManagementTab').classList.remove('tab-active');
-            document.getElementById('studentsManagementTab').classList.add('text-gray-600');
-            document.getElementById('attendanceManagementTab').classList.remove('tab-active');
-            document.getElementById('attendanceManagementTab').classList.add('text-gray-600');
-            
-            document.getElementById('notificationsView').classList.remove('hidden');
-            document.getElementById('studentsManagementView').classList.add('hidden');
-            document.getElementById('attendanceManagementView').classList.add('hidden');
-            
-            displayNotifications();
         }
 
         document.getElementById('studentTab').addEventListener('click', function() {
@@ -1031,38 +955,37 @@
             document.getElementById('presentDays').textContent = totalPresent;
             document.getElementById('absentDays').textContent = totalClasses - totalPresent;
             
-            if (student.attendance) {
-                for (let sem in student.attendance) {
-                    const semesterDiv = document.createElement('div');
-                    semesterDiv.className = 'mb-6 p-4 bg-gray-50 rounded-xl';
-                    
-                    semesterDiv.innerHTML = `
-                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Semester ${sem} Attendance</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            ${Object.entries(student.attendance[sem]).map(([subject, data]) => {
-                                const percentage = calculateSubjectAttendance(data.present, data.total);
-                                const isLow = percentage < 70;
-                                return `
-                                    <div class="bg-white rounded-lg p-4 border-2 ${isLow ? 'border-red-200' : 'border-green-200'}">
-                                        <h5 class="font-medium text-gray-800 mb-2">${subject}</h5>
-                                        <div class="flex justify-between items-center mb-2">
-                                            <span class="text-gray-600 text-sm">Present: ${data.present}/${data.total}</span>
-                                            <span class="px-2 py-1 rounded text-xs font-medium ${isLow ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
-                                                ${percentage}%
-                                            </span>
-                                        </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div class="${isLow ? 'progress-bar-danger' : 'progress-bar'} h-2 rounded-full" style="width: ${percentage}%"></div>
-                                        </div>
-                                        ${isLow ? '<p class="text-red-600 text-xs mt-2">⚠️ Low Attendance</p>' : ''}
+            if (student.attendance && student.attendance[student.currentSemester]) {
+                const currentSem = student.currentSemester;
+                const semesterDiv = document.createElement('div');
+                semesterDiv.className = 'mb-6 p-4 bg-gray-50 rounded-xl';
+                
+                semesterDiv.innerHTML = `
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Semester ${currentSem} Attendance</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${Object.entries(student.attendance[currentSem]).map(([subject, data]) => {
+                            const percentage = calculateSubjectAttendance(data.present, data.total);
+                            const isLow = percentage < 70;
+                            return `
+                                <div class="bg-white rounded-lg p-4 border-2 ${isLow ? 'border-red-200' : 'border-green-200'}">
+                                    <h5 class="font-medium text-gray-800 mb-2">${subject}</h5>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-gray-600 text-sm">Present: ${data.present}/${data.total}</span>
+                                        <span class="px-2 py-1 rounded text-xs font-medium ${isLow ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                                            ${percentage}%
+                                        </span>
                                     </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    `;
-                    
-                    container.appendChild(semesterDiv);
-                }
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="${isLow ? 'progress-bar-danger' : 'progress-bar'} h-2 rounded-full" style="width: ${percentage}%"></div>
+                                    </div>
+                                    ${isLow ? '<p class="text-red-600 text-xs mt-2">⚠️ Low Attendance</p>' : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(semesterDiv);
             } else {
                 container.innerHTML = `
                     <div class="text-center py-8 text-gray-500">
@@ -1080,7 +1003,6 @@
             currentView = 'all';
             displayStudentsList();
             updateSystemStats();
-            updateNotificationBadge();
         }
 
         function showAllStudents() {
@@ -1273,7 +1195,7 @@
                 return;
             }
             
-            if (!dailyAttendanceData[date]) {
+            if (!dailyAttendanceData[date] || Object.keys(dailyAttendanceData[date]).length === 0) {
                 showErrorMessage('No attendance data to save.');
                 return;
             }
@@ -1282,46 +1204,73 @@
             attendanceRef.set(dailyAttendanceData[date])
                 .then(() => {
                     showSuccessMessage(`Daily attendance saved to database!`);
-                    
-                    const studentsWithAbsence = Object.keys(dailyAttendanceData[date]).filter(rollNo => {
-                        const subjectsAttended = Object.values(dailyAttendanceData[date][rollNo]).filter(p => p).length;
-                        const totalSubjects = Object.keys(dailyAttendanceData[date][rollNo]).length;
-                        return subjectsAttended < totalSubjects;
-                    });
-                    
-                    studentsWithAbsence.forEach(rollNo => {
-                        const student = studentsData[rollNo];
-                        const absentSubjects = Object.keys(dailyAttendanceData[date][rollNo]).filter(subject => !dailyAttendanceData[date][rollNo][subject]);
-                        const presentCount = Object.keys(dailyAttendanceData[date][rollNo]).length - absentSubjects.length;
-
-                        const notification = {
-                            id: Date.now() + Math.random(),
-                            rollNo: rollNo,
-                            studentName: student.name,
-                            type: 'daily_attendance',
-                            subType: (presentCount / Object.keys(dailyAttendanceData[date][rollNo]).length) * 100 < 70 ? 'low_daily' : 'normal_daily',
-                            message: `Dear Parent, your child ${student.name} (${rollNo}) was marked absent in the following subjects on ${new Date(date).toLocaleDateString()}: ${absentSubjects.join(', ')}`,
-                            parentContact: student.parentContact,
-                            date: date,
-                            formattedDate: new Date(date).toLocaleDateString(),
-                            presentCount: presentCount,
-                            totalSubjects: Object.keys(dailyAttendanceData[date][rollNo]).length,
-                            absentSubjects: absentSubjects,
-                            attendancePercentage: ((presentCount / Object.keys(dailyAttendanceData[date][rollNo]).length) * 100).toFixed(1),
-                            status: 'pending',
-                            createdAt: new Date().toLocaleString()
-                        };
-                        database.ref('notifications_outbound').push(notification);
-                    });
-                    
-                    updateSystemStats();
-                    updateNotificationBadge();
                 })
                 .catch(error => {
                     showErrorMessage('Error saving attendance: ' + error.message);
                 });
         }
+        
+        function sendDailyAttendanceSMS() {
+    const today = document.getElementById('dailyAttendanceDate').value;
+    const attendanceForToday = dailyAttendanceData[today];
 
+    if (!attendanceForToday) {
+        showErrorMessage("No attendance data for today to send.");
+        return;
+    }
+
+    // Find students who were absent today
+    const studentsWithAbsence = Object.keys(attendanceForToday).filter(rollNo => {
+        const subjectsAttended = Object.values(attendanceForToday[rollNo]).filter(p => p).length;
+        const totalSubjects = Object.keys(attendanceForToday[rollNo]).length;
+        return subjectsAttended < totalSubjects;
+    });
+
+    if (studentsWithAbsence.length === 0) {
+        showSuccessMessage("All students were present today. No attendance SMS needed.");
+        return;
+    }
+
+    const message = `This will send attendance alerts to the parents of ${studentsWithAbsence.length} students who were absent today. Are you sure you want to proceed?`;
+    showConfirmationMessage(message, () => {
+        studentsWithAbsence.forEach(rollNo => {
+            const student = studentsData[rollNo];
+            const absentSubjects = Object.keys(attendanceForToday[rollNo]).filter(subject => !attendanceForToday[rollNo][subject]);
+            const presentCount = Object.keys(attendanceForToday[rollNo]).length - absentSubjects.length;
+            const totalSubjects = Object.keys(attendanceForToday[rollNo]).length;
+            const attendancePercentage = ((presentCount / totalSubjects) * 100).toFixed(1);
+
+            const parentPhone = student.parentContact?.fatherPhone || student.parentContact?.motherPhone;
+
+            if (!parentPhone) return;
+
+            const cleanPhone = parentPhone.replace(/\s+/g, '').replace(/[^+\d]/g, '');
+
+            const alertMessage = `
+📅 DAILY ATTENDANCE ALERT
+Student: ${student.name} (${rollNo})
+Date: ${new Date(today).toLocaleDateString()}
+Present: ${presentCount}/${totalSubjects} (${attendancePercentage}%)
+Absent in: ${absentSubjects.join(', ')}
+
+Please ensure regular attendance.
+Best regards,
+Academic Office
+            `.trim();
+
+            // Save to Firebase → triggers cloud function
+            database.ref('alerts_to_send').push({
+                type: 'daily_attendance',
+                rollNo: rollNo,
+                to: cleanPhone,
+                body: alertMessage,
+                status: 'pending'
+            });
+        });
+
+        showSuccessMessage(`${studentsWithAbsence.length} attendance alerts queued. Messages will be sent via WhatsApp.`);
+    });
+}
         function loadAttendanceHistory() {
             const fromDate = document.getElementById('historyFromDate').value;
             const toDate = document.getElementById('historyToDate').value;
@@ -1414,288 +1363,59 @@
                 });
             });
         }
-
-      function checkLowAttendanceAndNotify() {
-    Object.keys(studentsData).forEach(rollNo => {
-        const student = studentsData[rollNo];
-        const attendance = parseFloat(calculateOverallAttendance(student));
-        const backlogs = calculateBacklogs(student);
-
-        if (attendance < 70 || backlogs > 0) {
-            createParentNotification(rollNo, attendance, backlogs);
-        }
-    });
-}
-        function createParentNotification(rollNo, attendance, backlogs) {
-    const student = studentsData[rollNo];
-    const currentDate = new Date().toLocaleDateString();
-
-    const existingNotification = notificationHistory.find(n =>
-        n.rollNo === rollNo && n.status === 'pending' && n.type !== 'daily_attendance'
-    );
-    if (existingNotification) return;
-
-    let message = `Academic Alert - Immediate Attention Required\n`;
-    message += `---------------------------------------------\n`;
-    message += `Student: ${student.name} (${rollNo})\n`;
-    message += `Date: ${currentDate}\n\n`;
-
-    if (attendance < 70) {
-        message += `⚠️ LOW ATTENDANCE: ${attendance}% (Below 70%)\n`;
-    }
-    if (backlogs > 0) {
-        message += `📚 BACKLOGS: ${backlogs} subject(s)\n`;
-    }
-
-    message += `\nPlease contact college administration urgently.\n`;
-    message += `Contact: +91XXXXXXXXXX`;
-
-    const notification = {
-        rollNo: rollNo,
-        studentName: student.name,
-        type: 'academic_alert',
-        subType: attendance < 70 ? 'low_attendance' : 'backlog',
-        message: message,
-        parentPhone: student.parentContact?.fatherPhone || student.parentContact?.motherPhone,
-        date: new Date().toISOString().split('T')[0],
-        attendance: attendance,
-        backlogs: backlogs,
-        status: 'pending',
-        createdAt: new Date().toLocaleString()
-    };
-
-    database.ref('notifications_outbound').push(notification)
-        .then(() => {
-            console.log("✅ Notification sent to Firebase:", rollNo);
-            notificationHistory.push(notification);
-            updateNotificationBadge();
-        })
-        .catch(err => {
-            console.error("❌ Failed to save notification:", err);
-            showErrorMessage("Could not send alert: " + err.message);
-        });
-}
+      
         function sendParentBacklogNotifications() {
-            const backlogStudents = Object.values(studentsData).filter(student => calculateBacklogs(student) > 0);
-            if (backlogStudents.length === 0) {
-                showSuccessMessage('No students with backlogs to send alerts to.');
-                return;
-            }
+    const backlogStudents = Object.values(studentsData).filter(student => calculateBacklogs(student) > 0);
 
-            const message = `This will send academic backlog alerts to the parents of ${backlogStudents.length} students. Are you sure you want to proceed?`;
-            showConfirmationMessage(message, () => {
-                backlogStudents.forEach(student => {
-                    const notification = {
-                        rollNo: student.rollNumber,
-                        type: 'backlog_alert',
-                        message: `Academic Alert: Your child ${student.name} has ${calculateBacklogs(student)} backlog(s). Please contact the academic office.`,
-                        parentPhone: student.parentContact.fatherPhone,
-                        status: 'pending',
-                        createdAt: new Date().toLocaleString()
-                    };
-                    database.ref('notifications_outbound').push(notification);
-                });
-                showSuccessMessage(`${backlogStudents.length} backlog alerts queued. A backend service will send the messages.`);
-            });
-        }
-        
-        function showSendAttendanceSMSModal() {
-            document.getElementById('sendAttendanceSMSModal').classList.remove('hidden');
-        }
+    if (backlogStudents.length === 0) {
+        showSuccessMessage('No students with backlogs to send alerts to.');
+        return;
+    }
 
-        function closeSendAttendanceSMSModal() {
-            document.getElementById('sendAttendanceSMSModal').classList.add('hidden');
-        }
+    backlogStudents.forEach(student => {
+        const backlogs = calculateBacklogs(student);
+        const parentPhone = student.parentContact?.fatherPhone || student.parentContact?.motherPhone;
 
-        function sendDailyAttendanceSMS() {
-            const today = document.getElementById('dailyAttendanceDate').value;
-            const attendanceForToday = dailyAttendanceData[today];
+        if (!parentPhone) return;
 
-            if (!attendanceForToday) {
-                closeSendAttendanceSMSModal();
-                showErrorMessage("No attendance data for today to send.");
-                return;
-            }
+        // Clean phone number
+        const cleanPhone = parentPhone.replace(/\s+/g, '').replace(/[^+\d]/g, '');
 
-            const studentsWithAbsence = Object.keys(attendanceForToday).filter(rollNo => {
-                const subjectsAttended = Object.values(attendanceForToday[rollNo]).filter(p => p).length;
-                const totalSubjects = Object.keys(attendanceForToday[rollNo]).length;
-                return subjectsAttended < totalSubjects;
-            });
+        const message = `
+📚 BACKLOG ALERT
+Student: ${student.name} (${student.rollNumber})
+Backlogs: ${backlogs} subject(s)
 
-            if (studentsWithAbsence.length === 0) {
-                closeSendAttendanceSMSModal();
-                showSuccessMessage("All students were present today. No attendance SMS needed.");
-                return;
-            }
+Please contact college urgently.
+Academic Office
+        `.trim();
 
-            studentsWithAbsence.forEach(rollNo => {
-                const student = studentsData[rollNo];
-                const absentSubjects = Object.keys(attendanceForToday[rollNo]).filter(subject => !attendanceForToday[rollNo][subject]);
-                const presentCount = Object.keys(attendanceForToday[rollNo]).length - absentSubjects.length;
-                const attendancePercentage = ((presentCount / Object.keys(attendanceForToday[rollNo]).length) * 100).toFixed(1);
+        // Save to Firebase → triggers WhatsApp
+        database.ref('alerts_to_send').push({
+            type: 'backlog_alert',
+            rollNo: student.rollNumber,
+            to: cleanPhone,
+            body: message,
+            status: 'pending'
+        });
+    });
 
-                const notification = {
-                    rollNo: rollNo,
-                    studentName: student.name,
-                    type: 'daily_attendance_alert',
-                    message: `Daily Attendance Report: Your child ${student.name} (${rollNo}) was absent in ${absentSubjects.join(', ')} on ${new Date(today).toLocaleDateString()}. Attendance today: ${attendancePercentage}%.`,
-                    parentPhone: student.parentContact.fatherPhone,
-                    status: 'pending',
-                    createdAt: new Date().toLocaleString()
-                };
-                
-                database.ref('notifications_outbound').push(notification);
-            });
-            closeSendAttendanceSMSModal();
-            showSuccessMessage(`${studentsWithAbsence.length} attendance alerts for today's absences have been queued.`);
-        }
-
+    showSuccessMessage(`${backlogStudents.length} backlog alerts queued. Messages will be sent via WhatsApp.`);
+}
         function updateNotificationBadge() {
-            const badge = document.getElementById('notificationBadge');
-            const notificationsRef = database.ref('notifications_outbound');
-            notificationsRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const pendingCount = Object.values(data).filter(n => n.status === 'pending').length;
-                    if (pendingCount > 0) {
-                        badge.textContent = pendingCount;
-                        badge.classList.remove('hidden');
-                    } else {
-                        badge.classList.add('hidden');
-                    }
-                } else {
-                    badge.classList.add('hidden');
-                }
-            });
+            // This function is no longer needed since the Notifications tab was removed.
         }
 
         function displayNotifications() {
-            const container = document.getElementById('notificationsList');
-            container.innerHTML = '';
-            
-            const notificationsRef = database.ref('notifications_outbound');
-            notificationsRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                container.innerHTML = '';
-                if (!data) {
-                    container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-bell-slash text-4xl mb-4"></i><p class="text-lg">No notifications yet</p></div>`;
-                    return;
-                }
-
-                const allNotifications = Object.values(data).sort((a, b) => new Date(b.createdAt || a.createdAt) - new Date(a.createdAt || b.createdAt));
-
-                const filterTabs = document.createElement('div');
-                filterTabs.className = 'flex space-x-2 mb-6';
-                filterTabs.innerHTML = `
-                    <button onclick="filterNotifications('all', this)" id="filterAll" class="px-4 py-2 rounded-xl text-sm font-medium bg-purple-600 text-white">
-                        All (${allNotifications.length})
-                    </button>
-                    <button onclick="filterNotifications('daily', this)" id="filterDaily" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300">
-                        Daily Reports (${allNotifications.filter(n => n.type === 'daily_attendance_alert').length})
-                    </button>
-                    <button onclick="filterNotifications('backlog', this)" id="filterAcademic" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300">
-                        Backlog Alerts (${allNotifications.filter(n => n.type === 'backlog_alert').length})
-                    </button>
-                    <button onclick="filterNotifications('pending', this)" id="filterPending" class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300">
-                        Pending (${allNotifications.filter(n => n.status === 'pending').length})
-                    </button>
-                `;
-                container.appendChild(filterTabs);
-
-                const notificationsContainer = document.createElement('div');
-                notificationsContainer.id = 'notificationsContainer';
-                container.appendChild(notificationsContainer);
-
-                displayFilteredNotifications(allNotifications, 'all');
-            });
+            // This function is no longer needed since the Notifications tab was removed.
         }
 
         function filterNotifications(filter, buttonElement) {
-            document.querySelectorAll('[id^="filter"]').forEach(btn => {
-                btn.className = 'px-4 py-2 rounded-xl text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300';
-            });
-            buttonElement.className = 'px-4 py-2 rounded-xl text-sm font-medium bg-purple-600 text-white';
-
-            database.ref('notifications_outbound').once('value').then((snapshot) => {
-                const data = snapshot.val();
-                const allNotifications = data ? Object.values(data).sort((a, b) => new Date(b.createdAt || a.createdAt) - new Date(a.createdAt || b.createdAt)) : [];
-                
-                let filteredNotifications = allNotifications;
-                if (filter === 'daily') {
-                    filteredNotifications = allNotifications.filter(n => n.type === 'daily_attendance_alert');
-                } else if (filter === 'backlog') {
-                    filteredNotifications = allNotifications.filter(n => n.type === 'backlog_alert');
-                } else if (filter === 'pending') {
-                    filteredNotifications = allNotifications.filter(n => n.status === 'pending');
-                }
-                
-                displayFilteredNotifications(filteredNotifications, filter);
-            });
+            // This function is no longer needed since the Notifications tab was removed.
         }
 
         function displayFilteredNotifications(notifications, filter) {
-            const container = document.getElementById('notificationsContainer');
-            container.innerHTML = '';
-            
-            if (notifications.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-bell-slash text-4xl mb-4"></i><p class="text-lg">No ${filter} notifications found</p></div>`;
-                return;
-            }
-            
-            notifications.forEach(notification => {
-                const notificationDiv = document.createElement('div');
-                let borderColor = 'border-gray-500';
-                let typeLabel = 'General';
-                let typeIcon = 'fas fa-bell';
-                
-                if (notification.type === 'daily_attendance_alert') {
-                    borderColor = notification.subType === 'low_daily' ? 'border-red-500' : 'border-blue-500';
-                    typeLabel = 'Daily Attendance Report';
-                    typeIcon = 'fas fa-calendar-day';
-                } else if (notification.type === 'backlog_alert') {
-                    borderColor = 'border-orange-500';
-                    typeLabel = 'Backlog Alert';
-                    typeIcon = 'fas fa-exclamation-triangle';
-                }
-                
-                notificationDiv.className = `p-4 bg-gray-50 rounded-xl mb-4 border-l-4 ${borderColor}`;
-                
-                notificationDiv.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h5 class="font-semibold text-gray-800">${notification.studentName} (${notification.rollNo})</h5>
-                            <p class="text-sm text-gray-600">
-                                <i class="${typeIcon} mr-1"></i>${typeLabel}
-                            </p>
-                            ${notification.type === 'daily_attendance_alert' ? `
-                                <p class="text-xs text-gray-500 mt-1">
-                                    ${new Date(notification.date).toLocaleDateString()} | Present: ${notification.presentCount}/${notification.totalSubjects} (${notification.attendancePercentage}%)
-                                </p>
-                            ` : ''}
-                        </div>
-                        <div class="text-right">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium ${notification.status === 'sent' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                                ${notification.status === 'sent' ? 'Sent' : 'Pending'}
-                            </span>
-                            <p class="text-xs text-gray-500 mt-1">${notification.createdAt}</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-3 rounded-lg mb-3 border border-gray-200">
-                        <pre class="text-sm text-gray-700 whitespace-pre-wrap">${notification.message}</pre>
-                    </div>
-                    <div class="flex justify-between items-center text-sm text-gray-600">
-                        <div>
-                            <p><i class="fas fa-phone mr-1 text-purple-600"></i>Parent: ${notification.parentPhone || 'N/A'}</p>
-                        </div>
-                        <div class="text-right">
-                            ${notification.sentDate ? `<p><i class="fas fa-check-circle mr-1 text-green-600"></i>Sent: ${notification.sentDate}</p>` : ''}
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(notificationDiv);
-            });
+            // This function is no longer needed since the Notifications tab was removed.
         }
 
         function displayStudentsList() {
@@ -1849,11 +1569,8 @@
             const avgCGPA = studentCount > 0 ? (totalCGPA / studentCount).toFixed(2) : '0.00';
             
             document.getElementById('totalStudents').textContent = totalStudents;
-            document.getElementById('totalStudentsCount').textContent = totalStudents;
             document.getElementById('backlogStudentsCount').textContent = backlogStudents;
-            document.getElementById('backlogCount').textContent = backlogStudents;
             document.getElementById('lowAttendanceCount').textContent = lowAttendanceStudents;
-            document.getElementById('lowAttendanceSystemCount').textContent = lowAttendanceStudents;
             document.getElementById('avgCGPA').textContent = avgCGPA;
         }
 
@@ -1867,25 +1584,27 @@
         }
 
         function editStudent(rollNo) {
-    const student = studentsData[rollNo];
-    document.getElementById('modalTitle').textContent = 'Edit Student';
-    document.getElementById('rollNumber').value = student.rollNumber;
-    document.getElementById('studentNameInput').value = student.name;
-    document.getElementById('program').value = student.program;
-    document.getElementById('branch').value = student.branch;
-    document.getElementById('currentSem').value = student.currentSemester;
-
-    // ✅ Set parent info
-    document.getElementById('fatherName').value = student.parentContact?.fatherName || '';
-    document.getElementById('fatherPhone').value = student.parentContact?.fatherPhone || '';
-    document.getElementById('motherName').value = student.parentContact?.motherName || '';
-    document.getElementById('motherPhone').value = student.parentContact?.motherPhone || '';
-
-    // ✅ Set password
-    document.getElementById('studentPassword').value = student.password || 'password123';
-
-    document.getElementById('studentModal').classList.remove('hidden');
-}
+            const student = studentsData[rollNo];
+            if (!student) {
+                showErrorMessage('Student not found in database.');
+                return;
+            }
+            document.getElementById('modalTitle').textContent = 'Edit Student';
+            document.getElementById('studentForm').dataset.oldRollNumber = rollNo;
+            document.getElementById('rollNumber').value = student.rollNumber;
+            document.getElementById('rollNumber').disabled = false; 
+            document.getElementById('studentNameInput').value = student.name;
+            document.getElementById('program').value = student.program || 'B.Tech';
+            document.getElementById('branch').value = student.branch;
+            document.getElementById('currentSem').value = student.currentSemester;
+            document.getElementById('studentPassword').value = student.password || '';
+            document.getElementById('fatherName').value = student.parentContact?.fatherName || '';
+            document.getElementById('fatherPhone').value = student.parentContact?.fatherPhone || '';
+            document.getElementById('motherName').value = student.parentContact?.motherName || '';
+            document.getElementById('motherPhone').value = student.parentContact?.motherPhone || '';
+            document.getElementById('studentModal').classList.remove('hidden');
+            generateSemesterInputs(student);
+        }
 
         function generateSemesterInputs(student = null) {
             const container = document.getElementById('semesterMarks');
@@ -1977,41 +1696,42 @@
             const program = document.getElementById('program').value;
             const branch = document.getElementById('branch').value;
             const currentSem = parseInt(document.getElementById('currentSem').value);
-            const password = document.getElementById('studentPassword').value || 'password123';
-            
-            const studentData = {
-                name: name,
-                rollNumber: rollNumber,
-                program: program,
-                branch: branch,
-                currentSemester: currentSem,
-                password: password,
-                parentContact: {
-                    fatherName: document.getElementById('fatherName').value,
-                    fatherPhone: document.getElementById('fatherPhone').value,
-                    motherName: document.getElementById('motherName').value,
-                    motherPhone: document.getElementById('motherPhone').value
-                },
-                semesters: {},
-                attendance: {}
-            };
+            const password = document.getElementById('studentPassword').value || studentsData[rollNumber]?.password || 'password123';
             
             const oldRollNumber = document.getElementById('studentForm').dataset.oldRollNumber;
+            const isEditing = !!oldRollNumber;
+            
+            // Get existing data to merge with new data
+            const existingStudentData = isEditing ? studentsData[oldRollNumber] : { semesters: {}, attendance: {} };
+            
+            const studentData = {
+    name: name,
+    rollNumber: rollNumber,
+    program: program,
+    branch: branch,
+    currentSemester: currentSem,
+    password: document.getElementById('studentPassword').value || 'password123', // ✅ Add this line
+    parentContact: {
+        fatherName: document.getElementById('fatherName').value,
+        fatherPhone: document.getElementById('fatherPhone').value,
+        motherName: document.getElementById('motherName').value,
+        motherPhone: document.getElementById('motherPhone').value
+    },
+    semesters: {},
+    attendance: {}
+};
 
-            if (oldRollNumber && oldRollNumber !== rollNumber) {
+            // Remove old entry if roll number changed
+            if (isEditing && oldRollNumber !== rollNumber) {
                 database.ref('students/' + oldRollNumber).remove();
             }
 
+            // Collect and merge semester data
             for (let sem = 1; sem <= currentSem; sem++) {
                 const semContainer = document.getElementById(`sem${sem}Subjects`);
                 if (semContainer) {
                     const subjectDivs = semContainer.children;
-                    if (!studentData.semesters[sem]) {
-                        studentData.semesters[sem] = { subjects: {} };
-                    }
-                    if (!studentData.attendance[sem]) {
-                        studentData.attendance[sem] = {};
-                    }
+                    const newSemesterSubjects = {};
                     
                     for (let i = 0; i < subjectDivs.length; i++) {
                         const inputs = subjectDivs[i].querySelectorAll('input');
@@ -2019,20 +1739,17 @@
                         const marks = parseInt(inputs[1].value);
                         
                         if (subjectName && marks !== '') {
-                            studentData.semesters[sem].subjects[subjectName] = {
+                            newSemesterSubjects[subjectName] = {
                                 credits: getSubjectCredits(subjectName),
                                 marks: marks
                             };
-                            
-                            if (!studentData.attendance[sem][subjectName]) {
-                                studentData.attendance[sem][subjectName] = { present: 0, total: 0 };
-                            }
                         }
                     }
+                    newStudentData.semesters[sem] = { subjects: newSemesterSubjects };
                 }
             }
             
-            database.ref('students/' + rollNumber).set(studentData)
+            database.ref('students/' + rollNumber).set(newStudentData)
                 .then(() => {
                     closeStudentModal();
                     showSuccessMessage('Student saved successfully!');
@@ -2234,79 +1951,12 @@
                 dailyAttendanceData = snapshot.val() || {};
             });
             
-            database.ref('notifications').on('value', (snapshot) => {
-                notificationHistory = Object.values(snapshot.val() || {});
-            });
-
             database.ref('notifications_outbound').on('value', (snapshot) => {
                 // This listener is for a potential Cloud Function to send SMS.
                 // The client-side code will not handle this, but it's good to monitor.
                 // The actual SMS sending logic would be in a separate, server-side function.
             });
             
-            updateNotificationBadge();
-
-            database.ref('students').once('value').then(snapshot => {
-                if (!snapshot.exists()) {
-                    database.ref('students').set({
-                        '21CS001': {
-                            name: 'Rahul Sharma', rollNumber: '21CS001', program: 'B.Tech', branch: 'Computer Science Engineering', currentSemester: 4, password: 'password123',
-                            parentContact: { fatherName: 'Suresh Sharma', fatherPhone: '+919876543210', motherName: 'Priya Sharma', motherPhone: '+919876543211' },
-                            semesters: {
-                                1: { subjects: { 'Mathematics-I': { marks: 85, credits: 4 }, 'Physics': { marks: 78, credits: 3 }, 'Chemistry': { marks: 82, credits: 3 }, 'Programming Fundamentals': { marks: 92, credits: 4 }, 'English Communication': { marks: 75, credits: 2 }}},
-                                2: { subjects: { 'Mathematics-II': { marks: 88, credits: 4 }, 'Data Structures': { marks: 90, credits: 4 }, 'Digital Logic Design': { marks: 85, credits: 3 }, 'Computer Graphics': { marks: 87, credits: 3 }, 'Technical Communication': { marks: 80, credits: 2 }}},
-                                3: { subjects: { 'Mathematics-III': { marks: 89, credits: 4 }, 'Database Management Systems': { marks: 86, credits: 4 }, 'Operating Systems': { marks: 84, credits: 3 }, 'Computer Networks': { marks: 91, credits: 3 }, 'Object Oriented Programming': { marks: 88, credits: 3 }}},
-                                4: { subjects: { 'Algorithms Analysis': { marks: 92, credits: 4 }, 'Software Engineering': { marks: 85, credits: 4 }, 'Web Technologies': { marks: 87, credits: 3 }, 'Computer Architecture': { marks: 89, credits: 3 }, 'Discrete Mathematics': { marks: 83, credits: 2 }}}
-                            },
-                            attendance: {
-                                1: { 'Mathematics-I': { present: 45, total: 50 }, 'Physics': { present: 42, total: 50 }},
-                                2: { 'Mathematics-II': { present: 44, total: 50 }, 'Data Structures': { present: 49, total: 50 }},
-                                3: { 'Mathematics-III': { present: 46, total: 50 }, 'Database Management Systems': { present: 47, total: 50 }},
-                                4: { 'Algorithms Analysis': { present: 48, total: 50 }, 'Software Engineering': { present: 46, total: 50 }}
-                            }
-                        },
-                        '21CS002': {
-                            name: 'Priya Patel', rollNumber: '21CS002', program: 'B.Tech', branch: 'Computer Science Engineering', currentSemester: 4, password: 'password123',
-                            parentContact: { fatherName: 'Rajesh Patel', fatherPhone: '+919876543212', motherName: 'Meera Patel', motherPhone: '+919876543213' },
-                            semesters: {
-                                1: { subjects: { 'Mathematics-I': { marks: 92, credits: 4 }, 'Physics': { marks: 88, credits: 3 }, 'Chemistry': { marks: 90, credits: 3 }, 'Programming Fundamentals': { marks: 95, credits: 4 }, 'English Communication': { marks: 85, credits: 2 }}},
-                                2: { subjects: { 'Mathematics-II': { marks: 94, credits: 4 }, 'Data Structures': { marks: 96, credits: 4 }, 'Digital Logic Design': { marks: 89, credits: 3 }, 'Computer Graphics': { marks: 91, credits: 3 }, 'Technical Communication': { marks: 87, credits: 2 }}},
-                                3: { subjects: { 'Mathematics-III': { marks: 93, credits: 4 }, 'Database Management Systems': { marks: 97, credits: 4 }, 'Operating Systems': { marks: 90, credits: 3 }, 'Computer Networks': { marks: 94, credits: 3 }, 'Object Oriented Programming': { marks: 92, credits: 3 }}},
-                                4: { subjects: { 'Algorithms Analysis': { marks: 98, credits: 4 }, 'Software Engineering': { marks: 95, credits: 4 }, 'Web Technologies': { marks: 93, credits: 3 }, 'Computer Architecture': { marks: 96, credits: 3 }, 'Discrete Mathematics': { marks: 89, credits: 2 }}}
-                            },
-                            attendance: {
-                                1: { 'Mathematics-I': { present: 49, total: 50 }, 'Physics': { present: 48, total: 50 }},
-                                2: { 'Mathematics-II': { present: 48, total: 50 }, 'Data Structures': { present: 50, total: 50 }},
-                                3: { 'Mathematics-III': { present: 49, total: 50 }, 'Database Management Systems': { present: 50, total: 50 }},
-                                4: { 'Algorithms Analysis': { present: 50, total: 50 }, 'Software Engineering': { present: 49, total: 50 }}
-                            }
-                        },
-                        '21CS003': {
-                            name: 'Amit Kumar', rollNumber: '21CS003', program: 'B.Tech', branch: 'Computer Science Engineering', currentSemester: 4, password: 'password123',
-                            parentContact: { fatherName: 'Vijay Kumar', fatherPhone: '+919876543214', motherName: 'Sunita Kumar', motherPhone: '+919876543215' },
-                            semesters: {
-                                1: { subjects: { 'Mathematics-I': { marks: 65, credits: 4 }, 'Physics': { marks: 58, credits: 3 }, 'Chemistry': { marks: 62, credits: 3 }, 'Programming Fundamentals': { marks: 72, credits: 4 }, 'English Communication': { marks: 55, credits: 2 }}},
-                                2: { subjects: { 'Mathematics-II': { marks: 68, credits: 4 }, 'Data Structures': { marks: 70, credits: 4 }, 'Digital Logic Design': { marks: 65, credits: 3 }, 'Computer Graphics': { marks: 67, credits: 3 }, 'Technical Communication': { marks: 60, credits: 2 }}},
-                                3: { subjects: { 'Mathematics-III': { marks: 35, credits: 4 }, 'Database Management Systems': { marks: 66, credits: 4 }, 'Operating Systems': { marks: 64, credits: 3 }, 'Computer Networks': { marks: 71, credits: 3 }, 'Object Oriented Programming': { marks: 68, credits: 3 }}},
-                                4: { subjects: { 'Algorithms Analysis': { marks: 72, credits: 4 }, 'Software Engineering': { marks: 65, credits: 4 }, 'Web Technologies': { marks: 67, credits: 3 }, 'Computer Architecture': { marks: 69, credits: 3 }, 'Discrete Mathematics': { marks: 38, credits: 2 }}}
-                            },
-                            attendance: {
-                                1: { 'Mathematics-I': { present: 32, total: 50 }, 'Physics': { present: 30, total: 50 }},
-                                2: { 'Mathematics-II' : { present: 34, total: 50 }, 'Data Structures': { present: 36, total: 50 }},
-                                3: { 'Mathematics-III': { present: 33, total: 50 }, 'Database Management Systems': { present: 37, total: 50 }},
-                                4: { 'Algorithms Analysis': { present: 38, total: 50 }, 'Software Engineering': { present: 36, total: 50 }}
-                            }
-                        }
-                    });
-                }
-            });
-            database.ref('admins').set({
-                'srms': {
-                    name: 'System Administrator',
-                    adminId: 'srms',
-                    password: 'srms@2468'
-                }
-            });
             isDataLoaded = true;
         });
     </script>
