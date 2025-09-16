@@ -5,82 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-
-    // === Auto-SMS: Check Low Attendance & Backlogs ===
-    function checkLowAttendanceAndNotify() {
-        Object.keys(studentsData).forEach(rollNo => {
-            const student = studentsData[rollNo];
-            const attendance = parseFloat(calculateOverallAttendance(student));
-            const backlogs = calculateBacklogs(student);
-
-            const existingNotification = notificationHistory.find(n => 
-                n.rollNo === rollNo && n.status === 'pending'
-            );
-
-            if (!existingNotification && (attendance < 70 || backlogs > 0)) {
-                const currentDate = new Date().toISOString().split('T')[0];
-                const message = `
-Academic Alert - Immediate Attention Required
----------------------------------------------
-Student: ${student.name} (${rollNo})
-Date: ${currentDate}
-
-${attendance < 70 ? `⚠️ LOW ATTENDANCE: ${attendance}% (Below 70%)` : ''}
-${backlogs > 0 ? `📚 BACKLOGS: ${backlogs} subject(s)` : ''}
-
-Please contact college administration urgently.
-Contact: +91-XXXXXXXXXX
-                `.trim();
-
-                const notification = {
-                    id: Date.now(),
-                    rollNo: rollNo,
-                    studentName: student.name,
-                    type: 'academic_alert',
-                    subType: attendance < 70 ? 'low_attendance' : 'backlog',
-                    message: message,
-                    parentPhone: student.parentContact?.fatherPhone || student.parentContact?.motherPhone,
-                    date: currentDate,
-                    attendance: attendance,
-                    backlogs: backlogs,
-                    status: 'pending',
-                    createdAt: new Date().toLocaleString()
-                };
-
-                database.ref('notifications_outbound').push(notification)
-                    .then(() => {
-                        console.log("Notification saved for", rollNo);
-                        notificationHistory.push(notification);
-                    })
-                    .catch(err => {
-                        console.error("Failed to save notification:", err);
-                    });
-            }
-        });
-
-        updateNotificationBadge();
-    }
-
-    // === Call Auto-Check After Loading Data ===
-    window.addEventListener('load', function() {
-        database.ref('students').on('value', (snapshot) => {
-            studentsData = snapshot.val() || {};
-            checkLowAttendanceAndNotify();
-            if (isAdmin) {
-                displayStudentsList();
-                updateSystemStats();
-            } else if (currentUser) {
-                showStudentDashboard();
-            }
-        });
-
-        database.ref('admins').on('value', (snapshot) => {
-            adminsData = snapshot.val() || {};
-        });
-    });
-</script>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -691,8 +615,8 @@ Contact: +91-XXXXXXXXXX
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -708,23 +632,6 @@ Contact: +91-XXXXXXXXXX
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-
-        // === Success & Error Message Functions ===
-    function showSuccessMessage(message) {
-        const successDiv = document.createElement('div');
-        successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
-        successDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
-        document.body.appendChild(successDiv);
-        setTimeout(() => successDiv.remove(), 3000);
-    }
-
-    function showErrorMessage(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
-        document.body.appendChild(errorDiv);
-        setTimeout(() => errorDiv.remove(), 5000);
-    }
 
         let studentsData = {};
         let adminsData = {};
@@ -1357,75 +1264,9 @@ Contact: +91-XXXXXXXXXX
             loadDailyAttendanceStudents(date, semester, subjects, student.program, student.branch);
         }
 
-        function markAllPresentDaily() {
-            const date = document.getElementById('dailyAttendanceDate').value;
-            const semester = document.getElementById('dailyAttendanceSemester').value;
-            const program = document.getElementById('dailyAttendanceProgram').value;
-            const branch = document.getElementById('dailyAttendanceBranch').value;
-
-            if (!program || !branch || !semester || !date) {
-                showErrorMessage('Please select Program, Branch, Semester, and Date.');
-                return;
-            }
-
-            const subjects = curriculumTemplates[branch][semester] || [];
-            
-            if (!dailyAttendanceData[date]) {
-                dailyAttendanceData[date] = {};
-            }
-            
-            for (let rollNo in studentsData) {
-                const student = studentsData[rollNo];
-                if (student.program === program && student.branch === branch && student.currentSemester >= parseInt(semester)) {
-                    if (!dailyAttendanceData[date][rollNo]) {
-                        dailyAttendanceData[date][rollNo] = {};
-                    }
-                    subjects.forEach(subject => {
-                        dailyAttendanceData[date][rollNo][subject] = true;
-                    });
-                }
-            }
-            
-            loadDailyAttendanceStudents(date, semester, subjects, program, branch);
-        }
-
-        function markAllAbsentDaily() {
-            const date = document.getElementById('dailyAttendanceDate').value;
-            const semester = document.getElementById('dailyAttendanceSemester').value;
-            const program = document.getElementById('dailyAttendanceProgram').value;
-            const branch = document.getElementById('dailyAttendanceBranch').value;
-
-            if (!program || !branch || !semester || !date) {
-                showErrorMessage('Please select Program, Branch, Semester, and Date.');
-                return;
-            }
-            
-            const subjects = curriculumTemplates[branch][semester] || [];
-            
-            if (!dailyAttendanceData[date]) {
-                dailyAttendanceData[date] = {};
-            }
-            
-            for (let rollNo in studentsData) {
-                const student = studentsData[rollNo];
-                if (student.program === program && student.branch === branch && student.currentSemester >= parseInt(semester)) {
-                    if (!dailyAttendanceData[date][rollNo]) {
-                        dailyAttendanceData[date][rollNo] = {};
-                    }
-                    subjects.forEach(subject => {
-                        dailyAttendanceData[date][rollNo][subject] = false;
-                    });
-                }
-            }
-            
-            loadDailyAttendanceStudents(date, semester, subjects, program, branch);
-        }
-
         function saveDailyAttendance() {
             const date = document.getElementById('dailyAttendanceDate').value;
             const semester = document.getElementById('dailyAttendanceSemester').value;
-                const subjects = ['Mathematics-I', 'Physics']; // Replace with dynamic list
-
             
             if (!date || !semester) {
                 showErrorMessage('Please select date and semester.');
@@ -1436,51 +1277,6 @@ Contact: +91-XXXXXXXXXX
                 showErrorMessage('No attendance data to save.');
                 return;
             }
-              // Process each student
-    Object.keys(dailyAttendanceData[date]).forEach(rollNo => {
-        const student = studentsData[rollNo];
-        const subjectData = dailyAttendanceData[date][rollNo];
-        const presentCount = Object.values(subjectData).filter(p => p).length;
-        const totalSubjects = Object.keys(subjectData).length;
-        const absentSubjects = Object.keys(subjectData).filter(subj => !subjectData[subj]);
-
-        // Create daily notification if absent
-        if (absentSubjects.length > 0) {
-            const message = `
-Daily Attendance Report
------------------------
-Student: ${student.name} (${rollNo})
-Date: ${new Date(date).toLocaleDateString()}
-Present: ${presentCount}/${totalSubjects}
-Absent in: ${absentSubjects.join(', ')}
-
-Please ensure regular attendance.
-Best regards,
-Academic Office
-            `.trim();
-
-            const notification = {
-                rollNo: rollNo,
-                studentName: student.name,
-                type: 'daily_attendance',
-                message: message,
-                parentPhone: student.parentContact?.fatherPhone || student.parentContact?.motherPhone,
-                date: date,
-                presentCount: presentCount,
-                totalSubjects: totalSubjects,
-                absentSubjects: absentSubjects,
-                status: 'pending',
-                createdAt: new Date().toLocaleString()
-            };
-
-            // ✅ Push to Firebase → triggers SMS
-            database.ref('notifications_outbound').push(notification);
-        }
-    });
-
-    showSuccessMessage(`Attendance saved! Alerts queued for absent students.`);
-    updateNotificationBadge();
-}
             
             const attendanceRef = database.ref('attendance/' + date);
             attendanceRef.set(dailyAttendanceData[date])
@@ -1524,6 +1320,7 @@ Academic Office
                 .catch(error => {
                     showErrorMessage('Error saving attendance: ' + error.message);
                 });
+        }
 
         function loadAttendanceHistory() {
             const fromDate = document.getElementById('historyFromDate').value;
@@ -1633,7 +1430,6 @@ Academic Office
     const student = studentsData[rollNo];
     const currentDate = new Date().toLocaleDateString();
 
-    // Check for existing pending alert
     const existingNotification = notificationHistory.find(n =>
         n.rollNo === rollNo && n.status === 'pending' && n.type !== 'daily_attendance'
     );
@@ -1668,11 +1464,9 @@ Academic Office
         createdAt: new Date().toLocaleString()
     };
 
-    // ✅ Save to Firebase → triggers cloud function
     database.ref('notifications_outbound').push(notification)
         .then(() => {
             console.log("✅ Notification sent to Firebase:", rollNo);
-            // Also add to local history
             notificationHistory.push(notification);
             updateNotificationBadge();
         })
@@ -2068,29 +1862,30 @@ Academic Office
             document.getElementById('studentForm').reset();
             document.getElementById('studentModal').classList.remove('hidden');
             document.getElementById('rollNumber').disabled = false;
+            delete document.getElementById('studentForm').dataset.oldRollNumber;
             generateSemesterInputs();
         }
 
         function editStudent(rollNo) {
-            const student = studentsData[rollNo];
-            if (!student) {
-                showErrorMessage('Student not found in database.');
-                return;
-            }
-            document.getElementById('modalTitle').textContent = 'Edit Student';
-            document.getElementById('rollNumber').value = student.rollNumber;
-            document.getElementById('rollNumber').disabled = false; 
-            document.getElementById('studentNameInput').value = student.name;
-            document.getElementById('program').value = student.program || 'B.Tech';
-            document.getElementById('branch').value = student.branch;
-            document.getElementById('currentSem').value = student.currentSemester;
-            document.getElementById('fatherName').value = student.parentContact?.fatherName || '';
-            document.getElementById('fatherPhone').value = student.parentContact?.fatherPhone || '';
-            document.getElementById('motherName').value = student.parentContact?.motherName || '';
-            document.getElementById('motherPhone').value = student.parentContact?.motherPhone || '';
-            document.getElementById('studentModal').classList.remove('hidden');
-            generateSemesterInputs(student);
-        }
+    const student = studentsData[rollNo];
+    document.getElementById('modalTitle').textContent = 'Edit Student';
+    document.getElementById('rollNumber').value = student.rollNumber;
+    document.getElementById('studentNameInput').value = student.name;
+    document.getElementById('program').value = student.program;
+    document.getElementById('branch').value = student.branch;
+    document.getElementById('currentSem').value = student.currentSemester;
+
+    // ✅ Set parent info
+    document.getElementById('fatherName').value = student.parentContact?.fatherName || '';
+    document.getElementById('fatherPhone').value = student.parentContact?.fatherPhone || '';
+    document.getElementById('motherName').value = student.parentContact?.motherName || '';
+    document.getElementById('motherPhone').value = student.parentContact?.motherPhone || '';
+
+    // ✅ Set password
+    document.getElementById('studentPassword').value = student.password || 'password123';
+
+    document.getElementById('studentModal').classList.remove('hidden');
+}
 
         function generateSemesterInputs(student = null) {
             const container = document.getElementById('semesterMarks');
@@ -2201,11 +1996,12 @@ Academic Office
                 attendance: {}
             };
             
-            if (studentsData[rollNumber]) {
-                studentData.semesters = { ...studentsData[rollNumber].semesters };
-                studentData.attendance = { ...studentsData[rollNumber].attendance };
+            const oldRollNumber = document.getElementById('studentForm').dataset.oldRollNumber;
+
+            if (oldRollNumber && oldRollNumber !== rollNumber) {
+                database.ref('students/' + oldRollNumber).remove();
             }
-            
+
             for (let sem = 1; sem <= currentSem; sem++) {
                 const semContainer = document.getElementById(`sem${sem}Subjects`);
                 if (semContainer) {
@@ -2251,34 +2047,18 @@ Academic Office
         }
 
         function deleteStudent(rollNo) {
-    const student = studentsData[rollNo];
-    if (!student) {
-        showErrorMessage('Student not found in database.');
-        return;
-    }
+            const message = `Are you sure you want to delete student ${studentsData[rollNo].name} (${rollNo})? This action cannot be undone.`;
+            showConfirmationMessage(message, (confirmedRollNo) => {
+                database.ref('students/' + confirmedRollNo).remove()
+                    .then(() => {
+                        showSuccessMessage('Student deleted successfully!');
+                    })
+                    .catch(error => {
+                        showErrorMessage('Error deleting student: ' + error.message);
+                    });
+            }, rollNo);
+        }
 
-    const confirmation = `Are you sure you want to delete ${student.name} (${rollNo})? This action cannot be undone.`;
-
-    if (confirm(confirmation)) {
-        // ✅ Delete from Firebase Realtime Database
-        database.ref('students/' + rollNo).remove()
-            .then(() => {
-                // ✅ Remove from local data
-                delete studentsData[rollNo];
-
-                // ✅ Update UI
-                displayStudentsList();
-                updateSystemStats();
-
-                // ✅ Show success message
-                showSuccessMessage(`✅ Student "${student.name}" (${rollNo}) deleted successfully!`);
-            })
-            .catch((error) => {
-                console.error("Delete failed:", error);
-                showErrorMessage(`❌ Failed to delete student: ${error.message}`);
-            });
-    }
-}
         function showGenerateReportModal() {
             const reportModal = document.getElementById('reportModal');
             const studentSelect = document.getElementById('reportStudentSelect');
