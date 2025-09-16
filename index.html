@@ -7,12 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
 
-    // Twilio config
-        // DO NOT STORE SECRETS IN FRONTEND CODE!
-        // Use Firebase Cloud Functions instead.
-    const authToken = 'abb1ba5ea699df28076935e9839b3019';
-    const twilioPhoneNumber = '+12135772051';
-
     // === Auto-SMS: Check Low Attendance & Backlogs ===
     function checkLowAttendanceAndNotify() {
         Object.keys(studentsData).forEach(rollNo => {
@@ -1430,6 +1424,8 @@ Contact: +91-XXXXXXXXXX
         function saveDailyAttendance() {
             const date = document.getElementById('dailyAttendanceDate').value;
             const semester = document.getElementById('dailyAttendanceSemester').value;
+                const subjects = ['Mathematics-I', 'Physics']; // Replace with dynamic list
+
             
             if (!date || !semester) {
                 showErrorMessage('Please select date and semester.');
@@ -1440,6 +1436,51 @@ Contact: +91-XXXXXXXXXX
                 showErrorMessage('No attendance data to save.');
                 return;
             }
+              // Process each student
+    Object.keys(dailyAttendanceData[date]).forEach(rollNo => {
+        const student = studentsData[rollNo];
+        const subjectData = dailyAttendanceData[date][rollNo];
+        const presentCount = Object.values(subjectData).filter(p => p).length;
+        const totalSubjects = Object.keys(subjectData).length;
+        const absentSubjects = Object.keys(subjectData).filter(subj => !subjectData[subj]);
+
+        // Create daily notification if absent
+        if (absentSubjects.length > 0) {
+            const message = `
+Daily Attendance Report
+-----------------------
+Student: ${student.name} (${rollNo})
+Date: ${new Date(date).toLocaleDateString()}
+Present: ${presentCount}/${totalSubjects}
+Absent in: ${absentSubjects.join(', ')}
+
+Please ensure regular attendance.
+Best regards,
+Academic Office
+            `.trim();
+
+            const notification = {
+                rollNo: rollNo,
+                studentName: student.name,
+                type: 'daily_attendance',
+                message: message,
+                parentPhone: student.parentContact?.fatherPhone || student.parentContact?.motherPhone,
+                date: date,
+                presentCount: presentCount,
+                totalSubjects: totalSubjects,
+                absentSubjects: absentSubjects,
+                status: 'pending',
+                createdAt: new Date().toLocaleString()
+            };
+
+            // ✅ Push to Firebase → triggers SMS
+            database.ref('notifications_outbound').push(notification);
+        }
+    });
+
+    showSuccessMessage(`Attendance saved! Alerts queued for absent students.`);
+    updateNotificationBadge();
+}
             
             const attendanceRef = database.ref('attendance/' + date);
             attendanceRef.set(dailyAttendanceData[date])
@@ -1483,7 +1524,6 @@ Contact: +91-XXXXXXXXXX
                 .catch(error => {
                     showErrorMessage('Error saving attendance: ' + error.message);
                 });
-        }
 
         function loadAttendanceHistory() {
             const fromDate = document.getElementById('historyFromDate').value;
@@ -1578,74 +1618,69 @@ Contact: +91-XXXXXXXXXX
             });
         }
 
-        function checkLowAttendanceAndNotify() {
-            for (let rollNo in studentsData) {
-                const student = studentsData[rollNo];
-                const attendance = calculateOverallAttendance(student);
-                const backlogs = calculateBacklogs(student);
-                
-                if (attendance < 70 || backlogs > 0) {
-                    createParentNotification(rollNo, attendance, backlogs);
-                }
-            }
-        }
+      function checkLowAttendanceAndNotify() {
+    Object.keys(studentsData).forEach(rollNo => {
+        const student = studentsData[rollNo];
+        const attendance = parseFloat(calculateOverallAttendance(student));
+        const backlogs = calculateBacklogs(student);
 
+        if (attendance < 70 || backlogs > 0) {
+            createParentNotification(rollNo, attendance, backlogs);
+        }
+    });
+}
         function createParentNotification(rollNo, attendance, backlogs) {
-            const student = studentsData[rollNo];
-            const currentDate = new Date().toLocaleDateString();
-            
-            const existingNotification = notificationHistory.find(n => 
-                n.rollNo === rollNo && n.status === 'pending' && n.type !== 'daily_attendance'
-            );
-            
-            if (existingNotification) {
-                return;
-            }
-            
-            let message = `Dear Parent,\n\n📋 ACADEMIC ALERT\n`;
-            message += `Student: ${student.name} (${rollNo})\n`;
-            message += `Date: ${currentDate}\n\n`;
-            
-            if (attendance < 70) {
-                message += `⚠️ OVERALL ATTENDANCE ALERT:\n`;
-                message += `Current overall attendance: ${attendance}% (Below required 70%)\n\n`;
-            }
-            
-            if (backlogs > 0) {
-                message += `⚠️ ACADEMIC PERFORMANCE ALERT:\n`;
-                message += `Student has ${backlogs} backlog subject(s)\n`;
-                
-                const backlogSubjects = getBacklogSubjects(student);
-                if (backlogSubjects.length > 0) {
-                    message += `\nBacklog Subjects:\n`;
-                    backlogSubjects.forEach((subject, index) => {
-                        message += `${index + 1}. ${subject.name} (Marks: ${subject.marks}, Semester: ${subject.semester})\n`;
-                    });
-                }
-                message += `\n`;
-            }
-            
-            message += `Please contact the college immediately to discuss improvement strategies.\n\n`;
-            message += `Best regards,\nAcademic Office\n`;
-            message += `Contact: +91-XXXXXXXXXX`;
-            
-            const notification = {
-                id: Date.now(),
-                rollNo: rollNo,
-                studentName: student.name,
-                type: attendance < 70 ? 'overall_attendance' : 'backlog',
-                message: message,
-                parentContact: student.parentContact,
-                date: currentDate,
-                attendance: attendance,
-                backlogs: backlogs,
-                status: 'pending',
-                createdAt: new Date().toLocaleString()
-            };
-            
-            database.ref('notifications').push(notification);
-        }
+    const student = studentsData[rollNo];
+    const currentDate = new Date().toLocaleDateString();
 
+    // Check for existing pending alert
+    const existingNotification = notificationHistory.find(n =>
+        n.rollNo === rollNo && n.status === 'pending' && n.type !== 'daily_attendance'
+    );
+    if (existingNotification) return;
+
+    let message = `Academic Alert - Immediate Attention Required\n`;
+    message += `---------------------------------------------\n`;
+    message += `Student: ${student.name} (${rollNo})\n`;
+    message += `Date: ${currentDate}\n\n`;
+
+    if (attendance < 70) {
+        message += `⚠️ LOW ATTENDANCE: ${attendance}% (Below 70%)\n`;
+    }
+    if (backlogs > 0) {
+        message += `📚 BACKLOGS: ${backlogs} subject(s)\n`;
+    }
+
+    message += `\nPlease contact college administration urgently.\n`;
+    message += `Contact: +91-XXXXXXXXXX`;
+
+    const notification = {
+        rollNo: rollNo,
+        studentName: student.name,
+        type: 'academic_alert',
+        subType: attendance < 70 ? 'low_attendance' : 'backlog',
+        message: message,
+        parentPhone: student.parentContact?.fatherPhone || student.parentContact?.motherPhone,
+        date: new Date().toISOString().split('T')[0],
+        attendance: attendance,
+        backlogs: backlogs,
+        status: 'pending',
+        createdAt: new Date().toLocaleString()
+    };
+
+    // ✅ Save to Firebase → triggers cloud function
+    database.ref('notifications_outbound').push(notification)
+        .then(() => {
+            console.log("✅ Notification sent to Firebase:", rollNo);
+            // Also add to local history
+            notificationHistory.push(notification);
+            updateNotificationBadge();
+        })
+        .catch(err => {
+            console.error("❌ Failed to save notification:", err);
+            showErrorMessage("Could not send alert: " + err.message);
+        });
+}
         function sendParentBacklogNotifications() {
             const backlogStudents = Object.values(studentsData).filter(student => calculateBacklogs(student) > 0);
             if (backlogStudents.length === 0) {
