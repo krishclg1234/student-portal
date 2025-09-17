@@ -383,7 +383,12 @@
                         <div id="dailyAttendanceStudentsList" class="space-y-3 max-h-96 overflow-y-auto scrollbar-custom"></div>
                         <div class="mt-6 flex justify-between items-center">
                             <div class="flex space-x-4">
-                    
+                                <button onclick="markAllPresentDaily()" class="btn-success text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                                    <i class="fas fa-check-double mr-2"></i>Mark All Present
+                                </button>
+                                <button onclick="markAllAbsentDaily()" class="btn-danger text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
+                                    <i class="fas fa-times-circle mr-2"></i>Mark All Absent
+                                </button>
                             </div>
                             <button onclick="saveDailyAttendance()" class="btn-info text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
                                 <i class="fas fa-save mr-2"></i>Save Attendance
@@ -415,6 +420,7 @@
                                 <option value="7">Semester 7</option>
                                 <option value="8">Semester 8</option>
                             </select>
+                            
                             <button onclick="loadAttendanceHistory()" class="btn-warning text-white px-6 py-3 rounded-xl hover-lift transition-all font-medium">
                                 <i class="fas fa-search mr-2"></i>View History
                             </button>
@@ -425,6 +431,7 @@
             </div>
         </div>
     </div>
+    
 
     <!-- Add/Edit Student Modal -->
     <div id="studentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -835,6 +842,8 @@
                     isAdmin = false;
                     currentUser = loginId;
                     showStudentDashboard();
+                        displayStudentAttendance(); // ✅ Call it here
+
                 } else {
                     showError('Invalid Student credentials.');
                 }
@@ -932,70 +941,71 @@
             }
         }
 
-        function displayStudentAttendance() {
-            const student = studentsData[currentUser];
-            const container = document.getElementById('subjectAttendance');
-            container.innerHTML = '';
-            
-            let totalPresent = 0;
-            let totalClasses = 0;
-            
-            if (student.attendance) {
-                for (let sem in student.attendance) {
-                    for (let subject in student.attendance[sem]) {
-                        totalPresent += student.attendance[sem][subject].present;
-                        totalClasses += student.attendance[sem][subject].total;
-                    }
+        function saveDailyAttendance() {
+    const date = document.getElementById('dailyAttendanceDate').value;
+    const semester = document.getElementById('dailyAttendanceSemester').value;
+    const branch = document.getElementById('dailyAttendanceBranch').value;
+
+    if (!date || !semester) {
+        showErrorMessage("Please select date and semester.");
+        return;
+    }
+
+    if (!dailyAttendanceData[date] || Object.keys(dailyAttendanceData[date]).length === 0) {
+        showErrorMessage("No attendance data to save.");
+        return;
+    }
+
+    // Prepare batch update
+    const updates = {};
+
+    // Loop through all students marked today
+    Object.keys(dailyAttendanceData[date]).forEach(rollNo => {
+        const student = studentsData[rollNo];
+        if (!student) return;
+
+        // Initialize student's attendance structure
+        if (!student.attendance) student.attendance = {};
+        if (!student.attendance[semester]) student.attendance[semester] = {};
+
+        // Get subject list from curriculum
+        const subjectsInSemester = curriculumTemplates[branch]?.[semester] || [];
+
+        // For each subject in semester
+        subjectsInSemester.forEach(subject => {
+            // Initialize subject if not exists
+            if (!student.attendance[semester][subject]) {
+                student.attendance[semester][subject] = { present: 0, total: 0 };
+            }
+
+            // Only count if attendance was recorded today
+            if (dailyAttendanceData[date][rollNo][subject] !== undefined) {
+                student.attendance[semester][subject].total++;
+                if (dailyAttendanceData[date][rollNo][subject]) {
+                    student.attendance[semester][subject].present++;
                 }
             }
-            
-            const overallPercentage = totalClasses > 0 ? ((totalPresent / totalClasses) * 100).toFixed(1) : 0;
-            
-            document.getElementById('overallAttendance').textContent = overallPercentage + '%';
-            document.getElementById('presentDays').textContent = totalPresent;
-            document.getElementById('absentDays').textContent = totalClasses - totalPresent;
-            
-            if (student.attendance && student.attendance[student.currentSemester]) {
-                const currentSem = student.currentSemester;
-                const semesterDiv = document.createElement('div');
-                semesterDiv.className = 'mb-6 p-4 bg-gray-50 rounded-xl';
-                
-                semesterDiv.innerHTML = `
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Semester ${currentSem} Attendance</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        ${Object.entries(student.attendance[currentSem]).map(([subject, data]) => {
-                            const percentage = calculateSubjectAttendance(data.present, data.total);
-                            const isLow = percentage < 70;
-                            return `
-                                <div class="bg-white rounded-lg p-4 border-2 ${isLow ? 'border-red-200' : 'border-green-200'}">
-                                    <h5 class="font-medium text-gray-800 mb-2">${subject}</h5>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-gray-600 text-sm">Present: ${data.present}/${data.total}</span>
-                                        <span class="px-2 py-1 rounded text-xs font-medium ${isLow ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
-                                            ${percentage}%
-                                        </span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2">
-                                        <div class="${isLow ? 'progress-bar-danger' : 'progress-bar'} h-2 rounded-full" style="width: ${percentage}%"></div>
-                                    </div>
-                                    ${isLow ? '<p class="text-red-600 text-xs mt-2">⚠️ Low Attendance</p>' : ''}
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
-                
-                container.appendChild(semesterDiv);
-            } else {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-calendar-times text-4xl mb-4"></i>
-                        <p class="text-lg">No attendance data available</p>
-                    </div>
-                `;
-            }
-        }
+        });
 
+        // Save only the updated semester attendance back to Firebase
+        updates[`students/${rollNo}/attendance/${semester}`] = student.attendance[semester];
+    });
+
+    // Also save full daily attendance
+    updates[`attendance/${date}`] = dailyAttendanceData[date];
+
+    // Perform batch write
+    database.ref().update(updates)
+        .then(() => {
+            showSuccessMessage("✅ Daily attendance saved and synced to student records!");
+            updateSystemStats();
+            updateNotificationBadge();
+        })
+        .catch(error => {
+            console.error("Error saving attendance:", error);
+            showErrorMessage("Failed to save attendance: " + error.message);
+        });
+}
         function showAdminDashboard() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('adminDashboard').classList.remove('hidden');
@@ -1104,12 +1114,7 @@
                                 </div>
                             </div>
                             <div class="flex space-x-2">
-                                <button onclick="markStudentAllPresent('${rollNo}')" class="btn-success text-white px-3 py-1 rounded-lg text-xs hover-lift transition-all font-medium">
-                                    <i class="fas fa-check-double mr-1"></i>All Present
-                                </button>
-                                <button onclick="markStudentAllAbsent('${rollNo}')" class="btn-danger text-white px-3 py-1 rounded-lg text-xs hover-lift transition-all font-medium">
-                                    <i class="fas fa-times-circle mr-1"></i>All Absent
-                                </button>
+                                
                             </div>
                         </div>
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -1150,40 +1155,68 @@
             }
         }
 
-        function markStudentAllPresent(rollNo) {
-            const date = document.getElementById('dailyAttendanceDate').value;
+        function markAllPresentDaily() {
+            const program = document.getElementById('dailyAttendanceProgram').value;
+            const branch = document.getElementById('dailyAttendanceBranch').value;
             const semester = document.getElementById('dailyAttendanceSemester').value;
-            const student = studentsData[rollNo];
-            const subjects = curriculumTemplates[student.branch][semester] || [];
+            const date = document.getElementById('dailyAttendanceDate').value;
 
+            if (!program || !branch || !semester || !date) {
+                showErrorMessage('Please select Program, Branch, Semester, and Date.');
+                return;
+            }
+
+            const subjects = curriculumTemplates[branch][semester] || [];
+            
             if (!dailyAttendanceData[date]) {
                 dailyAttendanceData[date] = {};
             }
-            dailyAttendanceData[date][rollNo] = {};
             
-            subjects.forEach(subject => {
-                dailyAttendanceData[date][rollNo][subject] = true;
-            });
+            for (let rollNo in studentsData) {
+                const student = studentsData[rollNo];
+                if (student.program === program && student.branch === branch && student.currentSemester == semester) {
+                    if (!dailyAttendanceData[date][rollNo]) {
+                        dailyAttendanceData[date][rollNo] = {};
+                    }
+                    subjects.forEach(subject => {
+                        dailyAttendanceData[date][rollNo][subject] = true;
+                    });
+                }
+            }
             
-            loadDailyAttendanceStudents(date, semester, subjects, student.program, student.branch);
+            loadDailyAttendanceStudents(date, semester, subjects, program, branch);
         }
 
-        function markStudentAllAbsent(rollNo) {
-            const date = document.getElementById('dailyAttendanceDate').value;
+        function markAllAbsentDaily() {
+            const program = document.getElementById('dailyAttendanceProgram').value;
+            const branch = document.getElementById('dailyAttendanceBranch').value;
             const semester = document.getElementById('dailyAttendanceSemester').value;
-            const student = studentsData[rollNo];
-            const subjects = curriculumTemplates[student.branch][semester] || [];
+            const date = document.getElementById('dailyAttendanceDate').value;
 
+            if (!program || !branch || !semester || !date) {
+                showErrorMessage('Please select Program, Branch, Semester, and Date.');
+                return;
+            }
+            
+            const subjects = curriculumTemplates[branch][semester] || [];
+            
             if (!dailyAttendanceData[date]) {
                 dailyAttendanceData[date] = {};
             }
-            dailyAttendanceData[date][rollNo] = {};
             
-            subjects.forEach(subject => {
-                dailyAttendanceData[date][rollNo][subject] = false;
-            });
+            for (let rollNo in studentsData) {
+                const student = studentsData[rollNo];
+                if (student.program === program && student.branch === branch && student.currentSemester == semester) {
+                    if (!dailyAttendanceData[date][rollNo]) {
+                        dailyAttendanceData[date][rollNo] = {};
+                    }
+                    subjects.forEach(subject => {
+                        dailyAttendanceData[date][rollNo][subject] = false;
+                    });
+                }
+            }
             
-            loadDailyAttendanceStudents(date, semester, subjects, student.program, student.branch);
+            loadDailyAttendanceStudents(date, semester, subjects, program, branch);
         }
 
         function saveDailyAttendance() {
@@ -1199,18 +1232,66 @@
                 showErrorMessage('No attendance data to save.');
                 return;
             }
+
+            const program = document.getElementById('dailyAttendanceProgram').value;
+            const branch = document.getElementById('dailyAttendanceBranch').value;
+
+            // Update student's total and present counts in their attendance record
+            const updates = {};
+            for (const rollNo in dailyAttendanceData[date]) {
+                const student = studentsData[rollNo];
+                if(student && student.program === program && student.branch === branch && student.currentSemester == semester) {
+                     const subjectsForStudent = curriculumTemplates[branch][semester];
+
+                    if (!student.attendance) {
+                        student.attendance = {};
+                    }
+                    if (!student.attendance[semester]) {
+                        student.attendance[semester] = {};
+                    }
+                    
+                    subjectsForStudent.forEach(subject => {
+                        if (!student.attendance[semester][subject]) {
+                            student.attendance[semester][subject] = { present: 0, total: 0 };
+                        }
+                         // Check if this subject was already marked on this date
+                         let alreadySaved = false;
+                        if(dailyAttendanceData[date].hasOwnProperty(rollNo) && dailyAttendanceData[date][rollNo].hasOwnProperty(subject)){
+                            alreadySaved = true;
+                        }
+                        
+                        if(alreadySaved) {
+                             if (dailyAttendanceData[date][rollNo][subject]) { // Present
+                                 if(!student.attendance[semester][subject].present.hasOwnProperty(date)){
+                                     student.attendance[semester][subject].present++;
+                                 }
+                             }
+                             if(!student.attendance[semester][subject].total.hasOwnProperty(date)){
+                                 student.attendance[semester][subject].total++;
+                             }
+                        }
+                    });
+                    updates['students/' + rollNo + '/attendance/' + semester] = student.attendance[semester];
+                }
+            }
             
-            const attendanceRef = database.ref('attendance/' + date);
-            attendanceRef.set(dailyAttendanceData[date])
+            database.ref().update(updates)
                 .then(() => {
-                    showSuccessMessage(`Daily attendance saved to database!`);
+                    const attendanceRef = database.ref('attendance/' + date);
+                    attendanceRef.set(dailyAttendanceData[date])
+                        .then(() => {
+                             showSuccessMessage(`Daily attendance saved to database!`);
+                        })
+                        .catch(error => {
+                            showErrorMessage('Error saving attendance: ' + error.message);
+                        });
                 })
                 .catch(error => {
-                    showErrorMessage('Error saving attendance: ' + error.message);
+                    showErrorMessage('Error updating student attendance records: ' + error.message);
                 });
         }
         
-        function sendDailyAttendanceSMS() {
+ function sendDailyAttendanceSMS() {
     const today = document.getElementById('dailyAttendanceDate').value;
     const attendanceForToday = dailyAttendanceData[today];
 
@@ -1219,7 +1300,6 @@
         return;
     }
 
-    // Find students who were absent today
     const studentsWithAbsence = Object.keys(attendanceForToday).filter(rollNo => {
         const subjectsAttended = Object.values(attendanceForToday[rollNo]).filter(p => p).length;
         const totalSubjects = Object.keys(attendanceForToday[rollNo]).length;
@@ -1227,142 +1307,51 @@
     });
 
     if (studentsWithAbsence.length === 0) {
-        showSuccessMessage("All students were present today. No attendance SMS needed.");
+        showSuccessMessage("All students were present today. No attendance alerts needed.");
         return;
     }
 
-    const message = `This will send attendance alerts to the parents of ${studentsWithAbsence.length} students who were absent today. Are you sure you want to proceed?`;
+    const message = `This will send attendance alerts to the parents of ${studentsWithAbsence.length} students who were absent today. Are you sure?`;
+
     showConfirmationMessage(message, () => {
+        let sentCount = 0;
+
         studentsWithAbsence.forEach(rollNo => {
             const student = studentsData[rollNo];
-            const absentSubjects = Object.keys(attendanceForToday[rollNo]).filter(subject => !attendanceForToday[rollNo][subject]);
+            const parentPhone = student.parentContact?.fatherPhone || student.parentContact?.motherPhone;
+            if (!parentPhone) return;
+
+            const absentSubjects = Object.keys(attendanceForToday[rollNo]).filter(subj => !attendanceForToday[rollNo][subj]);
             const presentCount = Object.keys(attendanceForToday[rollNo]).length - absentSubjects.length;
             const totalSubjects = Object.keys(attendanceForToday[rollNo]).length;
             const attendancePercentage = ((presentCount / totalSubjects) * 100).toFixed(1);
-
-            const parentPhone = student.parentContact?.fatherPhone || student.parentContact?.motherPhone;
-
-            if (!parentPhone) return;
-
-            const cleanPhone = parentPhone.replace(/\s+/g, '').replace(/[^+\d]/g, '');
 
             const alertMessage = `
 📅 DAILY ATTENDANCE ALERT
 Student: ${student.name} (${rollNo})
 Date: ${new Date(today).toLocaleDateString()}
-Present: ${presentCount}/${totalSubjects} (${attendancePercentage}%)
 Absent in: ${absentSubjects.join(', ')}
 
 Please ensure regular attendance.
-Best regards,
 Academic Office
             `.trim();
 
-            // Save to Firebase → triggers cloud function
+            // Save to Firebase → triggers Twilio WhatsApp
             database.ref('alerts_to_send').push({
-                type: 'daily_attendance',
-                rollNo: rollNo,
-                to: cleanPhone,
+                to: parentPhone.replace(/\s+/g, '').replace(/[^+\d]/g, ''),
                 body: alertMessage,
                 status: 'pending'
+            }).then(() => {
+                sentCount++;
+                if (sentCount === studentsWithAbsence.length) {
+                    showSuccessMessage(`${sentCount} messages queued successfully.`);
+                }
+            }).catch(err => {
+                console.error("Failed to queue message:", err);
             });
         });
-
-        showSuccessMessage(`${studentsWithAbsence.length} attendance alerts queued. Messages will be sent via WhatsApp.`);
     });
 }
-        function loadAttendanceHistory() {
-            const fromDate = document.getElementById('historyFromDate').value;
-            const toDate = document.getElementById('historyToDate').value;
-            const semester = document.getElementById('historySemester').value;
-            const container = document.getElementById('attendanceHistoryContainer');
-            
-            if (!fromDate || !toDate) {
-                showErrorMessage('Please select date range.');
-                return;
-            }
-            
-            container.innerHTML = '';
-            
-            const datesRef = database.ref('attendance');
-            datesRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) {
-                    container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-calendar-times text-4xl mb-4"></i><p class="text-lg">No attendance data found for the selected date range</p></div>`;
-                    return;
-                }
-                
-                const allDates = Object.keys(data).filter(date => date >= fromDate && date <= toDate).sort().reverse();
-                
-                if (allDates.length === 0) {
-                    container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-calendar-times text-4xl mb-4"></i><p class="text-lg">No attendance data found for the selected date range</p></div>`;
-                    return;
-                }
-
-                allDates.forEach(date => {
-                    const dateData = data[date];
-                    const dateDiv = document.createElement('div');
-                    dateDiv.className = 'bg-gray-50 rounded-xl p-4 border border-gray-200';
-                    
-                    let studentsHTML = '';
-                    for (let rollNo in dateData) {
-                        const student = studentsData[rollNo];
-                        if (!student) continue;
-                        
-                        if (semester && student.currentSemester != semester) continue;
-                        
-                        const subjectData = dateData[rollNo];
-                        const presentSubjects = Object.keys(subjectData).filter(subject => subjectData[subject] === true);
-                        const absentSubjects = Object.keys(subjectData).filter(subject => subjectData[subject] === false);
-                        const totalSubjects = Object.keys(subjectData).length;
-                        const attendancePercentage = totalSubjects > 0 ? ((presentSubjects.length / totalSubjects) * 100).toFixed(1) : 0;
-                        
-                        studentsHTML += `
-                            <div class="bg-white p-3 rounded-lg border border-gray-200 mb-2">
-                                <div class="flex justify-between items-center mb-2">
-                                    <div>
-                                        <h6 class="font-medium text-gray-800">${student.name} (${rollNo})</h6>
-                                        <p class="text-sm text-gray-600">Semester ${student.currentSemester}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="px-2 py-1 rounded text-xs font-medium ${attendancePercentage >= 70 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                                            ${attendancePercentage}% (${presentSubjects.length}/${totalSubjects})
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 text-xs">
-                                    <div>
-                                        <span class="text-green-600 font-medium">Present:</span>
-                                        <span class="text-gray-700">${presentSubjects.join(', ') || 'None'}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-red-600 font-medium">Absent:</span>
-                                        <span class="text-gray-700">${absentSubjects.join(', ') || 'None'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    dateDiv.innerHTML = `
-                        <div class="flex justify-between items-center mb-4">
-                            <h5 class="text-lg font-semibold text-gray-800">
-                                <i class="fas fa-calendar-day mr-2 text-purple-600"></i>
-                                ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                            </h5>
-                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-                                ${Object.keys(dateData).length} Students
-                            </span>
-                        </div>
-                        <div class="space-y-2">
-                            ${studentsHTML}
-                        </div>
-                    `;
-                    
-                    container.appendChild(dateDiv);
-                });
-            });
-        }
       
         function sendParentBacklogNotifications() {
     const backlogStudents = Object.values(studentsData).filter(student => calculateBacklogs(student) > 0);
@@ -1372,52 +1361,41 @@ Academic Office
         return;
     }
 
-    backlogStudents.forEach(student => {
-        const backlogs = calculateBacklogs(student);
-        const parentPhone = student.parentContact?.fatherPhone || student.parentContact?.motherPhone;
+    const message = `This will send academic backlog alerts to the parents of ${backlogStudents.length} students. Are you sure?`;
 
-        if (!parentPhone) return;
+    showConfirmationMessage(message, () => {
+        let sentCount = 0;
 
-        // Clean phone number
-        const cleanPhone = parentPhone.replace(/\s+/g, '').replace(/[^+\d]/g, '');
+        backlogStudents.forEach(student => {
+            const parentPhone = student.parentContact?.fatherPhone || student.parentContact?.motherPhone;
+            if (!parentPhone) return;
 
-        const message = `
-📚 BACKLOG ALERT
+            const backlogs = calculateBacklogs(student);
+            const alertMessage = `
+📚 ACADEMIC BACKLOG ALERT
 Student: ${student.name} (${student.rollNumber})
 Backlogs: ${backlogs} subject(s)
 
-Please contact college urgently.
+Please contact the academic office urgently.
 Academic Office
-        `.trim();
+            `.trim();
 
-        // Save to Firebase → triggers WhatsApp
-        database.ref('alerts_to_send').push({
-            type: 'backlog_alert',
-            rollNo: student.rollNumber,
-            to: cleanPhone,
-            body: message,
-            status: 'pending'
+            // Save to Firebase → triggers Twilio WhatsApp
+            database.ref('alerts_to_send').push({
+                to: parentPhone.replace(/\s+/g, '').replace(/[^+\d]/g, ''),
+                body: alertMessage,
+                status: 'pending'
+            }).then(() => {
+                sentCount++;
+                if (sentCount === backlogStudents.length) {
+                    showSuccessMessage(`${sentCount} backlog alerts queued successfully.`);
+                }
+            }).catch(err => {
+                console.error("Failed to queue message:", err);
+            });
         });
     });
-
-    showSuccessMessage(`${backlogStudents.length} backlog alerts queued. Messages will be sent via WhatsApp.`);
 }
-        function updateNotificationBadge() {
-            // This function is no longer needed since the Notifications tab was removed.
-        }
-
-        function displayNotifications() {
-            // This function is no longer needed since the Notifications tab was removed.
-        }
-
-        function filterNotifications(filter, buttonElement) {
-            // This function is no longer needed since the Notifications tab was removed.
-        }
-
-        function displayFilteredNotifications(notifications, filter) {
-            // This function is no longer needed since the Notifications tab was removed.
-        }
-
         function displayStudentsList() {
             const container = document.getElementById('studentsList');
             container.innerHTML = '';
@@ -1580,7 +1558,7 @@ Academic Office
             document.getElementById('studentModal').classList.remove('hidden');
             document.getElementById('rollNumber').disabled = false;
             delete document.getElementById('studentForm').dataset.oldRollNumber;
-            generateSemesterInputs();
+            document.getElementById('semesterMarks').innerHTML = '';
         }
 
         function editStudent(rollNo) {
@@ -1696,37 +1674,33 @@ Academic Office
             const program = document.getElementById('program').value;
             const branch = document.getElementById('branch').value;
             const currentSem = parseInt(document.getElementById('currentSem').value);
-            const password = document.getElementById('studentPassword').value || studentsData[rollNumber]?.password || 'password123';
-            
+            const password = document.getElementById('studentPassword').value;            
             const oldRollNumber = document.getElementById('studentForm').dataset.oldRollNumber;
             const isEditing = !!oldRollNumber;
             
-            // Get existing data to merge with new data
-            const existingStudentData = isEditing ? studentsData[oldRollNumber] : { semesters: {}, attendance: {} };
-            
-            const studentData = {
-    name: name,
-    rollNumber: rollNumber,
-    program: program,
-    branch: branch,
-    currentSemester: currentSem,
-    password: document.getElementById('studentPassword').value || 'password123', // ✅ Add this line
-    parentContact: {
-        fatherName: document.getElementById('fatherName').value,
-        fatherPhone: document.getElementById('fatherPhone').value,
-        motherName: document.getElementById('motherName').value,
-        motherPhone: document.getElementById('motherPhone').value
-    },
-    semesters: {},
-    attendance: {}
-};
+            const existingStudentData = isEditing && studentsData[oldRollNumber] ? studentsData[oldRollNumber] : { semesters: {}, attendance: {} };
 
-            // Remove old entry if roll number changed
+            const newStudentData = {
+                name: name,
+                rollNumber: rollNumber,
+                program: program,
+                branch: branch,
+                currentSemester: currentSem,
+                password: password,
+                parentContact: {
+                    fatherName: document.getElementById('fatherName').value,
+                    fatherPhone: document.getElementById('fatherPhone').value,
+                    motherName: document.getElementById('motherName').value,
+                    motherPhone: document.getElementById('motherPhone').value
+                },
+                semesters: { ...existingStudentData.semesters },
+                attendance: { ...existingStudentData.attendance }
+            };
+
             if (isEditing && oldRollNumber !== rollNumber) {
                 database.ref('students/' + oldRollNumber).remove();
             }
 
-            // Collect and merge semester data
             for (let sem = 1; sem <= currentSem; sem++) {
                 const semContainer = document.getElementById(`sem${sem}Subjects`);
                 if (semContainer) {
@@ -1765,15 +1739,17 @@ Academic Office
 
         function deleteStudent(rollNo) {
             const message = `Are you sure you want to delete student ${studentsData[rollNo].name} (${rollNo})? This action cannot be undone.`;
-            showConfirmationMessage(message, (confirmedRollNo) => {
-                database.ref('students/' + confirmedRollNo).remove()
-                    .then(() => {
-                        showSuccessMessage('Student deleted successfully!');
-                    })
-                    .catch(error => {
-                        showErrorMessage('Error deleting student: ' + error.message);
-                    });
-            }, rollNo);
+            showConfirmationMessage(message, (confirmed) => {
+                if (confirmed) {
+                    database.ref('students/' + rollNo).remove()
+                        .then(() => {
+                            showSuccessMessage('Student deleted successfully!');
+                        })
+                        .catch(error => {
+                            showErrorMessage('Error deleting student: ' + error.message);
+                        });
+                }
+            }, true);
         }
 
         function showGenerateReportModal() {
@@ -1892,21 +1868,18 @@ Academic Office
                     <h3 class="text-xl font-bold text-gray-800 mb-4">Confirm Action</h3>
                     <p class="text-gray-600 mb-6">${message}</p>
                     <div class="flex justify-end space-x-3">
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors">Cancel</button>
-                        <button onclick="confirmAndExecute(this, ${onConfirm}, '${data}')" class="px-6 py-3 btn-danger text-white rounded-xl hover-lift transition-all font-medium">Confirm</button>
+                        <button id="confirmCancelBtn" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors">Cancel</button>
+                        <button id="confirmBtn" class="px-6 py-3 btn-danger text-white rounded-xl hover-lift transition-all font-medium">Confirm</button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
-        }
 
-        function confirmAndExecute(button, callback, data) {
-            button.parentElement.parentElement.parentElement.remove();
-            if (data) {
-                callback(data);
-            } else {
-                callback();
-            }
+            document.getElementById('confirmCancelBtn').onclick = () => modal.remove();
+            document.getElementById('confirmBtn').onclick = () => {
+                modal.remove();
+                onConfirm(data);
+            };
         }
 
         function logout() {
@@ -1959,6 +1932,195 @@ Academic Office
             
             isDataLoaded = true;
         });
+ function displayStudentAttendance() {
+    const container = document.getElementById('subjectAttendance');
+    if (!container) return;
+
+    container.innerHTML = '<p class="text-center text-gray-600 py-4">Loading attendance records...</p>';
+
+    const student = studentsData[currentUser];
+    if (!student) {
+        container.innerHTML = '<p class="text-center text-red-500 py-4">Student data not found.</p>';
+        return;
+    }
+
+    // Calculate overall attendance stats
+    let totalPresent = 0;
+    let totalClasses = 0;
+
+    if (student.attendance) {
+        for (let sem in student.attendance) {
+            for (let subject in student.attendance[sem]) {
+                const data = student.attendance[sem][subject];
+                totalPresent += data.present;
+                totalClasses += data.total;
+            }
+        }
+    }
+
+    const overallPercentage = totalClasses > 0 ? ((totalPresent / totalClasses) * 100).toFixed(1) : 0;
+
+    // Update DOM elements
+    document.getElementById('overallAttendance').textContent = overallPercentage + '%';
+    document.getElementById('presentDays').textContent = totalPresent;
+    document.getElementById('absentDays').textContent = totalClasses - totalPresent;
+
+    // Display semester-wise attendance
+    let html = '';
+    if (student.attendance) {
+        Object.keys(student.attendance)
+            .sort((a, b) => parseInt(b) - parseInt(a)) // Sort semesters descending
+            .forEach(sem => {
+                const subjects = student.attendance[sem];
+                if (!subjects || Object.keys(subjects).length === 0) return;
+
+                html += `
+    <div class="bg-white p-4 rounded-xl mb-4 border border-gray-200">
+        <h4 class="font-semibold text-gray-800 mb-3">Semester ${sem}</h4>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b">
+                        <th class="py-2 px-3 font-medium text-gray-700">Subject</th>
+                        <th class="py-2 px-3 font-medium text-gray-700">Present</th>
+                        <th class="py-2 px-3 font-medium text-gray-700">Absent</th>
+                        <th class="py-2 px-3 font-medium text-gray-700">%</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+                
+Object.keys(subjects).forEach(subject => {
+    const data = subjects[subject];
+    const absent = data.total - data.present;
+    const percent = data.total > 0 ? ((data.present / data.total) * 100).toFixed(1) : 0;
+    const color = percent < 70 ? 'text-red-600' : 'text-green-600';
+    
+    html += `
+        <tr class="border-b">
+            <td class="py-2 px-3">${subject}</td>
+            <td class="py-2 px-3">${data.present}/${data.total}</td>
+            <td class="py-2 px-3">${absent}/${data.total}</td>
+            <td class="py-2 px-3 ${color} font-medium">${percent}%</td>
+        </tr>`;
+});
+                html += `</tbody></table></div></div>`;
+            });
+    }
+
+    container.innerHTML = html || `
+        <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-calendar-times text-4xl mb-4"></i>
+            <p class="text-lg">No attendance records found</p>
+        </div>
+    `;
+}
+function loadAttendanceHistory() {
+    const fromDate = document.getElementById('historyFromDate').value;
+    const toDate = document.getElementById('historyToDate').value;
+    const semester = document.getElementById('historySemester').value;
+    const container = document.getElementById('attendanceHistoryContainer');
+    
+    if (!fromDate || !toDate) {
+        showErrorMessage('Please select date range.');
+        return;
+    }
+    
+    container.innerHTML = '<p class="text-center py-4">Loading attendance history...</p>';
+    
+    database.ref('attendance').once('value').then(snapshot => {
+        const data = snapshot.val() || {};
+        container.innerHTML = '';
+        
+        // Convert to array and sort by date (newest first)
+        const dates = Object.keys(data).sort((a, b) => new Date(b) - new Date(a));
+        
+        let hasData = false;
+        
+        dates.forEach(date => {
+            // Check if date is within range
+            if (date < fromDate || date > toDate) return;
+            
+            const attendanceForDate = data[date];
+            const dateObj = new Date(date);
+            
+            // Create date section
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'mb-6';
+            dateDiv.innerHTML = `
+                <h4 class="font-semibold text-gray-800 mb-3">${dateObj.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                })}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            `;
+            
+            let dateHasData = false;
+            
+            // Add students for this date
+            Object.keys(attendanceForDate).forEach(rollNo => {
+                const student = studentsData[rollNo];
+                if (!student) return;
+                
+                // Filter by semester if selected
+                if (semester && student.currentSemester != semester) return;
+                
+                const attendance = attendanceForDate[rollNo];
+                const presentCount = Object.values(attendance).filter(p => p).length;
+                const totalSubjects = Object.keys(attendance).length;
+                const attendancePercentage = ((presentCount / totalSubjects) * 100).toFixed(1);
+                
+                dateDiv.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl border border-gray-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h5 class="font-medium text-gray-800">${student.name}</h5>
+                                <p class="text-sm text-gray-600">${rollNo} | ${student.branch}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-medium ${attendancePercentage >= 70 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${attendancePercentage}%
+                            </span>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            ${Object.keys(attendance).map(subject => `
+                                <div class="text-center p-2 rounded-lg ${attendance[subject] ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}">
+                                    <div class="font-medium text-xs truncate">${subject}</div>
+                                    <div class="text-sm">${attendance[subject] ? 'P' : 'A'}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                dateHasData = true;
+                hasData = true;
+            });
+            
+            dateDiv.innerHTML += `</div>`;
+            
+            if (dateHasData) {
+                container.appendChild(dateDiv);
+            }
+        });
+        
+        if (!hasData) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-calendar-times text-4xl mb-4"></i>
+                    <p class="text-lg">No attendance records found for the selected period</p>
+                </div>
+            `;
+        }
+    }).catch(error => {
+        container.innerHTML = `
+            <div class="text-center py-8 text-red-500">
+                <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                <p class="text-lg">Error loading attendance history: ${error.message}</p>
+            </div>
+        `;
+    });
+}
     </script>
 </body>
 </html>
