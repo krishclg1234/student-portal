@@ -1336,21 +1336,22 @@ Please ensure regular attendance.
 Academic Office
             `.trim();
 
-            // Save to Firebase → triggers Twilio WhatsApp
-           to: "whatsapp:+91" + parentPhone.replace(/\D/g, ''),
-from: "whatsapp:+14155238886",
-body: alertMessage
-                status: 'pending'
-            }).then(() => {
-                sentCount++;
-                if (sentCount === studentsWithAbsence.length) {
-                    showSuccessMessage(`${sentCount} messages queued successfully.`);
-                }
-            }).catch(err => {
-                console.error("Failed to queue message:", err);
-            });
-        });
-    });
+           // Save to Firebase → triggers Twilio WhatsApp
+if (parentPhone) {
+  database.ref('alerts_to_send').push({
+    to: "whatsapp:+91" + parentPhone.replace(/\D/g, ''),
+    from: "whatsapp:+14155238886",
+    body: alertMessage,
+    status: 'pending'
+  }).then(() => {
+    sentCount++;
+    if (sentCount === studentsWithAbsence.length) {
+      showSuccessMessage(`${sentCount} messages queued successfully.`);
+    }
+  }).catch(err => {
+    console.error("Failed to queue message:", err);
+    sentCount++; // prevent freeze
+  });
 }
       
         function sendParentBacklogNotifications() {
@@ -1380,21 +1381,22 @@ Please contact the academic office urgently.
 Academic Office
             `.trim();
 
-            // Save to Firebase → triggers Twilio WhatsApp
-           to: "whatsapp:+91" + parentPhone.replace(/\D/g, ''),
-from: "whatsapp:+14155238886",
-body: alertMessage
-                status: 'pending'
-            }).then(() => {
-                sentCount++;
-                if (sentCount === backlogStudents.length) {
-                    showSuccessMessage(`${sentCount} backlog alerts queued successfully.`);
-                }
-            }).catch(err => {
-                console.error("Failed to queue message:", err);
-            });
-        });
-    });
+           // Save to Firebase → triggers Twilio WhatsApp
+if (parentPhone) {
+  database.ref('alerts_to_send').push({
+    to: "whatsapp:+91" + parentPhone.replace(/\D/g, ''),
+    from: "whatsapp:+14155238886",
+    body: alertMessage,
+    status: 'pending'
+  }).then(() => {
+    sentCount++;
+    if (sentCount === studentsWithAbsence.length) {
+      showSuccessMessage(`${sentCount} messages queued successfully.`);
+    }
+  }).catch(err => {
+    console.error("Failed to queue message:", err);
+    sentCount++; // prevent freeze
+  });
 }
         function displayStudentsList() {
             const container = document.getElementById('studentsList');
