@@ -1336,23 +1336,22 @@ Please ensure regular attendance.
 Academic Office
             `.trim();
 
-           // Save to Firebase → triggers Twilio WhatsApp
-if (parentPhone) {
-  database.ref('alerts_to_send').push({
-    to: "whatsapp:+91" + parentPhone.replace(/\D/g, ''),
-    from: "whatsapp:+14155238886",
-    body: alertMessage,
-    status: 'pending'
-  }).then(() => {
-    sentCount++;
-    if (sentCount === studentsWithAbsence.length) {
-      showSuccessMessage(`${sentCount} messages queued successfully.`);
-    }
-  }).catch(err => {
-    console.error("Failed to queue message:", err);
-    sentCount++; // prevent freeze
-  });
+           // Save to Firebase triggers Twilio WhatsApp
+database.ref('alerts_to_send").push({
+to: parentPhone.replace(/\s+/g,'').replace(/[^+\d]/g,''),
+body: alertMessage,
+status: 'pending
+}).then(() => {
+sentCount++;
+if (sentCount backlogStudents.length) {
+showSuccessMessage("${sentCount) backlog alerts queued successfully.");
 }
+}).catch(err => {
+console.error("Failed to queue message:", err);
+});
+});
+}
+});
       
         function sendParentBacklogNotifications() {
     const backlogStudents = Object.values(studentsData).filter(student => calculateBacklogs(student) > 0);
@@ -1381,23 +1380,22 @@ Please contact the academic office urgently.
 Academic Office
             `.trim();
 
-           // Save to Firebase → triggers Twilio WhatsApp
-if (parentPhone) {
-  database.ref('alerts_to_send').push({
-    to: "whatsapp:+91" + parentPhone.replace(/\D/g, ''),
-    from: "whatsapp:+14155238886",
-    body: alertMessage,
-    status: 'pending'
-  }).then(() => {
-    sentCount++;
-    if (sentCount === studentsWithAbsence.length) {
-      showSuccessMessage(`${sentCount} messages queued successfully.`);
-    }
-  }).catch(err => {
-    console.error("Failed to queue message:", err);
-    sentCount++; // prevent freeze
-  });
+          // Save to Firebase triggers Twilio WhatsApp
+database.ref('alerts_to_send").push({
+to: parentPhone.replace(/\s+/g,'').replace(/[^+\d]/g,''),
+body: alertMessage,
+status: 'pending
+}).then(() => {
+sentCount++;
+if (sentCount backlogStudents.length) {
+showSuccessMessage("${sentCount) backlog alerts queued successfully.");
 }
+}).catch(err => {
+console.error("Failed to queue message:", err);
+});
+});
+}
+});
         function displayStudentsList() {
             const container = document.getElementById('studentsList');
             container.innerHTML = '';
