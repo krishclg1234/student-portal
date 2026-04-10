@@ -1337,9 +1337,9 @@ Academic Office
             `.trim();
 
             // Save to Firebase → triggers Twilio WhatsApp
-            database.ref('alerts_to_send').push({
-                to: parentPhone.replace(/\s+/g, '').replace(/[^+\d]/g, ''),
-                body: alertMessage,
+           to: "whatsapp:+91" + parentPhone.replace(/\D/g, ''),
+from: "whatsapp:+14155238886",
+body: alertMessage
                 status: 'pending'
             }).then(() => {
                 sentCount++;
@@ -1381,9 +1381,9 @@ Academic Office
             `.trim();
 
             // Save to Firebase → triggers Twilio WhatsApp
-            database.ref('alerts_to_send').push({
-                to: parentPhone.replace(/\s+/g, '').replace(/[^+\d]/g, ''),
-                body: alertMessage,
+           to: "whatsapp:+91" + parentPhone.replace(/\D/g, ''),
+from: "whatsapp:+14155238886",
+body: alertMessage
                 status: 'pending'
             }).then(() => {
                 sentCount++;
